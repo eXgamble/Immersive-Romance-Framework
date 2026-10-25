@@ -208,6 +208,7 @@ namespace Events
 					const bool meeting = player->GetPosition().GetDistance(actor->GetPosition()) < 400.0f;
 					Queue([handle = actor->GetHandle(), meeting]() {
 						if (const auto a = handle.get()) {
+							Children::Count();
 							Children::Sync(a.get());
 							Romance::Sync(a.get(), meeting);
 							if (meeting && a.get() == Romance::Partner()) {
@@ -305,6 +306,13 @@ namespace Events
 				logger::info("Events: line '{}' {} ({:08X})", key, a_event->type == RE::TESTopicInfoEvent::TopicInfoEventType::kTopicEnd ? "ended" : "began",
 					a_event->topicInfoFormID);
 				if (a_event->type != RE::TESTopicInfoEvent::TopicInfoEventType::kTopicEnd) {
+					if (key == "stayhome" && a_event->speakerRef) {  // said once: a second force greet finds nothing to say
+						Queue([handle = a_event->speakerRef->GetHandle()]() {
+							if (const auto ref = handle.get(); ref && ref->As<RE::Actor>()) {
+								ref->As<RE::Actor>()->AddToFaction(Forms::Get().moment, 0);
+							}
+						});
+					}
 					return RE::BSEventNotifyControl::kContinue;
 				}
 				const auto speaker = a_event->speakerRef ? a_event->speakerRef->As<RE::Actor>() : nullptr;

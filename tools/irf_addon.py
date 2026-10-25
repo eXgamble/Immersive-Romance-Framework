@@ -14,6 +14,9 @@ Spec (JSON):
   "candidate": { "name": "Camilla Valerius", "npc": "Skyrim.esm|0x01347B", "ref": "Skyrim.esm|0x013488" },
   "attributes": { ... },                      copied into the manifest as is
   "lines": { "court": "Text" | ["Text", ...], ... },   any key missing gets a placeholder ("[Name: key]")
+             a text may be { "text": "...", "boys": 0 | ">=1", "girls": ... }: played only with that many adopted
+             boys / girls (IRF_AdoptedBoys / IRF_AdoptedGirls); the game plays the first that fits, so list the
+             most specific first and a plain one last
   "placeholders": true,                      fill every required key that has no text
   "circle": [ { "name": "Lucan", "npc": "...", "ref": "...",
                 "reactions": { "amends": "Text" },
@@ -42,6 +45,8 @@ ABSENCE_F, REACTION_F, RECENT_F, MOMENT_F = 0x812, 0x813, 0x814, 0x816
 ASKDATE_F, FOLLOW_F, KISS_F, BREAKUP_F, AMENDS_F, WINBACK_F, SECRET_F, TALK_F, CONFRONT_F, TAKEN_F = (
     0x818, 0x819, 0x81A, 0x81B, 0x81C, 0x81D, 0x81E, 0x81F, 0x820, 0x821)
 GIFT_F = 0x841  # her answer to a gift: 1 insulted, 2 disliked, 3 plain, 4 liked, 5 loved
+ADOPTED = {"boys": 0x859, "girls": 0x85A}  # IRF_AdoptedBoys / IRF_AdoptedGirls (globals)
+OPS = {"==": "EqualTo", "!=": "NotEqualTo", ">=": "GreaterThanOrEqualTo", "<=": "LessThanOrEqualTo", ">": "GreaterThan", "<": "LessThan"}
 
 EVENTS = {"courting": 1, "dating": 2, "committed": 3, "engaged": 4, "married": 5, "amends": 6,
           "playerEnded": 7, "theyEnded": 8, "brokenHeart": 9, "seeingSomeone": 10, "widowed": 11, "wonBack": 12, "killed": 13}
@@ -125,14 +130,31 @@ def condition(function, field, value, compare, op="EqualTo"):
                                                   "sets": [{"path": field, "value": value}]}}]}
 
 
+def adopted_conditions(text):
+    """{"boys": 0 | ">=1", "girls": ...} -> GetGlobalValue rows on IRF_AdoptedBoys / IRF_AdoptedGirls"""
+    rows = []
+    for name, local in ADOPTED.items():
+        if not isinstance(text, dict) or name not in text:
+            continue
+        want = str(text[name]).strip()
+        op = next((o for o in sorted(OPS, key=len, reverse=True) if want.startswith(o)), "==")
+        value = want[len(op):].strip() if want.startswith(op) else want
+        rows.append({"type": "ConditionFloat", "fields": {"CompareOperator": OPS[op], "ComparisonValue": value},
+                     "sets": [{"path": "Data", "compose": {"type": "GetGlobalValueConditionData",
+                                                           "sets": [{"path": "Global", "value": fw(local)}]}}]})
+    return rows
+
+
 def info(editor_id, topic, text, speaker_npc, faction, rank, op, goodbye):
+    extra = adopted_conditions(text)
+    text = text["text"] if isinstance(text, dict) else text
     ops = [
         {"field_path": "Topic", "value": fw(topic)},
         {"field_path": "Responses", "op": "Add", "compose": {"type": "DialogResponse", "fields": {
             "Emotion": "Neutral", "EmotionValue": "50", "ResponseNumber": "1", "Text": text}}},
         {"field_path": "Conditions", "op": "Add", "composes": [
             condition("GetIsIDConditionData", "Object", speaker_npc, 1),
-            condition("GetFactionRankConditionData", "Faction", fw(faction), rank, op)]},
+            condition("GetFactionRankConditionData", "Faction", fw(faction), rank, op)] + extra},
     ]
     if goodbye:
         ops.append({"field_path": "Flags.Flags", "value": "Goodbye"})

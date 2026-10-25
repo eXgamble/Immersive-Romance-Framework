@@ -152,6 +152,28 @@ namespace Children
 		}
 	}
 
+	int Boys()
+	{
+		return static_cast<int>(std::ranges::count_if(Adopted(), [](RE::Actor* a) { return a->GetActorBase() && a->GetActorBase()->GetSex() == RE::SEX::kMale; }));
+	}
+
+	int Girls()
+	{
+		return static_cast<int>(std::ranges::count_if(Adopted(), [](RE::Actor* a) { return a->GetActorBase() && a->GetActorBase()->GetSex() == RE::SEX::kFemale; }));
+	}
+
+	void Count()
+	{
+		const auto& f = Forms::Get();
+		const auto  boys = static_cast<float>(Boys());
+		const auto  girls = static_cast<float>(Girls());
+		if (f.adoptedBoys && f.adoptedGirls && (f.adoptedBoys->value != boys || f.adoptedGirls->value != girls)) {
+			f.adoptedBoys->value = boys;
+			f.adoptedGirls->value = girls;
+			logger::info("Children: {} boys, {} girls", boys, girls);
+		}
+	}
+
 	bool IsChild(RE::Actor* a_actor)
 	{
 		const auto faction = Forms::Get().adoptionFaction;

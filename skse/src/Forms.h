@@ -52,6 +52,8 @@ namespace Forms
 		kStayHomePackage = 0x84A,    // IRF_StayHomeForceGreet, on IRF_SayQuest's StayHome alias
 		kChildQuest = 0x851,         // IRF_ChildQuest, priority 105, speaks only for a child with something to say
 		kChildHelloTopic = 0x852,    // IRF_ChildHelloTopic: the children's greetings (IRF_ChildFaction 1-3, 11-13)
+		kAdoptedBoys = 0x859,        // IRF_AdoptedBoys: how many boys Hearthfire has you raising (for any line's conditions)
+		kAdoptedGirls = 0x85A,       // IRF_AdoptedGirls: and girls
 
 		// quests and topics
 		kQuest = 0x805,  // IRF_Quest, priority 105
@@ -136,6 +138,8 @@ namespace Forms
 		RE::TESTopic*   giftAnswer{ nullptr };
 		RE::TESFaction* child{ nullptr };
 		RE::TESTopic*   childHello{ nullptr };
+		RE::TESGlobal*  adoptedBoys{ nullptr };
+		RE::TESGlobal*  adoptedGirls{ nullptr };
 		RE::TESTopic*   stayHomeTopic{ nullptr };
 		RE::TESQuest*   sayQuest{ nullptr };     // IRF_SayQuest: its alias 0, StayHome, holds the force greet
 

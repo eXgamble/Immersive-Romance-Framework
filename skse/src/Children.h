@@ -14,6 +14,12 @@ namespace Children
 	// Hearthfire adopted this actor (BYOHRelationshipAdoptionFaction)
 	bool IsChild(RE::Actor* a_actor);
 
+	// How many boys and girls Hearthfire has you raising; Count() writes them to IRF_AdoptedBoys and IRF_AdoptedGirls
+	// (any line can read them) when they changed: after a load, when you look at someone or open a conversation
+	int  Boys();
+	int  Girls();
+	void Count();
+
 	// Up close (crosshair): the greeting they'd give now
 	void Sync(RE::Actor* a_child);
 

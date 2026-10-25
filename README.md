@@ -171,12 +171,17 @@ yet, 0 Friend, 1 Courting, 2 Dating, 3 Committed, 4 Engaged, 5 Married, 6 Ex, 7 
 `IRF_ChildFaction` 0x847: what their greeting is about (1-3 you were away, 11 strained, 12 bad, 13 heartbroken, 0 all
 well); the framework's own lines for it live in IRF_ChildHelloTopic 0x852.
 
+**Adopted children** (any line, any speaker): `GetGlobalValue` of `IRF_AdoptedBoys` 0x859 and `IRF_AdoptedGirls` 0x85A,
+how many boys and girls Hearthfire has you raising. Write variants of a line with these (most specific first, a plain
+one last: the game plays the first that fits), e.g. "I can't leave our girl alone." for girls == 1 and boys == 0.
+The generator takes them per text: `{ "text": "...", "girls": 1, "boys": ">=1" }`.
+
 ### Papyrus
 
 `Scripts/Source/IRF.psc` (MIT): `IsCandidate`, `GetStage`, `GetApproval`, `GetPartner`, `GetWhy`, `GetWho`,
 `IsBrokenHearted`, `IsIntimacyAllowed` (for mods that start scenes), `RequestStage` (story beats from your own
 quests), `ModApproval`, `SetPlayerInterest`, and debug tools (`DebugSetApproval`, `DebugSkipDays`, `DebugDeed`,
-`DebugDump`, `DebugReset`, `DebugAdopt`: a child counts as adopted without Hearthfire's move). Mod events: `IRF_StageChanged` (sender = candidate, numArg = new stage, strArg = cause),
+`GetAdoptedBoys`, `GetAdoptedGirls`, `DebugDump`, `DebugReset`, `DebugAdopt`: a child counts as adopted without Hearthfire's move). Mod events: `IRF_StageChanged` (sender = candidate, numArg = new stage, strArg = cause),
 `IRF_Strayed` (sender = the partner strayed from, numArg = 1 if caught, strArg = the deed).
 
 ## Building

@@ -214,6 +214,16 @@ namespace Papyrus
 	{
 		// A child counts as adopted (Hearthfire's free Child1/Child2 alias and its adoption faction), without
 		// Hearthfire's adoption and move: for testing the children's lines and a spouse staying home
+		std::int32_t GetAdoptedBoys(RE::StaticFunctionTag*)
+		{
+			return Children::Boys();
+		}
+
+		std::int32_t GetAdoptedGirls(RE::StaticFunctionTag*)
+		{
+			return Children::Girls();
+		}
+
 		void DebugAdopt(RE::StaticFunctionTag*, RE::Actor* a_child)
 		{
 			Later(a_child, [](RE::Actor* a) {
@@ -231,6 +241,7 @@ namespace Papyrus
 						ref->ForceRefTo(a);
 						a->AddToFaction(f.adoptionFaction, 0);
 						logger::info("Debug: {} counts as adopted ({})", a->GetDisplayFullName(), alias->aliasName.c_str());
+						Children::Count();
 						Children::Sync(a);
 						return;
 					}
@@ -260,6 +271,8 @@ namespace Papyrus
 		a_vm->RegisterFunction("DebugDump"sv, script, DebugDump);
 		a_vm->RegisterFunction("DebugReset"sv, script, DebugReset);
 		a_vm->RegisterFunction("DebugAdopt"sv, script, DebugAdopt);
+		a_vm->RegisterFunction("GetAdoptedBoys"sv, script, GetAdoptedBoys);
+		a_vm->RegisterFunction("GetAdoptedGirls"sv, script, GetAdoptedGirls);
 		logger::info("Papyrus: IRF natives registered");
 		return true;
 	}

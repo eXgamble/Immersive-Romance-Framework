@@ -48,6 +48,10 @@ Function ModApproval(Actor akActor, int aiAmount, string asCause = "script") glo
 ; Who the player is interested in: "any", "male" or "female" (overrides Rules.json; eXrim's character creator)
 Function SetPlayerInterest(string asInterest) global native
 
+; How many boys and girls Hearthfire has you raising (also in the globals IRF_AdoptedBoys and IRF_AdoptedGirls)
+int Function GetAdoptedBoys() global native
+int Function GetAdoptedGirls() global native
+
 ; ---- debug tools ----
 ; Set approval directly
 Function DebugSetApproval(Actor akActor, int aiValue) global native

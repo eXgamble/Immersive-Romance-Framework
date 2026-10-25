@@ -3,6 +3,7 @@
 // add-ons (a JSON manifest each); the framework keeps what lines read in faction ranks on the candidate.
 
 #include "Candidates.h"
+#include "Children.h"
 #include "Crimes.h"
 #include "Events.h"
 #include "Follower.h"
@@ -72,6 +73,7 @@ namespace
 			if (g_ready) {
 				SKSE::GetTaskInterface()->AddTask([]() {
 					Romance::StartQuests();
+					Children::Count();
 					Romance::SyncAll();
 					TellRejected();
 				});
