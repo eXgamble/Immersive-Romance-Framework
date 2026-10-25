@@ -1,12 +1,16 @@
 // Immersive Romance Framework: SKSE plugin.
 // Courting, dating and commitment before vanilla's marriage, with approval in between. Candidates come from
-// add-ons (a JSON manifest each); the framework keeps the state in faction ranks so every line can read it.
+// add-ons (a JSON manifest each); the framework keeps what lines read in faction ranks on the candidate.
 
 #include "Candidates.h"
+#include "Crimes.h"
 #include "Events.h"
+#include "Follower.h"
 #include "Forms.h"
 #include "Papyrus.h"
 #include "Romance.h"
+#include "Rules.h"
+#include "State.h"
 
 namespace
 {
@@ -39,7 +43,7 @@ namespace
 		g_toldRejected = true;
 		RE::SendHUDMessage::ShowHUDMessage(std::format("Immersive Romance Framework: {} candidate(s) not registered, see ImmersiveRomanceFramework.log",
 			Candidates::Rejected().size())
-								  .c_str());
+											   .c_str());
 	}
 
 	void OnMessage(SKSE::MessagingInterface::Message* a_msg)
@@ -48,14 +52,24 @@ namespace
 		case SKSE::MessagingInterface::kDataLoaded:
 			g_ready = Forms::Load();
 			if (g_ready) {
+				Rules::Load();
 				Candidates::Load();
 				Events::Register();
+				Crimes::Install();
+			}
+			break;
+		case SKSE::MessagingInterface::kPreLoadGame:
+			if (g_ready) {
+				Follower::OnGameLoaded();
+				Events::OnGameLoaded();
+				Crimes::OnGameLoaded();
 			}
 			break;
 		case SKSE::MessagingInterface::kPostLoadGame:
 		case SKSE::MessagingInterface::kNewGame:
 			if (g_ready) {
 				SKSE::GetTaskInterface()->AddTask([]() {
+					Romance::StartQuests();
 					Romance::SyncAll();
 					TellRejected();
 				});
@@ -75,6 +89,7 @@ SKSEPluginLoad(const SKSE::LoadInterface* a_skse)
 	SKSE::Init(a_skse, false);
 	SKSE::GetMessagingInterface()->RegisterListener(OnMessage);
 	SKSE::GetPapyrusInterface()->Register(Papyrus::Register);
+	State::Register();
 
 	logger::info("ImmersiveRomanceFramework loaded");
 	return true;

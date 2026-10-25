@@ -1,52 +1,56 @@
 #pragma once
 
-// A candidate's relationship with the player. Everything lives in faction ranks on the candidate, so it is saved
-// with the game and dialogue conditions read it directly:
-//   IRF_StageFaction     the stage (not a member before Friend)
-//   IRF_ApprovalFaction  approval 0..100
-//   IRF_GreetFaction     the greeting state the add-on's hellos and goodbyes are gated on
+#include "Candidates.h"
+#include "Types.h"
+
+// A candidate's relationship with the player. What lines read lives in faction ranks on the candidate (saved with
+// the game); the rest in State. All changes run on an SKSE task (callers from Papyrus and events queue them).
 namespace Romance
 {
-	enum class Stage : std::int8_t
-	{
-		kNone = -1,  // not a Friend yet (vanilla relationship rank below 1)
-		kFriend = 0,
-		kCourting = 1,
-		kDating = 2,
-		kCommitted = 3,
-		kEngaged = 4,
-		kMarried = 5,
-	};
-
-	// Greeting states, the rank IRF_GreetFaction holds; 0 = none (vanilla greets them)
-	enum class GreetState : std::int8_t
-	{
-		kNone = 0,
-		kCourting = 1,
-		kDating = 2,
-		kCommitted = 3,
-		kEngaged = 4,
-		kSpouse = 5,
-	};
-
-	// The states that need lines, with the name the manifest uses ("hello.<name>", "goodbye.<name>")
-	const std::vector<std::pair<GreetState, const char*>>& GreetStates();
-
-	// The stages that answer the amulet line with a rejection ("amulet.<name>"), and IRF_AmuletFaction's rank for each
-	const std::vector<std::pair<Stage, const char*>>& AmuletStages();
-	inline int AmuletRank(Stage a_stage) { return static_cast<int>(a_stage) + 1; }
-
-	inline constexpr int kStartApproval = 20;
+	using IRF::Event;
+	using IRF::Stage;
+	using IRF::Who;
+	using IRF::Why;
 
 	Stage GetStage(RE::Actor* a_actor);
 	int   GetApproval(RE::Actor* a_actor);
 
-	// Game-state changes: call from an SKSE task (they're queued for you from Papyrus and events)
-	void SetStage(RE::Actor* a_actor, Stage a_stage, std::string_view a_cause);
-	void ModApproval(RE::Actor* a_actor, int a_amount, std::string_view a_cause);
+	// The player's partner: the candidate at Dating or later (married included), not an ex; nullptr when none
+	RE::Actor* Partner();
 
-	// Brings a candidate's ranks in line with the save: Friend once vanilla's rank reaches 1, the greeting state,
-	// and the amulet gate (out of vanilla's marriage faction until Committed). Cheap; run on look, talk and load.
-	void Sync(RE::Actor* a_actor);
+	void SetStage(RE::Actor* a_actor, Stage a_stage, std::string_view a_cause);
+
+	// Raise or lower approval; a_why says what kind of hurt it was (for the breakup it may cause)
+	void ModApproval(RE::Actor* a_actor, int a_amount, std::string_view a_cause, Why a_why = Why::kNone);
+
+	// Hurt costs a candidate's tolerance (or ends it at once when it's "never")
+	void Hurt(RE::Actor* a_actor, const Candidates::Tolerance& a_tolerance, Why a_why, std::string_view a_cause, int a_times = 1);
+
+	// Ends the relationship: who and why are recorded for the ex lines and win-back
+	void BreakUp(RE::Actor* a_actor, Who a_who, Why a_why, bool a_unforgivable = false);
+
+	// She caught you with someone else (or word got back and your denial failed)
+	void Caught(RE::Actor* a_partner, std::string_view a_cause);
+
+	// The player strayed from their partner with a_other (kiss, courting talk, gift); checks who saw it
+	void Strayed(RE::Actor* a_other, std::string_view a_deed);
+
+	// Something happened with a candidate: pending reactions for everyone who reacts, the recent event, refusals
+	void Notify(RE::Actor* a_candidate, Event a_event);
+
+	// The candidate and the player spent time together (for absence)
+	void Contact(RE::Actor* a_actor);
+
+	// Brings a candidate's ranks in line with the save. a_talking: the player is about to talk to them (absence,
+	// word getting back and the answers are worked out then). Cheap; run on look, talk and load.
+	void Sync(RE::Actor* a_actor, bool a_talking = false);
 	void SyncAll();
+
+	// A circle member or anyone with a pending reaction: their ranks (reaction, refusal)
+	void SyncOther(RE::Actor* a_actor);
+
+	// Starts any framework quest a save doesn't have running (a save made before an update)
+	void StartQuests();
+
+	bool IsPlayerInterested(const Candidates::Candidate& a_candidate);
 }
