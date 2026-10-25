@@ -112,7 +112,9 @@ follow `killed`: a refusal over it lasts for good).
 
 Every line is an INFO in one of the framework's topics with these conditions, **ANDed**, run on the subject
 (the speaker): `GetIsID <npc> == 1` and `GetFactionRank <faction> == <rank>` from the table. Add more
-conditions of your own freely (time of day, location, quest stages).
+conditions of your own freely (time of day, location, quest stages). Several lines for one key without extra
+conditions should be a random run (Random on each, RandomEnd on the last) or the game always plays the first; the
+generator does this.
 
 | Key | Topic (Immersive Romance Framework.esp) | Faction | Rank |
 |---|---|---|---|
