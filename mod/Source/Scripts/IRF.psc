@@ -3,7 +3,8 @@ Scriptname IRF Hidden
 implemented by ImmersiveRomanceFramework.dll. Changes are carried out by the framework a moment later (on its
 own safe point), so read a value back on a later frame, not on the same line.
 
-Stages: -1 not a Friend yet, 0 Friend, 1 Courting, 2 Dating, 3 Committed, 4 Engaged, 5 Married, 6 Ex, 7 Widowed.
+Stages: -1 not a Friend yet, 0 Friend, 1 Courting, 2 Dating, 3 Committed, 4 Engaged, 5 Married, 6 Ex, 7 Widowed,
+8 Killed (you killed them and someone saw it).
 Why (a breakup): 1 cheating, 2 violence, 3 absence, 4 bleedouts, 5 crime, 6 the player's choice.
 Who (ended it): 1 the player, 2 the candidate.
 

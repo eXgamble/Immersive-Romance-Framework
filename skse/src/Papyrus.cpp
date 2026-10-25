@@ -85,7 +85,7 @@ namespace Papyrus
 
 		void RequestStage(RE::StaticFunctionTag*, RE::Actor* a_actor, std::int32_t a_stage, RE::BSFixedString a_cause)
 		{
-			if (a_stage < -1 || a_stage > Rank(Stage::kWidowed)) {
+			if (a_stage < -1 || a_stage > Rank(Stage::kKilled)) {
 				return;
 			}
 			std::string cause = a_cause.empty() ? "quest"s : a_cause.c_str();

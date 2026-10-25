@@ -21,8 +21,9 @@ line they say.
 ### What it does
 
 - **Stages:** Friend, Courting, Dating, Committed, then vanilla's Engaged and Married. An Ex and a Widowed state
-  follow a breakup or a death. Approval (0..100, never shown) moves you between them: talks, evening dates,
-  kisses, gifts (one a day counts), fighting and clearing places together raise it.
+  follow a breakup or a death; if you killed them and someone saw it, it's Killed instead (no condolences).
+  Approval (0..100, never shown) moves you between them: talks, evening dates, kisses, gifts (one a day counts),
+  fighting and clearing places together raise it.
 - **Tolerances**, per candidate: being caught straying, hitting them (a stray hit in a fight vs. turning on
   them), letting them bleed out, staying away too long. Any of them can be "never": one deed ends it for good.
 - **Breakups** remember who ended it and why (cheating, violence, absence, bleedouts, crime, your choice). You can
@@ -87,7 +88,8 @@ A candidate whose manifest is missing a required line, or whose lines don't carr
 ```
 
 Every attribute is optional; a missing one takes the default from Rules.json. A candidate's community (her
-town) comes from her editor location. `refuse.until` is `"amends"` or a number of days.
+town) comes from her editor location. `refuse.until` is `"amends"` or a number of days (no amends
+follow `killed`: a refusal over it lasts for good).
 
 ### The lines
 
@@ -123,8 +125,9 @@ conditions of your own freely (time of day, location, quest stages).
 
 - **why:** 1 cheating, 2 violence, 3 absence, 4 bleedouts, 5 crime, 6 choice (you ended it).
 - **events:** 1 courting, 2 dating, 3 committed, 4 engaged, 5 married, 6 amends, 7 playerEnded, 8 theyEnded,
-  9 brokenHeart, 10 seeingSomeone (said by other candidates who know), 11 widowed, 12 wonBack. A reaction plays
-  once, at the next meeting, within a week; a recent line plays for a while after the event.
+  9 brokenHeart, 10 seeingSomeone (said by other candidates who know), 11 widowed, 12 wonBack, 13 killed (you
+  killed them, seen). A reaction plays once, at the next meeting, within a week; a recent line plays for a while
+  after the event.
 - **moments:** 1 `caught`, 2 `revive`, 3 `attacked`, 4 `crime.approve` (required when alignment < 0),
   5 `crime.disapprove` (when alignment > 0), 6 `jealous`, 10 `road.afterfight`, 11 `road.dragon`,
   12 `road.nearlydead`, 13 `road.rest`, 20 `road.nordicruin`, 21 `road.dwarvenruin`, 22 `road.cave`,
@@ -143,7 +146,7 @@ conditions of your own freely (time of day, location, quest stages).
 ### Reading the state
 
 Conditions on any line, run on the candidate: `GetFactionRank` with `IRF_StageFaction` 0x801 (-1 not a Friend
-yet, 0 Friend, 1 Courting, 2 Dating, 3 Committed, 4 Engaged, 5 Married, 6 Ex, 7 Widowed), `IRF_ApprovalFaction`
+yet, 0 Friend, 1 Courting, 2 Dating, 3 Committed, 4 Engaged, 5 Married, 6 Ex, 7 Widowed, 8 Killed), `IRF_ApprovalFaction`
 0x802 (0..100), `IRF_WhyFaction` 0x810 and `IRF_WhoFaction` 0x811 (1 you, 2 them) for an Ex,
 `IRF_SecretFaction`, `IRF_RecentFaction` with `IRF_RecentDaysFaction` 0x815 (days since).
 

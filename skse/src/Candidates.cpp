@@ -54,6 +54,7 @@ namespace Candidates
 				{ Event::kSeeingSomeone, "seeingSomeone" },
 				{ Event::kWidowed, "widowed" },
 				{ Event::kWonBack, "wonBack" },
+				{ Event::kKilled, "killed" },
 			};
 			return names;
 		}

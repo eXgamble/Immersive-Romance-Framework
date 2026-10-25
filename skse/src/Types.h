@@ -15,6 +15,7 @@ namespace IRF
 		kMarried = 5,
 		kEx = 6,
 		kWidowed = 7,  // the candidate died; the player is their widow(er)
+		kKilled = 8,   // the candidate died at the player's hand and someone saw it (no widow(er) of your own victim)
 	};
 
 	// IRF_GreetFaction: which hellos and goodbyes are theirs right now (0 = none, vanilla greets them)
@@ -67,6 +68,7 @@ namespace IRF
 		kSeeingSomeone = 10,    // the player is dating someone else (said by other candidates who know)
 		kWidowed = 11,          // the candidate died
 		kWonBack = 12,          // back together after a breakup
+		kKilled = 13,           // the player killed them, and someone saw it
 		kBreakupSpeech = 20,    // + Why: the candidate's own speech as she leaves you (21 cheating .. 25 crime)
 		kConfront = 30,         // word got back: she confronts you
 	};
