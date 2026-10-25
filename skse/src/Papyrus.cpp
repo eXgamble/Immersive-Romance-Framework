@@ -125,6 +125,7 @@ namespace Papyrus
 				s.lastTalkDay -= d;
 				s.lastDateDay -= d;
 				s.lastKissDay -= d;
+				s.lastGiftDay -= d;
 				for (auto& [id, refusal] : State::Refusals()) {
 					if (refusal.untilDay > 0.0f) {
 						refusal.untilDay -= d;

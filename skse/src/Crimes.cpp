@@ -11,8 +11,9 @@ namespace Crimes
 
 	namespace
 	{
-		std::set<const RE::Crime*> g_seen;  // crimes already judged (each crime calls both hooks)
-		std::atomic_bool           g_queued{ false };
+		std::set<const RE::Crime*>              g_seen;  // crimes already judged (each crime calls both hooks)
+		std::atomic_bool                        g_queued{ false };
+		std::unordered_map<RE::FormID, int>     g_stolen;  // stolen units of an item in your pack, as last counted
 
 		int Severity(std::uint32_t a_type)
 		{
@@ -36,6 +37,11 @@ namespace Crimes
 		RE::RefHandle Criminal(const RE::Crime* a_crime)
 		{
 			return static_cast<RE::RefHandle>(a_crime->unk08 >> 32);
+		}
+
+		RE::RefHandle Victim(const RE::Crime* a_crime)
+		{
+			return static_cast<RE::RefHandle>(a_crime->unk08 & 0xFFFFFFFF);
 		}
 
 		void Judge(RE::Actor* a_witness, std::uint32_t a_type)
@@ -74,6 +80,10 @@ namespace Crimes
 				if (!list) {
 					continue;
 				}
+				// thefts and pickpocketing are judged from the item (OnItemTaken), which also sees the cheap ones
+				if (type == RE::PackageNS::CRIME_TYPES::kSteal || type == RE::PackageNS::CRIME_TYPES::kPickpocket) {
+					continue;
+				}
 				for (const auto crime : *list) {
 					if (!crime) {
 						continue;
@@ -98,6 +108,10 @@ namespace Crimes
 					if (const auto partner = Romance::Partner(); partner && partner->IsPlayerTeammate()) {
 						witnesses.insert(partner);  // followers are never on the game's list
 					}
+					// the victim of an attack judges it as an attack on them (Events), not as a crime they saw
+					RE::NiPointer<RE::TESObjectREFR> victim;
+					RE::LookupReferenceByHandle(Victim(crime), victim);
+					witnesses.erase(victim ? victim->As<RE::Actor>() : nullptr);
 					const auto distance = Rules::Get().witnessDistance;
 					for (const auto witness : witnesses) {
 						// the game's list holds everyone alerted (even a cow 50 m away): they must really see it
@@ -108,6 +122,32 @@ namespace Crimes
 				}
 			}
 			std::erase_if(g_seen, [&](const RE::Crime* a_crime) { return !live.contains(a_crime); });
+		}
+
+		// Units of a_item in the player's pack that still belong to someone else
+		int StolenUnits(RE::PlayerCharacter* a_player, RE::FormID a_item)
+		{
+			const auto changes = a_player->GetInventoryChanges();
+			if (!changes || !changes->entryList) {
+				return 0;
+			}
+			int units = 0;
+			for (const auto entry : *changes->entryList) {
+				if (!entry || !entry->object || entry->object->GetFormID() != a_item || !entry->extraLists) {
+					continue;
+				}
+				for (const auto xList : *entry->extraLists) {
+					const auto owner = xList ? xList->GetOwner() : nullptr;
+					if (!owner || owner == a_player || owner == a_player->GetActorBase()) {
+						continue;
+					}
+					if (const auto faction = owner->As<RE::TESFaction>(); faction && a_player->IsInFaction(faction)) {
+						continue;
+					}
+					units += xList->GetCount();
+				}
+			}
+			return units;
 		}
 
 		void Queue()
@@ -149,5 +189,36 @@ namespace Crimes
 	void OnGameLoaded()
 	{
 		g_seen.clear();
+		g_stolen.clear();
+	}
+
+	void OnItemTaken(RE::FormID a_from, RE::FormID a_item, std::int32_t a_count)
+	{
+		const auto player = RE::PlayerCharacter::GetSingleton();
+		if (!player) {
+			return;
+		}
+		const int  now = StolenUnits(player, a_item);
+		const auto it = g_stolen.find(a_item);
+		// not counted since the load: assume the stolen units in the pack came with this pickup
+		const int before = it != g_stolen.end() ? it->second : std::max(0, now - a_count);
+		g_stolen[a_item] = now;
+		if (now <= before) {
+			return;
+		}
+		const auto from = a_from ? RE::TESForm::LookupByID<RE::Actor>(a_from) : nullptr;
+		const auto type = from && !from->IsDead() ? RE::PackageNS::CRIME_TYPES::kPickpocket : RE::PackageNS::CRIME_TYPES::kSteal;
+		const auto distance = Rules::Get().witnessDistance;
+		for (const auto& candidate : Candidates::All()) {
+			const auto actor = Candidates::ActorOf(candidate);
+			if (actor && actor != from && actor->Is3DLoaded() && !actor->IsDead() && World::Sees(actor, player, distance)) {
+				Judge(actor, type);
+			}
+		}
+	}
+
+	void OnItemGiven(RE::FormID a_item)
+	{
+		g_stolen.erase(a_item);  // recounted at the next pickup
 	}
 }

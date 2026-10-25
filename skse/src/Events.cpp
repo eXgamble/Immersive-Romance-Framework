@@ -1,5 +1,7 @@
 #include "Events.h"
 
+#include "Crimes.h"
+
 #include "Candidates.h"
 #include "Follower.h"
 #include "Forms.h"
@@ -41,14 +43,47 @@ namespace Events
 		Clock::time_point g_lastMoment{};
 		Moment            g_lastPlace{ Moment::kNone };
 
-		void Moment_(RE::Actor* a_speaker, Moment a_moment)
+		void Moment_(RE::Actor* a_speaker, Moment a_moment, float a_delay = 0.0f)
 		{
 			const auto now = Clock::now();
 			if (now - g_lastMoment < std::chrono::duration<float>(Rules::Get().momentCooldownSeconds)) {
 				return;
 			}
 			g_lastMoment = now;
-			World::SayMoment(a_speaker, a_moment);
+			World::SayMoment(a_speaker, a_moment, a_delay);
+		}
+
+		// Travelling with another candidate where your partner sees you together: a jealous line and a small cost, once
+		// a game day (not straying; the session forgets the day on load, so a reload can bring it once more)
+		std::unordered_map<RE::FormID, float> g_jealousDay;
+
+		void CheckJealous(RE::Actor* a_partner)
+		{
+			const auto player = RE::PlayerCharacter::GetSingleton();
+			if (!a_partner || a_partner->IsDead()) {
+				return;
+			}
+			const auto today = std::floor(State::Today());
+			if (const auto it = g_jealousDay.find(a_partner->GetFormID()); it != g_jealousDay.end() && it->second == today) {
+				return;
+			}
+			const auto distance = Rules::Get().jealousDistance;
+			RE::Actor* other = nullptr;
+			for (const auto& candidate : Candidates::All()) {
+				const auto a = Candidates::ActorOf(candidate);
+				if (a && a != a_partner && a->IsPlayerTeammate() && !a->IsDead() &&
+					a->GetPosition().GetDistance(player->GetPosition()) < distance) {
+					other = a;
+					break;
+				}
+			}
+			if (!other || !World::Sees(a_partner, player, distance)) {
+				return;
+			}
+			g_jealousDay[a_partner->GetFormID()] = today;
+			logger::info("Events: {} saw you travelling with {}", a_partner->GetDisplayFullName(), other->GetDisplayFullName());
+			World::SayMoment(a_partner, Moment::kJealous);
+			Romance::ModApproval(a_partner, -Rules::Get().jealousCost, "you travel with someone else");
 		}
 
 		// The people around who are candidates learn you're seeing a_partner (a date, a kiss in public, a walk
@@ -168,6 +203,9 @@ namespace Events
 					Queue([handle = actor->GetHandle(), meeting]() {
 						if (const auto a = handle.get()) {
 							Romance::Sync(a.get(), meeting);
+							if (meeting && a.get() == Romance::Partner()) {
+								CheckJealous(a.get());
+							}
 						}
 					});
 				}
@@ -252,7 +290,20 @@ namespace Events
 		public:
 			RE::BSEventNotifyControl ProcessEvent(const RE::TESContainerChangedEvent* a_event, RE::BSTEventSource<RE::TESContainerChangedEvent>*) override
 			{
-				if (!a_event || a_event->oldContainer != 0x14 || a_event->itemCount <= 0 || !Candidates::FindByRef(a_event->newContainer)) {
+				if (!a_event || a_event->itemCount <= 0) {
+					return RE::BSEventNotifyControl::kContinue;
+				}
+				if (a_event->newContainer == 0x14) {
+					Queue([from = a_event->oldContainer, item = a_event->baseObj, count = a_event->itemCount]() {
+						Crimes::OnItemTaken(from, item, count);
+					});
+					return RE::BSEventNotifyControl::kContinue;
+				}
+				if (a_event->oldContainer != 0x14) {
+					return RE::BSEventNotifyControl::kContinue;
+				}
+				Queue([item = a_event->baseObj]() { Crimes::OnItemGiven(item); });
+				if (!Candidates::FindByRef(a_event->newContainer)) {
 					return RE::BSEventNotifyControl::kContinue;
 				}
 				Queue([to = a_event->newContainer, item = a_event->baseObj]() {
@@ -263,7 +314,11 @@ namespace Events
 					}
 					const auto& loved = candidate->attributes.lovedGifts;
 					const bool  love = std::ranges::any_of(loved, [&](RE::TESForm* a_form) { return a_form->GetFormID() == item; });
-					Romance::ModApproval(actor, Rules::Get().giftGain * (love ? 2 : 1), love ? "a gift they love" : "a gift");
+					auto&       s = State::Of(actor->GetFormID());
+					if (State::Today() - s.lastGiftDay >= 1.0f) {  // one gift a day counts, so a pile of gifts isn't a shortcut
+						s.lastGiftDay = State::Today();
+						Romance::ModApproval(actor, Rules::Get().giftGain * (love ? 2 : 1), love ? "a gift they love" : "a gift");
+					}
 					Romance::Contact(actor);
 					Romance::Strayed(actor, "a gift for someone else");
 				});
@@ -502,6 +557,7 @@ namespace Events
 					return RE::BSEventNotifyControl::kContinue;
 				}
 				Queue([loc = a_event->newLoc]() {
+					CheckJealous(Romance::Partner());
 					const auto partner = FollowingPartner();
 					if (!partner) {
 						return;
@@ -511,7 +567,7 @@ namespace Events
 					const auto moment = World::MomentForPlace(loc, candidate->community);
 					if (moment != Moment::kNone && moment != g_lastPlace) {
 						g_lastPlace = moment;
-						Moment_(partner, moment);
+						Moment_(partner, moment, 3.0f);  // once you're both through the door and looking around
 					}
 					if (moment == Moment::kHomeTown) {
 						Spread(partner, false);  // seen together in her town
@@ -605,5 +661,7 @@ namespace Events
 		g_down.clear();
 		g_lastHit.clear();
 		g_lastPlace = Moment::kNone;
+		g_jealousDay.clear();
+		g_refusing = {};
 	}
 }

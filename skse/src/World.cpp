@@ -73,7 +73,8 @@ namespace World
 	void SayMoment(RE::Actor* a_speaker, Moment a_moment, float a_delay)
 	{
 		const auto& f = Forms::Get();
-		if (!a_speaker || !a_speaker->Is3DLoaded() || a_speaker->IsDead()) {
+		// a delayed line may wait for its speaker to arrive (a follower comes through a load door a moment after you)
+		if (!a_speaker || a_speaker->IsDead() || (a_delay <= 0.0f && !a_speaker->Is3DLoaded())) {
 			return;
 		}
 		a_speaker->AddToFaction(f.moment, static_cast<std::int8_t>(a_moment));

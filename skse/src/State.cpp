@@ -11,7 +11,7 @@ namespace State
 
 		constexpr std::uint32_t kId = 'IRF0';
 		constexpr std::uint32_t kRecord = 'IRFS';
-		constexpr std::uint32_t kVersion = 1;
+		constexpr std::uint32_t kVersion = 2;
 
 		template <class T>
 		void Write(SKSE::SerializationInterface* a_intfc, const T& a_value)
@@ -72,6 +72,7 @@ namespace State
 				Write(a_intfc, c.lastTalkDay);
 				Write(a_intfc, c.lastDateDay);
 				Write(a_intfc, c.lastKissDay);
+				Write(a_intfc, c.lastGiftDay);
 				Write(a_intfc, c.killDay);
 				Write(a_intfc, c.killsToday);
 				Write(a_intfc, c.recent);
@@ -107,7 +108,7 @@ namespace State
 		{
 			return Read(a_intfc, c.lastContactDay) && Read(a_intfc, c.silentUntilDay) && Read(a_intfc, c.hurt) && Read(a_intfc, c.why) &&
 			       Read(a_intfc, c.who) && Read(a_intfc, c.breakupDay) && Read(a_intfc, c.unforgivable) && Read(a_intfc, c.secret) &&
-			       Read(a_intfc, c.lockUntilDay) && Read(a_intfc, c.lastTalkDay) && Read(a_intfc, c.lastDateDay) && Read(a_intfc, c.lastKissDay) &&
+			       Read(a_intfc, c.lockUntilDay) && Read(a_intfc, c.lastTalkDay) && Read(a_intfc, c.lastDateDay) && Read(a_intfc, c.lastKissDay) && Read(a_intfc, c.lastGiftDay) &&
 			       Read(a_intfc, c.killDay) && Read(a_intfc, c.killsToday) && Read(a_intfc, c.recent) && Read(a_intfc, c.recentDay) &&
 			       Read(a_intfc, c.partnerXp) && Read(a_intfc, c.appliedLevels) && Read(a_intfc, c.profileApplied) &&
 			       Read(a_intfc, c.savedConfidence) && Read(a_intfc, c.savedAggression) && Read(a_intfc, c.pendingBreakup) &&
