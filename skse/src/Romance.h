@@ -46,6 +46,11 @@ namespace Romance
 	void Sync(RE::Actor* a_actor, bool a_talking = false);
 	void SyncAll();
 
+	// IRF_ChatFaction: 1 while she follows you and may chat (not hurt or silent, no reaction, plea or confession
+	// waiting). An add-on's own follower comments (towns, guilds, quests, bandit camps) need only this one condition, so
+	// a comment never plays over a breakup. Part of Sync; also run when a moment starts or ends outside it
+	void SyncChat(RE::Actor* a_actor);
+
 	// A circle member or anyone with a pending reaction: their ranks (reaction, refusal)
 	void SyncOther(RE::Actor* a_actor);
 

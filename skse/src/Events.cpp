@@ -236,6 +236,7 @@ namespace Events
 		// a refusal line waits for the dialogue menu to close and 1.5 s more (a line said while it is open, or up to
 		// about a second after it closes, never plays; measured 2026-10-25)
 		RE::ActorHandle g_refusing{};
+		RE::ActorHandle g_talking{};  // whoever the open talk is with
 		RE::ActorHandle g_talkingChild{};  // an adopted child you're talking to
 
 		class Menus : public RE::BSTEventSink<RE::MenuOpenCloseEvent>
@@ -260,7 +261,13 @@ namespace Events
 					g_talkingChild = {};
 				}
 				if (a_event && !a_event->opening && a_event->menuName == RE::DialogueMenu::MENU_NAME) {
-					Queue([]() { Confess::OnDialogueClosed(); });
+					Queue([handle = g_talking]() {
+						Confess::OnDialogueClosed();
+						if (const auto a = handle.get()) {
+							Romance::Sync(a.get());  // she may have started or stopped following you
+						}
+					});
+					g_talking = {};
 				}
 				if (a_event && !a_event->opening && a_event->menuName == RE::LoadingMenu::MENU_NAME) {
 					Queue([]() {
@@ -279,6 +286,7 @@ namespace Events
 				}
 				const auto& name = a_event->menuName;
 				if (name == RE::DialogueMenu::MENU_NAME) {
+					g_talking = speaker->GetHandle();
 					if (Children::IsChild(speaker)) {
 						g_talkingChild = speaker->GetHandle();
 					}

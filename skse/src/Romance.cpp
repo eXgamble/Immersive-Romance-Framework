@@ -532,6 +532,19 @@ namespace Romance
 		}
 	}
 
+	void SyncChat(RE::Actor* a_actor)
+	{
+		const auto& f = Forms::Get();
+		if (!Candidates::Find(a_actor)) {
+			return;
+		}
+		const auto& s = State::Of(a_actor->GetFormID());
+		const bool  waiting = Rank(a_actor, f.reaction) > 0 || Rank(a_actor, f.plead) > 0 ||
+		                     Rank(a_actor, f.moment) == IRF::Rank(Moment::kConfess) || s.pendingBreakup != Why::kNone || s.confrontPending;
+		const bool  chat = a_actor->IsPlayerTeammate() && !a_actor->IsDead() && !s.hurt && s.silentUntilDay <= State::Today() && !waiting;
+		SetRank(a_actor, f.chat, chat ? 1 : 0);
+	}
+
 	void Sync(RE::Actor* a_actor, bool a_talking)
 	{
 		const auto candidate = Candidates::Find(a_actor);
@@ -723,6 +736,7 @@ namespace Romance
 		}
 		Follower::SyncProfile(a_actor);
 		SyncSpouseBonus(a_actor, *candidate, stage, s);
+		SyncChat(a_actor);
 	}
 
 	void SyncAll()

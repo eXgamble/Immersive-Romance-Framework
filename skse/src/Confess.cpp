@@ -24,6 +24,7 @@ namespace Confess
 			if (a_partner->GetFactionRank(Forms::Get().moment, false) == Rank(Moment::kConfess)) {
 				a_partner->AddToFaction(Forms::Get().moment, 0);
 			}
+			Romance::SyncChat(a_partner);
 		}
 
 		// Both in the same interior, or both outside in the same worldspace
@@ -105,6 +106,7 @@ namespace Confess
 		const auto& f = Forms::Get();
 		partner->AddToFaction(f.moment, static_cast<std::int8_t>(Rank(Moment::kConfess)));
 		Script::CallStatic("IRF_Internal"sv, "ForceGreet"sv, f.sayQuest, partner, true);
+		Romance::SyncChat(partner);
 		g_coming = partner->GetHandle();
 		g_comingDay = today;
 		logger::info("Confess: {} comes to tell you how much you mean to her", partner->GetDisplayFullName());

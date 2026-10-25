@@ -63,6 +63,7 @@ namespace Forms
 		// a pleading ex: "Alright. Let's try again." / "No. It's over."
 		kPleadFaction = 0x85D,       // 1 while she's asking you to take her back
 		kSpouseBonusFaction = 0x863, // 1 while her spouse perk is on (married, in good standing)
+		kChatFaction = 0x86E,        // 1 while she may chat on the road: an add-on's own follower comments read it
 		kPleadYesTopic = 0x85E,
 		kPleadNoTopic = 0x860,
 
@@ -157,6 +158,7 @@ namespace Forms
 		RE::TESTopic*   idle{ nullptr };
 		RE::TESFaction* plead{ nullptr };
 		RE::TESFaction* spouseBonus{ nullptr };
+		RE::TESFaction* chat{ nullptr };
 		RE::TESTopic*   pleadYes{ nullptr };
 		RE::TESTopic*   pleadNo{ nullptr };
 		RE::TESTopic*   forceGreetTopic{ nullptr };

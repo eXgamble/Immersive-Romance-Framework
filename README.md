@@ -222,6 +222,12 @@ yet, 0 Friend, 1 Courting, 2 Dating, 3 Committed, 4 Engaged, 5 Married, 6 Ex, 7 
 `IRF_ChildFaction` 0x847: what their greeting is about (1-3 you were away, 11 strained, 12 bad, 13 heartbroken, 0 all
 well); the framework's own lines for it live in IRF_ChildHelloTopic 0x852.
 
+**Her own follower comments** (towns, guilds, quests, a bandit camp ahead: an expansion's worth of road talk) belong in
+the add-on: its own quest and lines, triggered the vanilla way (location conditions or Story Manager events, `GetStage`,
+the player's factions, Say Once). Give each of those lines one framework condition, `GetFactionRank IRF_ChatFaction`
+0x86E == 1: she's following you, not hurt or silent, and no reaction, plea or confession is waiting, so a comment never
+plays over a breakup. Add `IRF_StageFaction` where the words depend on what you are to her ("our home" once married).
+
 **Adopted children** (any line, any speaker): `GetGlobalValue` of `IRF_AdoptedBoys` 0x859 and `IRF_AdoptedGirls` 0x85A,
 how many boys and girls Hearthfire has you raising. Write variants of a line with these (most specific first, a plain
 one last: the game plays the first that fits), e.g. "I can't leave our girl alone." for girls == 1 and boys == 0.
