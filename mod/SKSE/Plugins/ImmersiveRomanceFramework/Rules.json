@@ -39,6 +39,13 @@
   "absenceDays": 7,         // apart longer than this hurts ...
   "absenceCost": 5,         // ... this much per band (1-3), once, when you meet again
   "jealousCost": 3,         // seen travelling with another candidate, once a day
+  "waryDays": 5,            // her wary mood after an attack (a candidate's "wary" days override it)
+
+  // her moods (for her greetings, goodbyes and idles)
+  "jealousDays": 3,         // jealous after seeing you with another candidate
+  "warmDays": 2,            // warm after a quick revive, amends, the wedding or a win-back
+  "strainedBelow": 15,      // approval under this: strained
+  "warmFrom": 80,           // approval from this: warm
   "crimeScale": 1,          // a crime they see: alignment x severity x this (theft 1, pickpocket 2, assault 4, murder 10)
 
   // breakups and reactions

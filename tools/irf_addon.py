@@ -46,6 +46,9 @@ ABSENCE_F, REACTION_F, RECENT_F, MOMENT_F = 0x812, 0x813, 0x814, 0x816
 ASKDATE_F, FOLLOW_F, KISS_F, BREAKUP_F, AMENDS_F, WINBACK_F, SECRET_F, TALK_F, CONFRONT_F, TAKEN_F = (
     0x818, 0x819, 0x81A, 0x81B, 0x81C, 0x81D, 0x81E, 0x81F, 0x820, 0x821)
 GIFT_F = 0x841  # her answer to a gift: 1 insulted, 2 disliked, 3 plain, 4 liked, 5 loved
+MOOD_F, IDLE = 0x85B, 0x85C  # her mood (IRF_MoodFaction), her idles (IRF_IdleTopic, by IRF_StageFaction)
+MOODS = {"warm": 1, "strained": 2, "jealous": 3, "hurt": 4, "wary": 5}
+SPOUSE_IDLE_SHARE = 50  # a spouse's plain idles play this % of the time: vanilla's spouse chatter mixes in
 ADOPTED = {"boys": 0x859, "girls": 0x85A}  # IRF_AdoptedBoys / IRF_AdoptedGirls (globals)
 OPS = {"==": "EqualTo", "!=": "NotEqualTo", ">=": "GreaterThanOrEqualTo", "<=": "LessThanOrEqualTo", ">": "GreaterThan", "<": "LessThan"}
 
@@ -61,17 +64,33 @@ MOMENTS = {"caught": 1, "revive": 2, "attacked": 3, "crime.approve": 4, "crime.d
 
 
 def requirements(alignment):
-    """key -> (topic, faction, rank, operator, goodbye flag, required); mirrors Candidates.cpp"""
+    """key -> (topic, faction, rank, operator, goodbye flag, required, extra condition rows); mirrors Candidates.cpp.
+    A mood version comes before its plain line: the game plays the first line that fits."""
     r = {}
 
-    def add(key, topic, faction, rank, required=True, op="EqualTo", goodbye=False):
-        r[key] = (topic, faction, rank, op, goodbye, required)
+    def add(key, topic, faction, rank, required=True, op="EqualTo", goodbye=False, extra=None):
+        r[key] = (topic, faction, rank, op, goodbye, required, extra or [])
+
+    def mood_row(mood):
+        return condition("GetFactionRankConditionData", "Faction", fw(MOOD_F), MOODS[mood], "EqualTo")
 
     add("court", COURT, TAKEN_F, 1)
     add("court.taken", COURT, TAKEN_F, 2)
     for rank, name in enumerate(["courting", "dating", "committed", "engaged", "spouse"], start=1):
+        for mood in MOODS:
+            if mood != "hurt":  # the broken heart has its own greetings
+                add(f"hello.{name}.{mood}", HELLO, GREET_F, rank, required=False, extra=[mood_row(mood)])
+                add(f"goodbye.{name}.{mood}", GOODBYE, GREET_F, rank, required=False, extra=[mood_row(mood)])
         add(f"hello.{name}", HELLO, GREET_F, rank)
         add(f"goodbye.{name}", GOODBYE, GREET_F, rank)
+        # her idles, by stage (IRF_StageFaction 1-5): the mood versions first
+        for mood in MOODS:
+            add(f"idle.{name}.{mood}", IDLE, STAGE_F, rank, required=False, extra=[mood_row(mood)])
+        share = [] if name != "spouse" else [{"type": "ConditionFloat", "fields": {"CompareOperator": "LessThan",
+                 "ComparisonValue": str(SPOUSE_IDLE_SHARE)}, "sets": [{"path": "Data", "compose": {
+                 "type": "GetRandomPercentConditionData"}}]}]
+        add(f"idle.{name}", IDLE, STAGE_F, rank, extra=share)
+    add("idle.ex", IDLE, STAGE_F, 6)
     add("hello.brokenheart.silent", HELLO, GREET_F, 10, goodbye=True)
     add("hello.brokenheart.hurt", HELLO, GREET_F, 11)
     add("goodbye.brokenheart", GOODBYE, GREET_F, 11)
@@ -146,8 +165,8 @@ def adopted_conditions(text):
     return rows
 
 
-def info(editor_id, topic, text, speaker_npc, faction, rank, op, goodbye, random=None):
-    extra = adopted_conditions(text)
+def info(editor_id, topic, text, speaker_npc, faction, rank, op, goodbye, random=None, rows=None):
+    extra = (rows or []) + adopted_conditions(text)
     text = text["text"] if isinstance(text, dict) else text
     ops = [
         {"field_path": "Topic", "value": fw(topic)},
@@ -183,14 +202,14 @@ def main(spec_path, out_dir):
     records, lines = [], {}
     next_id = 0x800
 
-    def emit(key, editor_id, topic, text, speaker, faction, rank, op="EqualTo", goodbye=False, random=None):
+    def emit(key, editor_id, topic, text, speaker, faction, rank, op="EqualTo", goodbye=False, random=None, rows=None):
         nonlocal next_id
-        records.append(info(editor_id, topic, text, speaker, faction, rank, op, goodbye, random))
+        records.append(info(editor_id, topic, text, speaker, faction, rank, op, goodbye, random, rows))
         lines.setdefault(key, []).append(f"{plugin}|0x{next_id:03X}")
         next_id += 1
 
     given = spec.get("lines", {})
-    for key, (topic, faction, rank, op, goodbye, required) in reqs.items():
+    for key, (topic, faction, rank, op, goodbye, required, rows) in reqs.items():
         if key in given:
             values = texts(given[key])
         elif required and spec.get("placeholders", False):
@@ -206,7 +225,7 @@ def main(spec_path, out_dir):
             random = None
             if len(plain) > 1 and i in plain:
                 random = "end" if i == plain[-1] else "start"
-            emit(key, eid, topic, text, npc, faction, rank, op, goodbye, random)
+            emit(key, eid, topic, text, npc, faction, rank, op, goodbye, random, rows)
 
     manifest_circle = []
     for index, member in enumerate(spec.get("circle", [])):

@@ -37,6 +37,11 @@ namespace Rules
 		int absenceDays = 7;        // default absence-tolerance
 		int absenceCost = 5;        // per band, once when you come back
 		int jealousCost = 3;        // travelling with another candidate
+		int waryDays = 5;           // default wary-tolerance: days she's wary of you after an attack
+		int jealousDays = 3;        // her jealous mood after seeing you with another candidate
+		int warmDays = 2;           // her warm mood after something good (a quick revive, amends, the wedding, a win-back)
+		int strainedBelow = 15;     // approval under this: strained mood
+		int warmFrom = 80;          // approval from this: warm mood
 		int crimeScale = 1;         // approval per alignment point per crime severity point
 		int winBackDays = 7;
 		int winBackApproval = 15;   // approval they start from when they take you back

@@ -55,6 +55,10 @@ namespace Forms
 		kAdoptedBoys = 0x859,        // IRF_AdoptedBoys: how many boys Hearthfire has you raising (for any line's conditions)
 		kAdoptedGirls = 0x85A,       // IRF_AdoptedGirls: and girls
 
+		// her mood and her idle chatter
+		kMoodFaction = 0x85B,        // rank = Mood
+		kIdleTopic = 0x85C,          // IRF_IdleTopic (in IRF_Quest): her idles by stage (IRF_StageFaction) and mood
+
 		// quests and topics
 		kQuest = 0x805,  // IRF_Quest, priority 105
 		kHelloTopic = 0x806,
@@ -140,6 +144,8 @@ namespace Forms
 		RE::TESTopic*   childHello{ nullptr };
 		RE::TESGlobal*  adoptedBoys{ nullptr };
 		RE::TESGlobal*  adoptedGirls{ nullptr };
+		RE::TESFaction* moodFaction{ nullptr };
+		RE::TESTopic*   idle{ nullptr };
 		RE::TESTopic*   stayHomeTopic{ nullptr };
 		RE::TESQuest*   sayQuest{ nullptr };     // IRF_SayQuest: its alias 0, StayHome, holds the force greet
 

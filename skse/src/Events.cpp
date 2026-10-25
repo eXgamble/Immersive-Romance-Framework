@@ -85,7 +85,8 @@ namespace Events
 			g_jealousDay[a_partner->GetFormID()] = today;
 			logger::info("Events: {} saw you travelling with {}", a_partner->GetDisplayFullName(), other->GetDisplayFullName());
 			World::SayMoment(a_partner, Moment::kJealous);
-			Romance::ModApproval(a_partner, -Rules::Get().jealousCost, "you travel with someone else");
+			State::Of(a_partner->GetFormID()).jealousUntilDay = State::Today() + static_cast<float>(Rules::Get().jealousDays);
+			Romance::ModApproval(a_partner, -Rules::Get().jealousCost, "you travel with someone else");  // syncs her mood too
 		}
 
 		// The people around who are candidates learn you're seeing a_partner (a date, a kiss in public, a walk
@@ -170,7 +171,10 @@ namespace Events
 				s.secret = true;
 			} else if (a_key == "talk") {
 				const bool date = stage >= Stage::kDating && Evening();
-				if (date && today - s.lastDateDay >= 1.0f) {
+				const bool cold = candidate->attributes.waryStyle == Candidates::WaryStyle::kCold && s.waryUntilDay > today;
+				if (cold) {
+					logger::info("Events: {} is cold with you: the talk brings nothing", a_speaker->GetDisplayFullName());
+				} else if (date && today - s.lastDateDay >= 1.0f) {
 					s.lastDateDay = today;
 					Romance::ModApproval(a_speaker, r.dateGain, "an evening together");
 					if (Romance::Partner() == a_speaker) {
@@ -361,7 +365,8 @@ namespace Events
 			const auto seconds = std::chrono::duration<float>(Clock::now() - it->second).count();
 			g_down.erase(it);
 			if (!a_actor->IsDead() && seconds <= Rules::Get().reviveSeconds) {
-				Romance::ModApproval(a_actor, Rules::Get().reviveBack, "you got them back up quickly");
+				State::Of(a_actor->GetFormID()).warmUntilDay = State::Today() + static_cast<float>(Rules::Get().warmDays);
+				Romance::ModApproval(a_actor, Rules::Get().reviveBack, "you got them back up quickly");  // syncs her mood too
 				World::SayMoment(a_actor, Moment::kRevive);
 			}
 		}
@@ -391,24 +396,6 @@ namespace Events
 		// hits on a partner: stray ones in a fight, or an attack
 		std::unordered_map<RE::FormID, Clock::time_point> g_lastHit;
 
-		void Attack(RE::Actor* a_actor, std::string_view a_how)
-		{
-			const auto candidate = Candidates::Find(a_actor);
-			auto&      s = State::Of(a_actor->GetFormID());
-			if (s.lockUntilDay > State::Today()) {
-				return;  // already counted
-			}
-			s.strayHits = 0;
-			s.lockUntilDay = State::Today() + static_cast<float>(candidate->attributes.attackLockDays);
-			logger::info("Events: you attacked {} ({})", a_actor->GetDisplayFullName(), a_how);
-			World::SayMoment(a_actor, Moment::kAttacked);
-			Follower::Dismiss(a_actor);
-			auto tolerance = candidate->attributes.hit;
-			if (!tolerance.never) {
-				tolerance.cost = Rules::Get().attackCost;
-			}
-			Romance::Hurt(a_actor, tolerance, Why::kViolence, a_how);
-		}
 
 		class Hit : public RE::BSTEventSink<RE::TESHitEvent>
 		{
@@ -463,6 +450,10 @@ namespace Events
 						return;
 					}
 					auto& s = State::Of(a->GetFormID());
+					if (candidate->attributes.waryStyle == Candidates::WaryStyle::kAngry && s.waryUntilDay > State::Today()) {
+						Attack(a.get(), "a hit while she's still angry");  // no stray hits while she's angry with you
+						return;
+					}
 					++s.strayHits;
 					Romance::Hurt(a.get(), candidate->attributes.hit, Why::kViolence, "a stray hit");
 					if (s.strayHits >= candidate->attributes.strayHits) {
@@ -676,6 +667,29 @@ namespace Events
 				return RE::BSEventNotifyControl::kContinue;
 			}
 		};
+	}
+
+	void Attack(RE::Actor* a_actor, std::string_view a_how)
+	{
+		const auto candidate = Candidates::Find(a_actor);
+		auto&      s = State::Of(a_actor->GetFormID());
+		if (s.lockUntilDay > State::Today()) {
+			return;  // already counted
+		}
+		s.strayHits = 0;
+		s.lockUntilDay = State::Today() + static_cast<float>(candidate->attributes.attackLockDays);
+		s.waryUntilDay = State::Today() + static_cast<float>(candidate->attributes.waryDays);
+		if (candidate->attributes.waryStyle == Candidates::WaryStyle::kAfraid) {
+			s.lockUntilDay = std::max(s.lockUntilDay, s.waryUntilDay);  // she keeps away: no following, no dates
+		}
+		logger::info("Events: you attacked {} ({})", a_actor->GetDisplayFullName(), a_how);
+		World::SayMoment(a_actor, Moment::kAttacked);
+		Follower::Dismiss(a_actor);
+		auto tolerance = candidate->attributes.hit;
+		if (!tolerance.never) {
+			tolerance.cost = Rules::Get().attackCost;
+		}
+		Romance::Hurt(a_actor, tolerance, Why::kViolence, a_how);
 	}
 
 	void Register()

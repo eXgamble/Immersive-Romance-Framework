@@ -107,6 +107,8 @@ namespace Forms
 		s.childHello = f.Own<RE::TESTopic>(kChildHelloTopic, "IRF_ChildHelloTopic");
 		s.adoptedBoys = f.Own<RE::TESGlobal>(kAdoptedBoys, "IRF_AdoptedBoys");
 		s.adoptedGirls = f.Own<RE::TESGlobal>(kAdoptedGirls, "IRF_AdoptedGirls");
+		s.moodFaction = f.Own<RE::TESFaction>(kMoodFaction, "IRF_MoodFaction");
+		s.idle = f.Own<RE::TESTopic>(kIdleTopic, "IRF_IdleTopic");
 		s.stayHomeTopic = f.Own<RE::TESTopic>(kStayHomeTopic, "IRF_StayHomeTopic");
 		s.sayQuest = f.Own<RE::TESQuest>(kSayQuest, "IRF_SayQuest");
 		s.adoption = data->LookupForm<RE::TESQuest>(0x0042B4, "HearthFires.esm"sv);

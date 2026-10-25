@@ -98,6 +98,18 @@ namespace IRF
 		kHomeTown = 26,
 	};
 
+	// IRF_MoodFaction: her mood on top of the stage (Courting to Married), for the mood versions of her greetings,
+	// goodbyes and idles; the strongest wins
+	enum class Mood : std::int8_t
+	{
+		kNone = 0,      // plain stage lines (a spouse's idles mix with vanilla's)
+		kWarm = 1,      // approval high, or something good just happened
+		kStrained = 2,  // approval low
+		kJealous = 3,   // she saw you travelling with another candidate lately
+		kHurt = 4,      // broken heart (idles only: her greetings already have their own)
+		kWary = 5,      // you attacked her lately (how she takes it: her add-on's wary style)
+	};
+
 	// IRF_ChildFaction: what an adopted child's greeting is about (the framework's own lines)
 	enum class ChildMood : std::int8_t
 	{

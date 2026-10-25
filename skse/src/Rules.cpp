@@ -70,6 +70,11 @@ namespace Rules
 		IRF_RULE(absenceDays);
 		IRF_RULE(absenceCost);
 		IRF_RULE(jealousCost);
+		IRF_RULE(waryDays);
+		IRF_RULE(jealousDays);
+		IRF_RULE(warmDays);
+		IRF_RULE(strainedBelow);
+		IRF_RULE(warmFrom);
 		IRF_RULE(crimeScale);
 		IRF_RULE(winBackDays);
 		IRF_RULE(winBackApproval);

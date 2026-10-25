@@ -28,6 +28,15 @@ namespace Candidates
 		kFemale,
 	};
 
+	// How she takes being attacked (wary mood): afraid keeps away (no following or dates), angry takes any further
+	// hit as an attack, cold gives your talks and dates nothing; none of them kisses you while wary
+	enum class WaryStyle
+	{
+		kAfraid,
+		kAngry,
+		kCold,
+	};
+
 	struct Combat
 	{
 		std::string                      role;
@@ -59,6 +68,8 @@ namespace Candidates
 		Tolerance hit;
 		int       strayHits{ 0 };
 		int       attackLockDays{ 0 };
+		int       waryDays{ 0 };
+		WaryStyle waryStyle{ WaryStyle::kAfraid };
 		Tolerance bleedout;
 		Tolerance absence;
 		int       absenceDays{ 0 };

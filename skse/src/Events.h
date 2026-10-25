@@ -8,5 +8,8 @@
 namespace Events
 {
 	void Register();
+
+	// An attack on a candidate (a hit outside a fight, too many stray hits; debug): approval, lock, wary mood
+	void Attack(RE::Actor* a_actor, std::string_view a_how);
 	void OnGameLoaded();
 }

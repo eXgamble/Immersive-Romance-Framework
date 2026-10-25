@@ -38,6 +38,9 @@ namespace State
 		std::set<RE::FormID> sawStraying;   // who saw you stray from this candidate (word may get back)
 		bool  confrontPending{ false };
 		bool  confrontWorks{ false };
+		float waryUntilDay{ 0.0f };      // her moods (Mood) that last a while
+		float jealousUntilDay{ 0.0f };
+		float warmUntilDay{ 0.0f };
 	};
 
 	// A reaction waiting for the next time you meet someone

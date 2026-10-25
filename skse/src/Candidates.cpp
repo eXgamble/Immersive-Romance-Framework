@@ -64,6 +64,8 @@ namespace Candidates
 			Op              op{ Op::kEqualTo };
 			bool            goodbye{ false };  // must carry the Goodbye flag
 			bool            required{ true };
+			RE::TESFaction* faction2{ nullptr };  // a second row, == rank2 (a mood version: the mood)
+			int             rank2{ 0 };
 		};
 
 		std::vector<Requirement> Requirements(const Attributes& a_attributes)
@@ -84,10 +86,38 @@ namespace Candidates
 				{ GreetState::kEngaged, "engaged" },
 				{ GreetState::kSpouse, "spouse" },
 			};
+			// her moods: optional versions of the stage's greetings, goodbyes and idles (hurt: idles only, the broken
+			// heart has its own greetings)
+			const std::pair<Mood, const char*> moods[]{
+				{ Mood::kWarm, "warm" }, { Mood::kStrained, "strained" }, { Mood::kJealous, "jealous" }, { Mood::kHurt, "hurt" }, { Mood::kWary, "wary" }
+			};
+			auto addMood = [&](std::string a_key, RE::TESTopic* a_topic, RE::TESFaction* a_faction, int a_rank, Mood a_mood) {
+				add(std::move(a_key), a_topic, a_faction, a_rank, false);
+				list.back().faction2 = f.moodFaction;
+				list.back().rank2 = Rank(a_mood);
+			};
+			const std::pair<Stage, const char*> idleStages[]{
+				{ Stage::kCourting, "courting" }, { Stage::kDating, "dating" }, { Stage::kCommitted, "committed" },
+				{ Stage::kEngaged, "engaged" }, { Stage::kMarried, "spouse" }
+			};
 			for (const auto& [state, name] : states) {
 				add("hello."s + name, f.hello, f.greet, Rank(state));
 				add("goodbye."s + name, f.goodbye, f.greet, Rank(state));
+				for (const auto& [mood, moodName] : moods) {
+					if (mood != Mood::kHurt) {
+						addMood(std::format("hello.{}.{}", name, moodName), f.hello, f.greet, Rank(state), mood);
+						addMood(std::format("goodbye.{}.{}", name, moodName), f.goodbye, f.greet, Rank(state), mood);
+					}
+				}
 			}
+			// her idle chatter, the whole relationship long (a Friend's is vanilla's)
+			for (const auto& [stage, name] : idleStages) {
+				add("idle."s + name, f.idle, f.stage, Rank(stage));
+				for (const auto& [mood, moodName] : moods) {
+					addMood(std::format("idle.{}.{}", name, moodName), f.idle, f.stage, Rank(stage), mood);
+				}
+			}
+			add("idle.ex", f.idle, f.stage, Rank(Stage::kEx));
 			add("hello.brokenheart.silent", f.hello, f.greet, Rank(GreetState::kBrokenSilent));
 			list.back().goodbye = true;
 			add("hello.brokenheart.hurt", f.hello, f.greet, Rank(GreetState::kBrokenHurt));
@@ -209,6 +239,9 @@ namespace Candidates
 					a_req.op == Op::kEqualTo ? "==" : ">", a_req.rank);
 			}
 			// bit 0 of the INFO flags is Goodbye in the file format; CommonLib v10 names it kStartSceneOnEnd
+			if (a_req.faction2 && !HasRow(a_info, RE::FUNCTION_DATA::FunctionID::kGetFactionRank, a_req.faction2, static_cast<float>(a_req.rank2))) {
+				return std::format("has no GetFactionRank {:08X} == {} condition", a_req.faction2->GetFormID(), a_req.rank2);
+			}
 			if (a_req.goodbye && !a_info->data.flags.any(RE::TOPIC_INFO_DATA::TOPIC_INFO_FLAGS::kStartSceneOnEnd)) {
 				return "needs the Goodbye flag";
 			}
@@ -268,6 +301,10 @@ namespace Candidates
 			out.hit = ReadTolerance(hit, r.hitCost);
 			out.strayHits = hit.is_object() ? hit.value("strayHits", r.strayHitsToAttack) : r.strayHitsToAttack;
 			out.attackLockDays = hit.is_object() ? hit.value("lockDays", r.attackLockDays) : r.attackLockDays;
+			const auto wary = a.value("wary", nlohmann::json::object());
+			out.waryDays = wary.value("days", r.waryDays);
+			const auto style = wary.value("style", "afraid"s);
+			out.waryStyle = style == "angry" ? WaryStyle::kAngry : style == "cold" ? WaryStyle::kCold : WaryStyle::kAfraid;
 			out.bleedout = ReadTolerance(a.value("bleedoutTolerance", nlohmann::json()), r.bleedoutCost);
 			const auto absence = a.value("absenceTolerance", nlohmann::json());
 			out.absence = ReadTolerance(absence, r.absenceCost);
