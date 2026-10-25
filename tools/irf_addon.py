@@ -18,6 +18,8 @@ Spec (JSON):
              a text may be { "text": "...", "boys": 0 | ">=1", "girls": ... }: played only with that many adopted
              boys / girls (IRF_AdoptedBoys / IRF_AdoptedGirls); the game plays the first that fits, so list the
              most specific first and a plain one last
+             a text may also carry "alive": "Skyrim.esm|0x013487" or "dead": ... (a placed reference): played only
+             while that person lives (or after they died), e.g. lines about her brother; these join the random pick
   "placeholders": true,                      fill every required key that has no text
   "circle": [ { "name": "Lucan", "npc": "...", "ref": "...",
                 "reactions": { "amends": "Text" },
@@ -207,8 +209,24 @@ def adopted_conditions(text):
     return rows
 
 
+def life_conditions(text):
+    """{"alive": ref} / {"dead": ref} -> GetDead on that reference == 0 / == 1"""
+    rows = []
+    for name, dead in (("alive", 0), ("dead", 1)):
+        if isinstance(text, dict) and name in text:
+            rows.append({"type": "ConditionFloat", "fields": {"CompareOperator": "EqualTo", "ComparisonValue": str(dead)},
+                         "sets": [{"path": "Data", "compose": {"type": "GetDeadConditionData", "fields": {"RunOnType": "Reference"},
+                                                               "sets": [{"path": "Reference", "value": form_key(text[name])}]}}]})
+    return rows
+
+
+def specific(text):
+    """a boys/girls text: first-fit, before the random pick"""
+    return isinstance(text, dict) and any(name in text for name in ADOPTED)
+
+
 def info(editor_id, topic, text, speaker_npc, faction, rank, op, goodbye, random=None, rows=None):
-    extra = (rows or []) + adopted_conditions(text)
+    extra = (rows or []) + adopted_conditions(text) + life_conditions(text)
     prompt = text.get("prompt") if isinstance(text, dict) else None
     text = text["text"] if isinstance(text, dict) else text
     ops = [
@@ -297,10 +315,10 @@ def main(spec_path, out_dir):
         values = values_of(key, required)
         if not values:
             continue
-        # several plain texts: one random run (the game picks one each time); texts with conditions (boys,
-        # girls) stay first-fit, so they go before the run
-        values = [v for v in values if isinstance(v, dict)] + [v for v in values if not isinstance(v, dict)]
-        plain = [i for i, v in enumerate(values) if not isinstance(v, dict)]
+        # several texts: one random run (the game picks one of those that fit each time); boys/girls texts stay
+        # first-fit, so they go before the run
+        values = [v for v in values if specific(v)] + [v for v in values if not specific(v)]
+        plain = [i for i, v in enumerate(values) if not specific(v)]
         for i, text in enumerate(values):
             eid = f"IRF{short}_{key.replace('.', '_')}" + (f"_{i + 1}" if len(values) > 1 else "")
             random = None
