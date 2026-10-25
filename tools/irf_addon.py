@@ -13,7 +13,8 @@ Spec (JSON):
   "plugin": "IRF - Camilla.esp",
   "candidate": { "name": "Camilla Valerius", "npc": "Skyrim.esm|0x01347B", "ref": "Skyrim.esm|0x013488" },
   "attributes": { ... },                      copied into the manifest as is
-  "lines": { "court": "Text" | ["Text", ...], ... },   any key missing gets a placeholder ("[Name: key]")
+  "lines": { "court": "Text" | ["Text", ...], ... },   any key missing gets a placeholder ("[Name: key]");
+             several plain texts for a key are a random pick
              a text may be { "text": "...", "boys": 0 | ">=1", "girls": ... }: played only with that many adopted
              boys / girls (IRF_AdoptedBoys / IRF_AdoptedGirls); the game plays the first that fits, so list the
              most specific first and a plain one last
@@ -145,7 +146,7 @@ def adopted_conditions(text):
     return rows
 
 
-def info(editor_id, topic, text, speaker_npc, faction, rank, op, goodbye):
+def info(editor_id, topic, text, speaker_npc, faction, rank, op, goodbye, random=None):
     extra = adopted_conditions(text)
     text = text["text"] if isinstance(text, dict) else text
     ops = [
@@ -156,8 +157,9 @@ def info(editor_id, topic, text, speaker_npc, faction, rank, op, goodbye):
             condition("GetIsIDConditionData", "Object", speaker_npc, 1),
             condition("GetFactionRankConditionData", "Faction", fw(faction), rank, op)] + extra},
     ]
-    if goodbye:
-        ops.append({"field_path": "Flags.Flags", "value": "Goodbye"})
+    flags = (["Goodbye"] if goodbye else []) + (["Random"] if random else []) + (["RandomEnd"] if random == "end" else [])
+    if flags:
+        ops.append({"field_path": "Flags.Flags", "value": ", ".join(flags)})
     return {"record_type": "DialogResponses", "editorid": editor_id, "parent": fw(topic), "ops": ops}
 
 
@@ -181,9 +183,9 @@ def main(spec_path, out_dir):
     records, lines = [], {}
     next_id = 0x800
 
-    def emit(key, editor_id, topic, text, speaker, faction, rank, op="EqualTo", goodbye=False):
+    def emit(key, editor_id, topic, text, speaker, faction, rank, op="EqualTo", goodbye=False, random=None):
         nonlocal next_id
-        records.append(info(editor_id, topic, text, speaker, faction, rank, op, goodbye))
+        records.append(info(editor_id, topic, text, speaker, faction, rank, op, goodbye, random))
         lines.setdefault(key, []).append(f"{plugin}|0x{next_id:03X}")
         next_id += 1
 
@@ -195,9 +197,16 @@ def main(spec_path, out_dir):
             values = [f"[{who['name']}: {key}]"]
         else:
             continue
+        # several plain texts: one random run (the game picks one each time); texts with conditions (boys,
+        # girls) stay first-fit, so they go before the run
+        values = [v for v in values if isinstance(v, dict)] + [v for v in values if not isinstance(v, dict)]
+        plain = [i for i, v in enumerate(values) if not isinstance(v, dict)]
         for i, text in enumerate(values):
             eid = f"IRF{short}_{key.replace('.', '_')}" + (f"_{i + 1}" if len(values) > 1 else "")
-            emit(key, eid, topic, text, npc, faction, rank, op, goodbye)
+            random = None
+            if len(plain) > 1 and i in plain:
+                random = "end" if i == plain[-1] else "start"
+            emit(key, eid, topic, text, npc, faction, rank, op, goodbye, random)
 
     manifest_circle = []
     for index, member in enumerate(spec.get("circle", [])):
