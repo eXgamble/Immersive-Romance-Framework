@@ -1,0 +1,57 @@
+{
+  // Immersive Romance Framework: the numbers. Every value here is the built-in default; change any of them, or delete
+  // a line to keep the default. Approval runs 0..100. Days are game days. Distances are game units (~70 = 1 m).
+
+  // Who the player is interested in: "any", "male" or "female" (eXrim's character creator overrides this)
+  "playerInterestedIn": "any",
+
+  // stages
+  "startApproval": 20,      // when someone becomes a Friend
+  "askDateApproval": 35,    // Courting -> Dating needs this much
+  "commitBar": 60,          // Dating -> Committed at this; below it again -> back to Dating
+  "floorDating": 1,         // below this from Dating up, they end it
+
+  // what raises approval
+  "talkGain": 2,            // a talk, once a day
+  "dateGain": 4,            // a talk in the evening (18:00-23:00) counts as a date, once a day
+  "kissGain": 1,            // once a day
+  "giftGain": 3,            // one gift a day counts; a loved gift counts double
+  "killGain": 1,            // an enemy killed while they follow ...
+  "killCapPerDay": 5,       // ... up to this many a day
+  "clearGain": 5,           // a location cleared together
+  "reviveBack": 4,          // won back for getting them up quickly ...
+  "reviveSeconds": 30.0,    // ... within this many seconds
+
+  // what lowers it (defaults; each candidate's own tolerances override these)
+  "bleedoutCost": 8,        // one bleedout
+  "cheatCost": 30,          // being caught straying
+  "brokenHeartDays": 3,     // silent this long after being caught, then hurt until amends
+  "hitCost": 2,             // a stray hit in a fight
+  "strayHitsToAttack": 4,   // this many stray hits in one fight count as an attack
+  "attackCost": 25,         // an attack
+  "attackLockDays": 3,      // won't follow or date after an attack
+  "absenceDays": 7,         // apart longer than this hurts ...
+  "absenceCost": 5,         // ... this much per band (1-3), once, when you meet again
+  "jealousCost": 3,         // seen travelling with another candidate, once a day
+  "crimeScale": 1,          // a crime they see: alignment x severity x this (theft 1, pickpocket 2, assault 4, murder 10)
+
+  // breakups and reactions
+  "winBackDays": 7,         // after a breakup, "Could we try again?" works after this many days
+  "winBackApproval": 15,    // approval they start from when they take you back
+  "amendsApproval": 0,      // added when amends are made
+  "reactionDays": 7,        // a reaction line waiting for your next meeting expires after this
+  "garrulousScale": 100,    // a witness's garrulous (0..100) times this / 100 is the chance word gets back
+
+  // a partner fighting beside you grows like you do
+  "partnerXpPerLevel": 100,
+  "partnerXpKill": 10,      // per kill, times the enemy's level / 10 (at least 1)
+  "partnerXpClear": 50,     // a location cleared together
+  "partnerHealthPerLevel": 10,
+  "partnerSkillPerLevel": 2,
+
+  // lines and sight
+  "momentCooldownSeconds": 90.0,  // between two road lines
+  "witnessDistance": 2048.0,      // farther than this, nobody saw it
+  "caughtDistance": 2048.0,       // your partner sees you stray within this
+  "jealousDistance": 1536.0       // your partner sees you with another candidate within this
+}

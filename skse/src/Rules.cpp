@@ -9,10 +9,15 @@ namespace Rules
 
 		constexpr auto kPath = "Data/SKSE/Plugins/ImmersiveRomanceFramework/Rules.json"sv;
 
+		std::set<std::string> g_known;  // the keys Load reads, to flag a misspelt one
+
 		template <class T>
 		void Read(const nlohmann::json& a_json, const char* a_key, T& a_value)
 		{
-			if (a_json.contains(a_key) && a_json[a_key].is_number()) {
+			g_known.insert(a_key);
+			if (a_json.contains(a_key) && !a_json[a_key].is_number()) {
+				logger::warn("Rules: \"{}\" must be a number, keeping {}", a_key, a_value);
+			} else if (a_json.contains(a_key)) {
 				a_value = a_json[a_key].get<T>();
 			}
 		}
@@ -75,8 +80,14 @@ namespace Rules
 		IRF_RULE(caughtDistance);
 		IRF_RULE(jealousDistance);
 #undef IRF_RULE
+		g_known.insert("playerInterestedIn");
 		if (j.contains("playerInterestedIn") && j["playerInterestedIn"].is_string()) {
 			g_interest = j["playerInterestedIn"].get<std::string>();
+		}
+		for (const auto& [key, value] : j.items()) {
+			if (!g_known.contains(key)) {
+				logger::warn("Rules: unknown key \"{}\" (misspelt?), ignored", key);
+			}
 		}
 		logger::info("Rules: loaded {}", kPath);
 	}
