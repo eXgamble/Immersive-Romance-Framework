@@ -145,7 +145,7 @@ namespace Romance
 			}
 			switch (a_stage) {
 			case Stage::kCourting:
-				return GreetState::kCourting;
+				return GreetState::kNone;  // vanilla's Friend greetings
 			case Stage::kDating:
 				return GreetState::kDating;
 			case Stage::kCommitted:

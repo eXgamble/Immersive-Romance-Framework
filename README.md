@@ -133,7 +133,7 @@ generator does this.
 | Key | Topic (Immersive Romance Framework.esp) | Faction | Rank |
 |---|---|---|---|
 | `court` / `court.taken` | IRF_CourtTopic 0x808 | IRF_TakenFaction 0x821 | 1 / 2 (declines: taken) |
-| `hello.<state>`, `goodbye.<state>` | IRF_HelloTopic 0x806 / IRF_GoodbyeTopic 0x807 | IRF_GreetFaction 0x803 | courting 1, dating 2, committed 3, engaged 4, spouse 5 |
+| `hello.<state>`, `goodbye.<state>` (Courting is vanilla's Friend: her greetings, goodbyes and idles there stay vanilla's) | IRF_HelloTopic 0x806 / IRF_GoodbyeTopic 0x807 | IRF_GreetFaction 0x803 | dating 2, committed 3, engaged 4, spouse 5 |
 | `hello.brokenheart.silent` (Goodbye flag) | IRF_HelloTopic | IRF_GreetFaction | 10 |
 | `hello.brokenheart.hurt`, `goodbye.brokenheart` | Hello / Goodbye | IRF_GreetFaction | 11 |
 | `hello.ex.<why>`, `goodbye.ex.<why>` | Hello / Goodbye | IRF_GreetFaction | 20 + why |
@@ -151,7 +151,7 @@ generator does this.
 | `talk` (a talk; in the evening it's a date) | 0x838 | IRF_TalkFaction 0x81F | 1 |
 | `deny.works` / `deny.fails` | 0x83A | IRF_ConfrontFaction 0x820 | 1 / 2 |
 | `admit` | 0x83C | IRF_ConfrontFaction | **GreaterThan** 0 |
-| `idle.courting` / `.dating` / `.committed` / `.engaged` / `.spouse` / `idle.ex` (her idle chatter; a spouse's plain idles carry `GetRandomPercent < 50` so vanilla's spouse chatter mixes in) | IRF_IdleTopic 0x85C | IRF_StageFaction 0x801 | 1 / 2 / 3 / 4 / 5 / 6 |
+| `idle.dating` / `.committed` / `.engaged` / `.spouse` / `idle.ex` (her idle chatter; a spouse's plain idles carry `GetRandomPercent < 50` so vanilla's spouse chatter mixes in) | IRF_IdleTopic 0x85C | IRF_StageFaction 0x801 | 2 / 3 / 4 / 5 / 6 |
 | mood versions (optional): `hello.<state>.<mood>`, `goodbye.<state>.<mood>` (strained, jealous, wary) and `idle.<stage>.<mood>` (also hurt); one more row, `GetFactionRank IRF_MoodFaction == <mood>`, and listed BEFORE the plain line (the game plays the first that fits) | as the plain line | as the plain line, plus IRF_MoodFaction 0x85B | + mood: strained 2, jealous 3, hurt 4, wary 5 |
 | `plead` (a pleading ex you left asks you back; required for "pleading") | IRF_HelloTopic | IRF_GreetFaction | 30 |
 | `plead.yes` / `plead.no` (her answers to "Alright. Let's try again." / "No. It's over.") | 0x85E / 0x860 | IRF_PleadFaction 0x85D | 1 |

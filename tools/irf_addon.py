@@ -79,7 +79,8 @@ def requirements(attributes):
 
     add("court", COURT, TAKEN_F, 1)
     add("court.taken", COURT, TAKEN_F, 2)
-    for rank, name in enumerate(["courting", "dating", "committed", "engaged", "spouse"], start=1):
+    # Courting greets, says goodbye and idles as vanilla's Friend: her own everyday lines start at Dating
+    for rank, name in enumerate(["dating", "committed", "engaged", "spouse"], start=2):
         for mood in MOODS:
             if mood != "hurt":  # the broken heart has its own greetings
                 add(f"hello.{name}.{mood}", HELLO, GREET_F, rank, required=False, extra=[mood_row(mood)])

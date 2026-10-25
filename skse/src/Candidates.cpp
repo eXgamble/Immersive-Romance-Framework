@@ -79,8 +79,9 @@ namespace Candidates
 			add("court", f.court, f.taken, 1);
 			add("court.taken", f.court, f.taken, 2);
 
+			// Courting is vanilla's Friend with a romance meter under it: her everyday lines stay vanilla's (user,
+			// 2026-10-25), so her own greetings, goodbyes and idles start at Dating
 			const std::pair<GreetState, const char*> states[]{
-				{ GreetState::kCourting, "courting" },
 				{ GreetState::kDating, "dating" },
 				{ GreetState::kCommitted, "committed" },
 				{ GreetState::kEngaged, "engaged" },
@@ -97,7 +98,7 @@ namespace Candidates
 				list.back().rank2 = Rank(a_mood);
 			};
 			const std::pair<Stage, const char*> idleStages[]{
-				{ Stage::kCourting, "courting" }, { Stage::kDating, "dating" }, { Stage::kCommitted, "committed" },
+				{ Stage::kDating, "dating" }, { Stage::kCommitted, "committed" },
 				{ Stage::kEngaged, "engaged" }, { Stage::kMarried, "spouse" }
 			};
 			for (const auto& [state, name] : states) {

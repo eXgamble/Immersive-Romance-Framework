@@ -22,7 +22,7 @@ namespace IRF
 	enum class GreetState : std::int8_t
 	{
 		kNone = 0,
-		kCourting = 1,
+		kCourting = 1,  // retired: Courting greets as vanilla's Friend (kNone)
 		kDating = 2,
 		kCommitted = 3,
 		kEngaged = 4,
