@@ -40,6 +40,9 @@ namespace Rules
 		int waryDays = 5;           // default wary-tolerance: days she's wary of you after an attack
 		int jealousDays = 3;        // her jealous mood after seeing you with another candidate
 		int strainedBelow = 15;     // approval under this: strained mood
+		int heartbreakSilentDays = 5;  // a bitter candidate you left (or who caught you) won't talk this long
+		int pleads = 3;             // a pleading candidate you left asks you back this many times ...
+		int pleadEvery = 2;         // ... this many days apart
 		int crimeScale = 1;         // approval per alignment point per crime severity point
 		int winBackDays = 7;
 		int winBackApproval = 15;   // approval they start from when they take you back

@@ -48,6 +48,7 @@ ASKDATE_F, FOLLOW_F, KISS_F, BREAKUP_F, AMENDS_F, WINBACK_F, SECRET_F, TALK_F, C
 GIFT_F = 0x841  # her answer to a gift: 1 insulted, 2 disliked, 3 plain, 4 liked, 5 loved
 MOOD_F, IDLE = 0x85B, 0x85C  # her mood (IRF_MoodFaction), her idles (IRF_IdleTopic, by IRF_StageFaction)
 MOODS = {"strained": 2, "jealous": 3, "hurt": 4, "wary": 5}
+PLEAD_F, PLEAD_YES, PLEAD_NO, PLEAD_GREET = 0x85D, 0x85E, 0x860, 30  # a pleading ex you left
 SPOUSE_IDLE_SHARE = 50  # a spouse's plain idles play this % of the time: vanilla's spouse chatter mixes in
 ADOPTED = {"boys": 0x859, "girls": 0x85A}  # IRF_AdoptedBoys / IRF_AdoptedGirls (globals)
 OPS = {"==": "EqualTo", "!=": "NotEqualTo", ">=": "GreaterThanOrEqualTo", "<=": "LessThanOrEqualTo", ">": "GreaterThan", "<": "LessThan"}
@@ -63,10 +64,12 @@ MOMENTS = {"caught": 1, "revive": 2, "attacked": 3, "crime.approve": 4, "crime.d
            "road.town": 24, "road.inn": 25, "road.hometown": 26}
 
 
-def requirements(alignment):
+def requirements(attributes):
     """key -> (topic, faction, rank, operator, goodbye flag, required, extra condition rows); mirrors Candidates.cpp.
     A mood version comes before its plain line: the game plays the first line that fits."""
     r = {}
+    alignment = attributes.get("alignment", 0)
+    pleading = attributes.get("heartbreak", {}).get("style") == "pleading"
 
     def add(key, topic, faction, rank, required=True, op="EqualTo", goodbye=False, extra=None):
         r[key] = (topic, faction, rank, op, goodbye, required, extra or [])
@@ -91,6 +94,10 @@ def requirements(alignment):
                  "type": "GetRandomPercentConditionData"}}]}]
         add(f"idle.{name}", IDLE, STAGE_F, rank, extra=share)
     add("idle.ex", IDLE, STAGE_F, 6)
+    # a pleading candidate you left: her asking (a greeting), her answers to "Let's try again." / "It's over."
+    add("plead", HELLO, GREET_F, PLEAD_GREET, required=pleading)
+    add("plead.yes", PLEAD_YES, PLEAD_F, 1, required=pleading)
+    add("plead.no", PLEAD_NO, PLEAD_F, 1, required=pleading)
     add("hello.brokenheart.silent", HELLO, GREET_F, 10, goodbye=True)
     add("hello.brokenheart.hurt", HELLO, GREET_F, 11)
     add("goodbye.brokenheart", GOODBYE, GREET_F, 11)
@@ -198,7 +205,7 @@ def main(spec_path, out_dir):
     who = spec["candidate"]
     short = "".join(ch for ch in who["name"].split()[0] if ch.isalnum())
     npc = form_key(who["npc"])
-    reqs = requirements(spec.get("attributes", {}).get("alignment", 0))
+    reqs = requirements(spec.get("attributes", {}))
     records, lines = [], {}
     next_id = 0x800
 

@@ -134,6 +134,7 @@ namespace Papyrus
 				s.lockUntilDay -= d;
 				s.waryUntilDay -= d;
 				s.jealousUntilDay -= d;
+				s.nextPleadDay -= d;
 				s.recentDay -= d;
 				s.lastTalkDay -= d;
 				s.lastDateDay -= d;
@@ -149,7 +150,7 @@ namespace Papyrus
 			});
 		}
 
-		// "caught", "bleedout", "attack", "absence", "crime", "breakup" (they end it), "amends", "xp", "jealous"
+		// "caught", "bleedout", "attack", "absence", "crime", "breakup" (they end it), "amends", "xp", "jealous", "dumped" (you end it)
 		void DebugDeed(RE::StaticFunctionTag*, RE::Actor* a_actor, RE::BSFixedString a_deed)
 		{
 			std::string deed = a_deed.c_str();
@@ -165,6 +166,8 @@ namespace Papyrus
 					Romance::Hurt(a, candidate->attributes.bleedout, Why::kBleedouts, "debug bleedout");
 				} else if (deed == "attack") {
 					Events::Attack(a, "debug attack");  // as a real one: approval, lock, her wary mood
+				} else if (deed == "dumped") {
+					Romance::BreakUp(a, Who::kPlayer, Why::kChoice);  // you end it (her heartbreak style applies)
 				} else if (deed == "jealous") {
 					s.jealousUntilDay = State::Today() + static_cast<float>(Rules::Get().jealousDays);
 				} else if (deed == "absence") {

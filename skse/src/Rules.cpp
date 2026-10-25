@@ -73,6 +73,9 @@ namespace Rules
 		IRF_RULE(waryDays);
 		IRF_RULE(jealousDays);
 		IRF_RULE(strainedBelow);
+		IRF_RULE(heartbreakSilentDays);
+		IRF_RULE(pleads);
+		IRF_RULE(pleadEvery);
 		IRF_RULE(crimeScale);
 		IRF_RULE(winBackDays);
 		IRF_RULE(winBackApproval);

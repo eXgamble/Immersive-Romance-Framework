@@ -118,6 +118,12 @@ namespace Candidates
 				}
 			}
 			add("idle.ex", f.idle, f.stage, Rank(Stage::kEx));
+
+			// a pleading candidate you left: her asking (a greeting) and her answers to yours
+			const bool pleading = a_attributes.heartbreak == Heartbreak::kPleading;
+			add("plead", f.hello, f.greet, Rank(GreetState::kPlead), pleading);
+			add("plead.yes", f.pleadYes, f.plead, 1, pleading);
+			add("plead.no", f.pleadNo, f.plead, 1, pleading);
 			add("hello.brokenheart.silent", f.hello, f.greet, Rank(GreetState::kBrokenSilent));
 			list.back().goodbye = true;
 			add("hello.brokenheart.hurt", f.hello, f.greet, Rank(GreetState::kBrokenHurt));
@@ -305,6 +311,12 @@ namespace Candidates
 			out.waryDays = wary.value("days", r.waryDays);
 			const auto style = wary.value("style", "afraid"s);
 			out.waryStyle = style == "angry" ? WaryStyle::kAngry : style == "cold" ? WaryStyle::kCold : WaryStyle::kAfraid;
+			const auto heartbreak = a.value("heartbreak", nlohmann::json::object());
+			const auto how = heartbreak.value("style", "accepting"s);
+			out.heartbreak = how == "bitter" ? Heartbreak::kBitter : how == "pleading" ? Heartbreak::kPleading : Heartbreak::kAccepting;
+			out.silentDays = heartbreak.value("silentDays", r.heartbreakSilentDays);
+			out.pleads = heartbreak.value("pleads", r.pleads);
+			out.pleadEvery = heartbreak.value("every", r.pleadEvery);
 			out.bleedout = ReadTolerance(a.value("bleedoutTolerance", nlohmann::json()), r.bleedoutCost);
 			const auto absence = a.value("absenceTolerance", nlohmann::json());
 			out.absence = ReadTolerance(absence, r.absenceCost);

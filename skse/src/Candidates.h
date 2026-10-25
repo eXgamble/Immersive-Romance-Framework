@@ -37,6 +37,15 @@ namespace Candidates
 		kCold,
 	};
 
+	// How she takes it when you end it: accepting (an ex at once), bitter (won't talk to you for a while; also when
+	// she catches you), pleading (asks you to take her back when you talk to her, a few times)
+	enum class Heartbreak
+	{
+		kAccepting,
+		kBitter,
+		kPleading,
+	};
+
 	struct Combat
 	{
 		std::string                      role;
@@ -70,6 +79,10 @@ namespace Candidates
 		int       attackLockDays{ 0 };
 		int       waryDays{ 0 };
 		WaryStyle waryStyle{ WaryStyle::kAfraid };
+		Heartbreak heartbreak{ Heartbreak::kAccepting };
+		int       silentDays{ 0 };   // bitter
+		int       pleads{ 0 };       // pleading
+		int       pleadEvery{ 0 };
 		Tolerance bleedout;
 		Tolerance absence;
 		int       absenceDays{ 0 };

@@ -36,6 +36,8 @@ line they say.
   back to a friend's chatter.
 - **Tolerances**, per candidate: being caught straying, hitting them (a stray hit in a fight vs. turning on
   them), letting them bleed out, staying away too long. Any of them can be "never": one deed ends it for good.
+- **Heartbreak**, per candidate, when you end it: she accepts it, turns bitter (won't speak to you for a while),
+  or pleads with you to take her back when you talk to her.
 - **Breakups** remember who ended it and why (cheating, violence, absence, bleedouts, crime, your choice). You can
   make amends after a broken heart, or try to win back an ex after a while.
 - **Witnesses:** your partner catches you straying if she sees it; if someone else from her town or her family
@@ -72,6 +74,11 @@ A candidate whose manifest is missing a required line, or whose lines don't carr
     "wary": { "days": 5, "style": "afraid" },      // after an attack: days she's wary; "afraid" keeps away (no
                                                    // following, no dates), "angry" takes any hit as an attack,
                                                    // "cold" gives talks and dates nothing; none kisses you
+    "heartbreak": { "style": "pleading", "pleads": 3, "every": 2 },  // when YOU end it: "accepting" (an ex at once),
+                                                   // "bitter" (won't talk to you for "silentDays", also when she
+                                                   // catches you; the win-back wait starts after), "pleading" (asks
+                                                   // you to take her back when you talk to her, "pleads" times,
+                                                   // "every" days apart; "No. It's over." counts one)
     "bleedoutTolerance": 6,                        // per bleedout
     "absenceTolerance": { "days": 5, "cost": 4 },  // apart longer than days costs cost per band (1-3)
     "brokenHeartDays": 2,                          // silent this long after catching you, then hurt until amends
@@ -146,6 +153,8 @@ generator does this.
 | `admit` | 0x83C | IRF_ConfrontFaction | **GreaterThan** 0 |
 | `idle.courting` / `.dating` / `.committed` / `.engaged` / `.spouse` / `idle.ex` (her idle chatter; a spouse's plain idles carry `GetRandomPercent < 50` so vanilla's spouse chatter mixes in) | IRF_IdleTopic 0x85C | IRF_StageFaction 0x801 | 1 / 2 / 3 / 4 / 5 / 6 |
 | mood versions (optional): `hello.<state>.<mood>`, `goodbye.<state>.<mood>` (strained, jealous, wary) and `idle.<stage>.<mood>` (also hurt); one more row, `GetFactionRank IRF_MoodFaction == <mood>`, and listed BEFORE the plain line (the game plays the first that fits) | as the plain line | as the plain line, plus IRF_MoodFaction 0x85B | + mood: strained 2, jealous 3, hurt 4, wary 5 |
+| `plead` (a pleading ex you left asks you back; required for "pleading") | IRF_HelloTopic | IRF_GreetFaction | 30 |
+| `plead.yes` / `plead.no` (her answers to "Alright. Let's try again." / "No. It's over.") | 0x85E / 0x860 | IRF_PleadFaction 0x85D | 1 |
 | `stayhome` (married, with children: why she won't leave town; Goodbye flag) | IRF_StayHomeTopic 0x848 | IRF_MomentFaction 0x816 | 8 |
 | `gift.insulted` / `.disliked` / `gift` / `.liked` / `.loved` (her answer, as her goodbye) | IRF_GiftAnswerTopic 0x846 | IRF_GiftFaction 0x841 | 1 / 2 / 3 / 4 / 5 |
 | `absence.1`..`3` (back after a long time) | IRF_AbsenceHelloTopic 0x825 | IRF_AbsenceFaction 0x812 | 1..3 |

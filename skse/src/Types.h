@@ -30,6 +30,7 @@ namespace IRF
 		kBrokenSilent = 10,  // won't talk at all: the hello carries the Goodbye flag
 		kBrokenHurt = 11,    // talks, hurt, until amends
 		kEx = 20,            // + Why: an ex greets you by why it ended (21 cheating .. 26 choice)
+		kPlead = 30,         // a pleading ex you left asks you to take her back (her heartbreak style)
 	};
 
 	// Why a relationship ended (IRF_WhyFaction), and what drove an approval drop

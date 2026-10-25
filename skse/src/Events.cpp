@@ -167,6 +167,16 @@ namespace Events
 				a_speaker->AddToFaction(f.approval, static_cast<std::int8_t>(r.winBackApproval));
 				Romance::SetStage(a_speaker, Stage::kDating, "won back");
 				Romance::Notify(a_speaker, Event::kWonBack);
+			} else if (a_key == "plead.yes" && stage == Stage::kEx) {
+				s.pleadsLeft = 0;
+				a_speaker->AddToFaction(f.approval, static_cast<std::int8_t>(r.winBackApproval));
+				Romance::SetStage(a_speaker, Stage::kDating, "took them back");
+				Romance::Notify(a_speaker, Event::kWonBack);
+			} else if (a_key == "plead.no" && stage == Stage::kEx) {
+				s.pleadsLeft = std::max(0, s.pleadsLeft - 1);
+				s.nextPleadDay = today + static_cast<float>(candidate->attributes.pleadEvery);
+				logger::info("Events: you turned {} down ({} more time(s) she'll ask)", a_speaker->GetDisplayFullName(), s.pleadsLeft);
+				Romance::Sync(a_speaker);
 			} else if (a_key == "secret.yes") {
 				s.secret = true;
 			} else if (a_key == "talk") {

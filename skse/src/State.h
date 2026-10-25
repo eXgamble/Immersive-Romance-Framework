@@ -40,6 +40,8 @@ namespace State
 		bool  confrontWorks{ false };
 		float waryUntilDay{ 0.0f };      // her moods (Mood) that last a while
 		float jealousUntilDay{ 0.0f };
+		int   pleadsLeft{ 0 };           // a pleading ex you left: times she'll still ask you back ...
+		float nextPleadDay{ 0.0f };      // ... from this day
 	};
 
 	// A reaction waiting for the next time you meet someone

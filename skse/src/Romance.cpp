@@ -155,6 +155,9 @@ namespace Romance
 			case Stage::kMarried:
 				return GreetState::kSpouse;
 			case Stage::kEx:
+				if (a_state.pleadsLeft > 0 && a_state.nextPleadDay <= State::Today()) {
+					return GreetState::kPlead;  // she asks you to take her back
+				}
 				return static_cast<GreetState>(IRF::Rank(GreetState::kEx) + IRF::Rank(a_state.why == Why::kNone ? Why::kChoice : a_state.why));
 			default:
 				return GreetState::kNone;
@@ -324,6 +327,17 @@ namespace Romance
 		s.hurt = false;
 		s.silentUntilDay = 0.0f;
 		s.confrontPending = false;
+		s.pleadsLeft = 0;
+		// how she takes it when you end it (her heartbreak style)
+		if (a_who == Who::kPlayer && a_why == Why::kChoice && !s.unforgivable) {
+			const auto candidate = Candidates::Find(a_actor);
+			if (candidate && candidate->attributes.heartbreak == Candidates::Heartbreak::kBitter) {
+				s.silentUntilDay = s.breakupDay + static_cast<float>(candidate->attributes.silentDays);  // her brush-off
+			} else if (candidate && candidate->attributes.heartbreak == Candidates::Heartbreak::kPleading) {
+				s.pleadsLeft = candidate->attributes.pleads;
+				s.nextPleadDay = s.breakupDay;  // the next time you talk to her
+			}
+		}
 		const auto& f = Forms::Get();
 		SetRank(a_actor, f.who, IRF::Rank(a_who));
 		SetRank(a_actor, f.why, IRF::Rank(a_why));
@@ -343,7 +357,11 @@ namespace Romance
 		if (!RE::UI::GetSingleton()->IsMenuOpen(RE::DialogueMenu::MENU_NAME)) {
 			World::SayMoment(a_partner, Moment::kCaught);
 		}
-		s.silentUntilDay = State::Today() + static_cast<float>(candidate->attributes.brokenHeartDays);
+		int silent = candidate->attributes.brokenHeartDays;
+		if (candidate->attributes.heartbreak == Candidates::Heartbreak::kBitter) {
+			silent = std::max(silent, candidate->attributes.silentDays);  // a bitter heart stays silent longer
+		}
+		s.silentUntilDay = State::Today() + static_cast<float>(silent);
 		s.hurt = true;
 		Follower::Dismiss(a_partner);
 		Notify(a_partner, Event::kBrokenHeart);
@@ -637,8 +655,11 @@ namespace Romance
 		SetRank(a_actor, f.kiss, kiss);
 		SetRank(a_actor, f.breakUp, stage >= Stage::kDating && stage <= Stage::kEngaged && !silent ? 1 : 0);
 		SetRank(a_actor, f.amends, hurt && !s.unforgivable ? 1 : 0);
-		const bool winBackable = !s.unforgivable && today - s.breakupDay >= static_cast<float>(r.winBackDays);
-		SetRank(a_actor, f.winBack, stage == Stage::kEx ? (winBackable ? 1 : 2) : 0);
+		// a bitter ex's wait starts when her silence ends; a pleading one asks you herself meanwhile
+		const bool pleading = stage == Stage::kEx && s.pleadsLeft > 0 && s.nextPleadDay <= today;
+		const bool winBackable = !s.unforgivable && today - std::max(s.breakupDay, s.silentUntilDay) >= static_cast<float>(r.winBackDays);
+		SetRank(a_actor, f.winBack, stage == Stage::kEx && !silent && !pleading ? (winBackable ? 1 : 2) : 0);
+		SetRank(a_actor, f.plead, pleading ? 1 : 0);
 		const bool secretable = stage >= Stage::kCourting && stage <= Stage::kCommitted && !s.secret && !silent && !hurt && !s.confrontPending;
 		SetRank(a_actor, f.secret, secretable ? (candidate->attributes.refusesSecret ? 2 : 1) : 0);
 		SetRank(a_actor, f.talk, stage >= Stage::kFriend && stage <= Stage::kMarried && !silent && !hurt ? 1 : 0);
