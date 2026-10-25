@@ -66,6 +66,8 @@ namespace Candidates
 			bool            required{ true };
 			RE::TESFaction* faction2{ nullptr };  // a second row, == rank2 (a mood version: the mood)
 			int             rank2{ 0 };
+			std::vector<int> pool;              // instead of rank: an OR group, == each of these (a line for several stages)
+			bool             notBooked{ false };  // also GetQuestRunning RelationshipMarriageWedding == 0
 		};
 
 		std::vector<Requirement> Requirements(const Attributes& a_attributes)
@@ -81,14 +83,41 @@ namespace Candidates
 
 			// Courting is vanilla's Friend with a romance meter under it: her everyday lines stay vanilla's (user,
 			// 2026-10-25), so her own greetings, goodbyes and idles start at Dating
-			const std::pair<GreetState, const char*> states[]{
-				{ GreetState::kDating, "dating" },
-				{ GreetState::kCommitted, "committed" },
-				{ GreetState::kEngaged, "engaged" },
-				{ GreetState::kSpouse, "spouse" },
+			// her everyday greetings, goodbyes and idles are sets that build on each other (user, 2026-10-25): each set
+			// plays at several stages, and every set that fits joins one random pick
+			//   dating   Dating, Committed, Engaged     love     Committed, Engaged, Married
+			//   marry    Committed (she hints she wants to marry you)
+			//   maramal  Engaged until the wedding is booked (go and see Maramal)
+			//   spouse   Married
+			// GreetState and Stage share the numbers 2-5 for these, so one list serves IRF_GreetFaction and IRF_StageFaction
+			const int dating = Rank(Stage::kDating), committed = Rank(Stage::kCommitted), engaged = Rank(Stage::kEngaged),
+					  married = Rank(Stage::kMarried);
+			struct LineSet
+			{
+				const char*      name;
+				std::vector<int> ranks;
+				bool             notBooked;
 			};
-			// her moods: optional versions of the stage's greetings, goodbyes and idles (hurt: idles only, the broken
-			// heart has its own greetings)
+			const LineSet sets[]{
+				{ "dating", { dating, committed, engaged }, false },
+				{ "love", { committed, engaged, married }, false },
+				{ "marry", { committed }, false },
+				{ "maramal", { engaged }, true },
+				{ "spouse", { married }, false },
+			};
+			auto addSet = [&](std::string a_key, RE::TESTopic* a_topic, RE::TESFaction* a_faction, const LineSet& a_set) {
+				add(std::move(a_key), a_topic, a_faction, a_set.ranks.front());
+				list.back().pool = a_set.ranks;
+				list.back().notBooked = a_set.notBooked;
+			};
+			for (const auto& set : sets) {
+				addSet("hello."s + set.name, f.hello, f.greet, set);
+				addSet("goodbye."s + set.name, f.goodbye, f.greet, set);
+				addSet("idle."s + set.name, f.idle, f.stage, set);
+			}
+
+			// her moods: optional greetings, goodbyes and idles for one stage that win over the sets (hurt: idles only,
+			// the broken heart has its own greetings)
 			const std::pair<Mood, const char*> moods[]{
 				{ Mood::kStrained, "strained" }, { Mood::kJealous, "jealous" }, { Mood::kHurt, "hurt" }, { Mood::kWary, "wary" }
 			};
@@ -97,25 +126,14 @@ namespace Candidates
 				list.back().faction2 = f.moodFaction;
 				list.back().rank2 = Rank(a_mood);
 			};
-			const std::pair<Stage, const char*> idleStages[]{
-				{ Stage::kDating, "dating" }, { Stage::kCommitted, "committed" },
-				{ Stage::kEngaged, "engaged" }, { Stage::kMarried, "spouse" }
-			};
-			for (const auto& [state, name] : states) {
-				add("hello."s + name, f.hello, f.greet, Rank(state));
-				add("goodbye."s + name, f.goodbye, f.greet, Rank(state));
+			const std::pair<int, const char*> stages[]{ { dating, "dating" }, { committed, "committed" }, { engaged, "engaged" }, { married, "spouse" } };
+			for (const auto& [rank, name] : stages) {
 				for (const auto& [mood, moodName] : moods) {
 					if (mood != Mood::kHurt) {
-						addMood(std::format("hello.{}.{}", name, moodName), f.hello, f.greet, Rank(state), mood);
-						addMood(std::format("goodbye.{}.{}", name, moodName), f.goodbye, f.greet, Rank(state), mood);
+						addMood(std::format("hello.{}.{}", name, moodName), f.hello, f.greet, rank, mood);
+						addMood(std::format("goodbye.{}.{}", name, moodName), f.goodbye, f.greet, rank, mood);
 					}
-				}
-			}
-			// her idle chatter, the whole relationship long (a Friend's is vanilla's)
-			for (const auto& [stage, name] : idleStages) {
-				add("idle."s + name, f.idle, f.stage, Rank(stage));
-				for (const auto& [mood, moodName] : moods) {
-					addMood(std::format("idle.{}.{}", name, moodName), f.idle, f.stage, Rank(stage), mood);
+					addMood(std::format("idle.{}.{}", name, moodName), f.idle, f.stage, rank, mood);
 				}
 			}
 			add("idle.ex", f.idle, f.stage, Rank(Stage::kEx));
@@ -214,12 +232,12 @@ namespace Candidates
 			return list;
 		}
 
-		// A condition row the line must carry, ANDed (not part of an OR group), on the speaker
-		bool HasRow(const RE::TESTopicInfo* a_info, RE::FUNCTION_DATA::FunctionID a_function, const void* a_param, float a_value, Op a_op = Op::kEqualTo)
+		// A condition row the line must carry, ANDed (not part of an OR group unless a_inGroup), on the speaker
+		bool HasRow(const RE::TESTopicInfo* a_info, RE::FUNCTION_DATA::FunctionID a_function, const void* a_param, float a_value, Op a_op = Op::kEqualTo, bool a_inGroup = false)
 		{
 			for (auto item = a_info->objConditions.head; item; item = item->next) {
 				const auto& d = item->data;
-				if (d.functionData.function.get() != a_function || d.flags.isOR || d.flags.global) {
+				if (d.functionData.function.get() != a_function || (d.flags.isOR && !a_inGroup) || d.flags.global) {
 					continue;
 				}
 				if (d.object.get() != RE::CONDITIONITEMOBJECT::kSelf || d.flags.opCode != a_op) {
@@ -241,7 +259,17 @@ namespace Candidates
 			if (!HasRow(a_info, RE::FUNCTION_DATA::FunctionID::kGetIsID, a_speaker, 1.0f)) {
 				return "has no GetIsID == 1 condition for its speaker";
 			}
-			if (!HasRow(a_info, RE::FUNCTION_DATA::FunctionID::kGetFactionRank, a_req.faction, static_cast<float>(a_req.rank), a_req.op)) {
+			if (!a_req.pool.empty()) {
+				// a set: an OR group with one row per stage it plays at
+				for (const int rank : a_req.pool) {
+					if (!HasRow(a_info, RE::FUNCTION_DATA::FunctionID::kGetFactionRank, a_req.faction, static_cast<float>(rank), Op::kEqualTo, true)) {
+						return std::format("has no GetFactionRank {:08X} == {} condition", a_req.faction->GetFormID(), rank);
+					}
+				}
+				if (a_req.notBooked && !HasRow(a_info, RE::FUNCTION_DATA::FunctionID::kGetQuestRunning, Forms::Get().wedding, 0.0f)) {
+					return "has no GetQuestRunning RelationshipMarriageWedding == 0 condition";
+				}
+			} else if (!HasRow(a_info, RE::FUNCTION_DATA::FunctionID::kGetFactionRank, a_req.faction, static_cast<float>(a_req.rank), a_req.op)) {
 				return std::format("has no GetFactionRank {:08X} {} {} condition", a_req.faction->GetFormID(),
 					a_req.op == Op::kEqualTo ? "==" : ">", a_req.rank);
 			}

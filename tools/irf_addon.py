@@ -49,7 +49,13 @@ GIFT_F = 0x841  # her answer to a gift: 1 insulted, 2 disliked, 3 plain, 4 liked
 MOOD_F, IDLE = 0x85B, 0x85C  # her mood (IRF_MoodFaction), her idles (IRF_IdleTopic, by IRF_StageFaction)
 MOODS = {"strained": 2, "jealous": 3, "hurt": 4, "wary": 5}
 PLEAD_F, PLEAD_YES, PLEAD_NO, PLEAD_GREET = 0x85D, 0x85E, 0x860, 30  # a pleading ex you left
-SPOUSE_IDLE_SHARE = 50  # a spouse's plain idles play this % of the time: vanilla's spouse chatter mixes in
+SPOUSE_IDLE_SHARE = 50  # a spouse's own idles play this % of the time: vanilla's spouse chatter mixes in
+WEDDING = "07404E:Skyrim.esm"  # RelationshipMarriageWedding: runs once the wedding is booked
+# her everyday greetings, goodbyes and idles: sets that build on each other (user, 2026-10-25). Each set plays at
+# the stages listed (IRF_GreetFaction / IRF_StageFaction 2 Dating, 3 Committed, 4 Engaged, 5 Married) and every
+# set that fits joins ONE random pick per topic. "maramal" stops once the wedding is booked.
+SETS = {"dating": [2, 3, 4], "love": [3, 4, 5], "marry": [3], "maramal": [4], "spouse": [5]}
+MARRIED = 5
 ADOPTED = {"boys": 0x859, "girls": 0x85A}  # IRF_AdoptedBoys / IRF_AdoptedGirls (globals)
 OPS = {"==": "EqualTo", "!=": "NotEqualTo", ">=": "GreaterThanOrEqualTo", "<=": "LessThanOrEqualTo", ">": "GreaterThan", "<": "LessThan"}
 
@@ -66,7 +72,8 @@ MOMENTS = {"caught": 1, "revive": 2, "attacked": 3, "crime.approve": 4, "crime.d
 
 def requirements(attributes):
     """key -> (topic, faction, rank, operator, goodbye flag, required, extra condition rows); mirrors Candidates.cpp.
-    A mood version comes before its plain line: the game plays the first line that fits."""
+    rank may be a list (a set: an OR group, one row per stage). Mood versions come before the sets: the game plays
+    the first line that fits."""
     r = {}
     alignment = attributes.get("alignment", 0)
     pleading = attributes.get("heartbreak", {}).get("style") == "pleading"
@@ -79,21 +86,20 @@ def requirements(attributes):
 
     add("court", COURT, TAKEN_F, 1)
     add("court.taken", COURT, TAKEN_F, 2)
-    # Courting greets, says goodbye and idles as vanilla's Friend: her own everyday lines start at Dating
+    # Courting greets, says goodbye and idles as vanilla's Friend: her own everyday lines start at Dating.
+    # Mood versions first (the game plays the first line that fits; hurt: idles only, the broken heart greets)
     for rank, name in enumerate(["dating", "committed", "engaged", "spouse"], start=2):
         for mood in MOODS:
-            if mood != "hurt":  # the broken heart has its own greetings
+            if mood != "hurt":
                 add(f"hello.{name}.{mood}", HELLO, GREET_F, rank, required=False, extra=[mood_row(mood)])
                 add(f"goodbye.{name}.{mood}", GOODBYE, GREET_F, rank, required=False, extra=[mood_row(mood)])
-        add(f"hello.{name}", HELLO, GREET_F, rank)
-        add(f"goodbye.{name}", GOODBYE, GREET_F, rank)
-        # her idles, by stage (IRF_StageFaction 1-5): the mood versions first
-        for mood in MOODS:
             add(f"idle.{name}.{mood}", IDLE, STAGE_F, rank, required=False, extra=[mood_row(mood)])
-        share = [] if name != "spouse" else [{"type": "ConditionFloat", "fields": {"CompareOperator": "LessThan",
-                 "ComparisonValue": str(SPOUSE_IDLE_SHARE)}, "sets": [{"path": "Data", "compose": {
-                 "type": "GetRandomPercentConditionData"}}]}]
-        add(f"idle.{name}", IDLE, STAGE_F, rank, extra=share)
+    # then the sets (main() emits each topic's sets as one random run)
+    for name, ranks in SETS.items():
+        booked = [condition("GetQuestRunningConditionData", "Quest", WEDDING, 0)] if name == "maramal" else []
+        add(f"hello.{name}", HELLO, GREET_F, ranks, extra=booked)
+        add(f"goodbye.{name}", GOODBYE, GREET_F, ranks, extra=booked)
+        add(f"idle.{name}", IDLE, STAGE_F, ranks, extra=booked)
     add("idle.ex", IDLE, STAGE_F, 6)
     # a pleading candidate you left: her asking (a greeting), her answers to "Let's try again." / "It's over."
     add("plead", HELLO, GREET_F, PLEAD_GREET, required=pleading)
@@ -152,10 +158,28 @@ def fw(local):
     return f"{local:06X}:{FRAMEWORK}"
 
 
-def condition(function, field, value, compare, op="EqualTo"):
-    return {"type": "ConditionFloat", "fields": {"CompareOperator": op, "ComparisonValue": str(compare)},
+def condition(function, field, value, compare, op="EqualTo", or_next=False):
+    fields = {"CompareOperator": op, "ComparisonValue": str(compare)}
+    if or_next:
+        fields["Flags"] = "OR"  # ORed with the row after it (OR binds before AND)
+    return {"type": "ConditionFloat", "fields": fields,
             "sets": [{"path": "Data", "compose": {"type": function, "fields": {"RunOnType": "Subject"},
                                                   "sets": [{"path": field, "value": value}]}}]}
+
+
+def share_rows(percent):
+    """(IRF_StageFaction != Married OR GetRandomPercent < percent): only a spouse's lines are thinned out"""
+    return [condition("GetFactionRankConditionData", "Faction", fw(STAGE_F), MARRIED, "NotEqualTo", or_next=True),
+            {"type": "ConditionFloat", "fields": {"CompareOperator": "LessThan", "ComparisonValue": str(percent)},
+             "sets": [{"path": "Data", "compose": {"type": "GetRandomPercentConditionData"}}]}]
+
+
+def rank_rows(faction, rank, op):
+    """one GetFactionRank row, or for a list of ranks an OR group (== each)"""
+    if not isinstance(rank, list):
+        return [condition("GetFactionRankConditionData", "Faction", fw(faction), rank, op)]
+    return [condition("GetFactionRankConditionData", "Faction", fw(faction), r, "EqualTo", or_next=i < len(rank) - 1)
+            for i, r in enumerate(rank)]
 
 
 def adopted_conditions(text):
@@ -181,8 +205,7 @@ def info(editor_id, topic, text, speaker_npc, faction, rank, op, goodbye, random
         {"field_path": "Responses", "op": "Add", "compose": {"type": "DialogResponse", "fields": {
             "Emotion": "Neutral", "EmotionValue": "50", "ResponseNumber": "1", "Text": text}}},
         {"field_path": "Conditions", "op": "Add", "composes": [
-            condition("GetIsIDConditionData", "Object", speaker_npc, 1),
-            condition("GetFactionRankConditionData", "Faction", fw(faction), rank, op)] + extra},
+            condition("GetIsIDConditionData", "Object", speaker_npc, 1)] + rank_rows(faction, rank, op) + extra},
     ]
     flags = (["Goodbye"] if goodbye else []) + (["Random"] if random else []) + (["RandomEnd"] if random == "end" else [])
     if flags:
@@ -217,12 +240,44 @@ def main(spec_path, out_dir):
         next_id += 1
 
     given = spec.get("lines", {})
-    for key, (topic, faction, rank, op, goodbye, required, rows) in reqs.items():
+
+    def values_of(key, required):
         if key in given:
-            values = texts(given[key])
-        elif required and spec.get("placeholders", False):
-            values = [f"[{who['name']}: {key}]"]
-        else:
+            return texts(given[key])
+        if required and spec.get("placeholders", False):
+            return [f"[{who['name']}: {key}]"]
+        return []
+
+    # the sets of one topic (hello, goodbye, idle): every line of every set in one random run, each line limited to
+    # its set's stages; boys/girls texts join the pick too (they only come up when they fit). A spouse's lines are
+    # thinned so that vanilla's spouse chatter still gets about (100 - SPOUSE_IDLE_SHARE) % of her idles.
+    set_keys = [k for k, req in reqs.items() if isinstance(req[2], list)]
+
+    def emit_sets(topic):
+        run = []
+        for k in [k for k in set_keys if reqs[k][0] == topic]:
+            vs = values_of(k, reqs[k][5])
+            for i, text in enumerate(vs):
+                run.append((k, f"IRF{short}_{k.replace('.', '_')}" + (f"_{i + 1}" if len(vs) > 1 else ""), text))
+        married = sum(1 for k, _, _ in run if MARRIED in reqs[k][2])
+        percent = None
+        if topic == IDLE and married:
+            percent = round(100 * (1 - (1 - SPOUSE_IDLE_SHARE / 100) ** (1 / married)))
+        for i, (k, eid, text) in enumerate(run):
+            t, f, r, o, g, _, extra = reqs[k]
+            random = None if len(run) < 2 else ("end" if i == len(run) - 1 else "start")
+            thin = share_rows(percent) if percent and MARRIED in r else []
+            emit(k, eid, t, text, npc, f, r, o, g, random, extra + thin)
+
+    sets_done = set()
+    for key, (topic, faction, rank, op, goodbye, required, rows) in reqs.items():
+        if key in set_keys:
+            if topic not in sets_done:  # after the topic's mood lines, which win when they fit
+                sets_done.add(topic)
+                emit_sets(topic)
+            continue
+        values = values_of(key, required)
+        if not values:
             continue
         # several plain texts: one random run (the game picks one each time); texts with conditions (boys,
         # girls) stay first-fit, so they go before the run
