@@ -19,7 +19,6 @@ namespace State
 		bool  unforgivable{ false };     // a "never" tolerance was crossed: no amends, no win-back
 		bool  secret{ false };
 		float lockUntilDay{ 0.0f };      // after an attack: won't follow or date until this day
-		float lastTalkDay{ -10.0f };
 		float lastDateDay{ -10.0f };
 		float lastKissDay{ -10.0f };
 		float lastGiftDay{ -10.0f };     // one gift a day: "I have something for you." waits until a day has passed
@@ -44,6 +43,8 @@ namespace State
 		float nextPleadDay{ 0.0f };      // ... from this day
 		float committedDay{ 0.0f };      // when she last became Committed
 		bool  confessed{ false };        // she told you how much you mean to her (once per relationship)
+		std::uint16_t knowAsked{ 0 };    // the get-to-know questions you asked (bit 0 = question 1)
+		float lastKnowDay{ -10.0f };     // the last day you asked one you hadn't (one a day)
 	};
 
 	// A reaction waiting for the next time you meet someone

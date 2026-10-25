@@ -18,6 +18,9 @@ namespace World
 
 	bool Roll(int a_percent);
 
+	// 18:00 to 23:30: when an evening together is a date
+	bool Evening();
+
 	// The speaker says their line for a moment (IRF_SayTopic, gated on IRF_MomentFaction), after a_delay seconds of
 	// game time when given (a line said while a dialogue is still closing never plays)
 	void SayMoment(RE::Actor* a_speaker, IRF::Moment a_moment, float a_delay = 0.0f);

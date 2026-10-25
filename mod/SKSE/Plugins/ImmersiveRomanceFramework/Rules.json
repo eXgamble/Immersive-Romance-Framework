@@ -12,8 +12,8 @@
   "floorDating": 1,         // below this from Dating up, they end it
 
   // what raises approval
-  "talkGain": 2,            // a talk, once a day
-  "dateGain": 4,            // a talk in the evening (18:00-23:00) counts as a date, once a day
+  "knowGain": 3,            // a question you hadn't asked her yet ("I'd like to get to know you better.", one a day)
+  "dateGain": 4,            // "Spend the evening with me." (evenings, from Dating up, once a day)
   "kissGain": 1,            // once a day
   "giftGain": 3,            // a gift (one a day: the line waits until a day has passed)
   "giftLikedGain": 5,       // a gift they like, instead

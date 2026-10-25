@@ -32,9 +32,9 @@ namespace Forms
 		kAmendsFaction = 0x81C,     // 1 while amends can be made
 		kWinBackFaction = 0x81D,    // answer to "Could we try again?": 1 yes, 2 no
 		kSecretFaction = 0x81E,     // answer to "Let's keep this between us": 1 yes, 2 no
-		kTalkFaction = 0x81F,       // 1 while "Let's talk a while" applies
+		kDateFaction = 0x81F,       // 1 while "Spend the evening with me." applies (evening, Dating up, once a day)
 		kConfrontFaction = 0x820,   // word got back: 1 your denial will work, 2 it won't
-		kTakenFaction = 0x821,      // 1 when she knows you're taken and won't be courted for it
+		kCourtFaction = 0x821,      // "I'd like to get to know you better.": 1 she answers (once a day), 2 she declines: you're taken
 
 		// items
 		kGiftInsultingKeyword = 0x83F,  // IRF_GiftInsulting: an item the average person takes as an insult
@@ -88,7 +88,8 @@ namespace Forms
 		kAmendsTopic = 0x832,
 		kWinBackTopic = 0x834,
 		kSecretTopic = 0x836,
-		kTalkTopic = 0x838,
+		kDateTopic = 0x838,
+		kKnowTopic1 = 0x864,         // IRF_KnowTopic1-10 (0x864-0x86D): the questions under "I'd like to get to know you better."
 		kDenyTopic = 0x83A,
 		kAdmitTopic = 0x83C,
 	};
@@ -117,9 +118,9 @@ namespace Forms
 		RE::TESFaction* amends{ nullptr };
 		RE::TESFaction* winBack{ nullptr };
 		RE::TESFaction* secret{ nullptr };
-		RE::TESFaction* talk{ nullptr };
+		RE::TESFaction* date{ nullptr };
 		RE::TESFaction* confront{ nullptr };
-		RE::TESFaction* taken{ nullptr };
+		RE::TESFaction* courtFaction{ nullptr };
 
 		std::vector<RE::TESQuest*> quests;  // every framework quest, started at load if a save lacks one
 
@@ -139,7 +140,8 @@ namespace Forms
 		RE::TESTopic* amendsTopic{ nullptr };
 		RE::TESTopic* winBackTopic{ nullptr };
 		RE::TESTopic* secretTopic{ nullptr };
-		RE::TESTopic* talkTopic{ nullptr };
+		RE::TESTopic* dateTopic{ nullptr };
+		std::array<RE::TESTopic*, 10> know{};  // IRF_KnowTopic1-10
 		RE::TESTopic* denyTopic{ nullptr };
 		RE::TESTopic* admitTopic{ nullptr };
 		RE::BGSKeyword* giftInsulting{ nullptr };

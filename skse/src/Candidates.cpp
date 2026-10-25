@@ -78,8 +78,14 @@ namespace Candidates
 				list.push_back({ std::move(a_key), a_topic, a_faction, a_rank, Op::kEqualTo, false, a_required });
 			};
 
-			add("court", f.court, f.taken, 1);
-			add("court.taken", f.court, f.taken, 2);
+			// "I'd like to get to know you better.": her opener (it links to her questions), or she declines: taken
+			add("court", f.court, f.courtFaction, 1);
+			add("court.taken", f.court, f.courtFaction, 2);
+			// her answers to her questions (at least one, up to ten); each carries its question as its prompt (the
+			// player's words)
+			for (std::uint32_t i = 0; i < f.know.size(); ++i) {
+				add(std::format("know.{}", i + 1), f.know[i], f.candidate, 0, i == 0);
+			}
 
 			// Courting is vanilla's Friend with a romance meter under it: her everyday lines stay vanilla's (user,
 			// 2026-10-25), so her own greetings, goodbyes and idles start at Dating
@@ -183,7 +189,7 @@ namespace Candidates
 			add("winback.no", f.winBackTopic, f.winBack, 2);
 			add("secret.yes", f.secretTopic, f.secret, 1);
 			add("secret.no", f.secretTopic, f.secret, 2);
-			add("talk", f.talkTopic, f.talk, 1);
+			add("date", f.dateTopic, f.date, 1);
 			add("confront", f.reactionHello, f.reaction, Rank(Event::kConfront));
 			add("deny.works", f.denyTopic, f.confront, 1);
 			add("deny.fails", f.denyTopic, f.confront, 2);

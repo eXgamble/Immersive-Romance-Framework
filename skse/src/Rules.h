@@ -11,8 +11,8 @@ namespace Rules
 		int commitBar = 60;       // Dating -> Committed at this; below it again -> back to Dating
 		int floorDating = 1;      // at or below 0 from Dating up: they end it (approval ran out)
 
-		int talkGain = 2;       // once a day
-		int dateGain = 4;       // a talk in the evening (18:00-23:00) counts as a date, once a day
+		int knowGain = 3;       // a question you hadn't asked her yet (one a day)
+		int dateGain = 4;       // "Spend the evening with me." (18:00-23:30, from Dating up, once a day)
 		int kissGain = 1;       // once a day
 		int giftGain = 3;          // a gift (one a day)
 		int giftLikedGain = 5;     // a gift they like (instead)

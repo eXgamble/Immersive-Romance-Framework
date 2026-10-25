@@ -116,6 +116,13 @@ namespace World
 		return Moment::kNone;
 	}
 
+	bool Evening()
+	{
+		const auto calendar = RE::Calendar::GetSingleton();
+		const auto hour = calendar ? calendar->GetHour() : 12.0f;
+		return hour >= 18.0f && hour <= 23.5f;
+	}
+
 	void Kiss(RE::Actor* a_partner)
 	{
 		// Game.FadeOutGame(abFadingOut, abBlackFade, afSecsBeforeFade, afFadeDuration): a short fade in

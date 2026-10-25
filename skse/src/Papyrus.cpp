@@ -137,7 +137,7 @@ namespace Papyrus
 				s.nextPleadDay -= d;
 				s.committedDay -= d;
 				s.recentDay -= d;
-				s.lastTalkDay -= d;
+				s.lastKnowDay -= d;
 				s.lastDateDay -= d;
 				s.lastKissDay -= d;
 				s.lastGiftDay -= d;

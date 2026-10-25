@@ -12,7 +12,7 @@ namespace State
 
 		constexpr std::uint32_t kId = 'IRF0';
 		constexpr std::uint32_t kRecord = 'IRFS';
-		constexpr std::uint32_t kVersion = 7;
+		constexpr std::uint32_t kVersion = 8;
 
 		template <class T>
 		void Write(SKSE::SerializationInterface* a_intfc, const T& a_value)
@@ -70,7 +70,6 @@ namespace State
 				Write(a_intfc, c.unforgivable);
 				Write(a_intfc, c.secret);
 				Write(a_intfc, c.lockUntilDay);
-				Write(a_intfc, c.lastTalkDay);
 				Write(a_intfc, c.lastDateDay);
 				Write(a_intfc, c.lastKissDay);
 				Write(a_intfc, c.lastGiftDay);
@@ -92,6 +91,8 @@ namespace State
 				Write(a_intfc, c.nextPleadDay);
 				Write(a_intfc, c.committedDay);
 				Write(a_intfc, c.confessed);
+				Write(a_intfc, c.knowAsked);
+				Write(a_intfc, c.lastKnowDay);
 				WriteSet(a_intfc, c.knowSeeing);
 				WriteSet(a_intfc, c.sawStraying);
 			}
@@ -121,12 +122,12 @@ namespace State
 		{
 			return Read(a_intfc, c.lastContactDay) && Read(a_intfc, c.silentUntilDay) && Read(a_intfc, c.hurt) && Read(a_intfc, c.why) &&
 			       Read(a_intfc, c.who) && Read(a_intfc, c.breakupDay) && Read(a_intfc, c.unforgivable) && Read(a_intfc, c.secret) &&
-			       Read(a_intfc, c.lockUntilDay) && Read(a_intfc, c.lastTalkDay) && Read(a_intfc, c.lastDateDay) && Read(a_intfc, c.lastKissDay) && Read(a_intfc, c.lastGiftDay) &&
+			       Read(a_intfc, c.lockUntilDay) && Read(a_intfc, c.lastDateDay) && Read(a_intfc, c.lastKissDay) && Read(a_intfc, c.lastGiftDay) &&
 			       Read(a_intfc, c.killDay) && Read(a_intfc, c.killsToday) && Read(a_intfc, c.recent) && Read(a_intfc, c.recentDay) &&
 			       Read(a_intfc, c.partnerXp) && Read(a_intfc, c.appliedLevels) && Read(a_intfc, c.profileApplied) &&
 			       Read(a_intfc, c.savedConfidence) && Read(a_intfc, c.savedAggression) && Read(a_intfc, c.pendingBreakup) &&
 			       Read(a_intfc, c.confrontPending) && Read(a_intfc, c.confrontWorks) && Read(a_intfc, c.waryUntilDay) &&
-			       Read(a_intfc, c.jealousUntilDay) && Read(a_intfc, c.pleadsLeft) && Read(a_intfc, c.nextPleadDay) && Read(a_intfc, c.committedDay) && Read(a_intfc, c.confessed) && ReadSet(a_intfc, c.knowSeeing) &&
+			       Read(a_intfc, c.jealousUntilDay) && Read(a_intfc, c.pleadsLeft) && Read(a_intfc, c.nextPleadDay) && Read(a_intfc, c.committedDay) && Read(a_intfc, c.confessed) && Read(a_intfc, c.knowAsked) && Read(a_intfc, c.lastKnowDay) && ReadSet(a_intfc, c.knowSeeing) &&
 			       ReadSet(a_intfc, c.sawStraying);
 		}
 

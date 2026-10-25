@@ -68,9 +68,9 @@ namespace Forms
 		s.amends = f.Own<RE::TESFaction>(kAmendsFaction, "IRF_AmendsFaction");
 		s.winBack = f.Own<RE::TESFaction>(kWinBackFaction, "IRF_WinBackFaction");
 		s.secret = f.Own<RE::TESFaction>(kSecretFaction, "IRF_SecretFaction");
-		s.talk = f.Own<RE::TESFaction>(kTalkFaction, "IRF_TalkFaction");
+		s.date = f.Own<RE::TESFaction>(kDateFaction, "IRF_DateFaction");
 		s.confront = f.Own<RE::TESFaction>(kConfrontFaction, "IRF_ConfrontFaction");
-		s.taken = f.Own<RE::TESFaction>(kTakenFaction, "IRF_TakenFaction");
+		s.courtFaction = f.Own<RE::TESFaction>(kCourtFaction, "IRF_CourtFaction");
 
 		s.quests.clear();
 		for (const auto id : { kQuest, kReactionQuest, kAbsenceQuest, kRecentQuest, kSayQuest, kGiftQuest, kChildQuest }) {
@@ -95,7 +95,10 @@ namespace Forms
 		s.amendsTopic = f.Own<RE::TESTopic>(kAmendsTopic, "IRF_AmendsTopic");
 		s.winBackTopic = f.Own<RE::TESTopic>(kWinBackTopic, "IRF_WinBackTopic");
 		s.secretTopic = f.Own<RE::TESTopic>(kSecretTopic, "IRF_SecretTopic");
-		s.talkTopic = f.Own<RE::TESTopic>(kTalkTopic, "IRF_TalkTopic");
+		s.dateTopic = f.Own<RE::TESTopic>(kDateTopic, "IRF_DateTopic");
+		for (std::uint32_t i = 0; i < s.know.size(); ++i) {
+			s.know[i] = f.Own<RE::TESTopic>(kKnowTopic1 + i, "IRF_KnowTopic");
+		}
 		s.denyTopic = f.Own<RE::TESTopic>(kDenyTopic, "IRF_DenyTopic");
 		s.admitTopic = f.Own<RE::TESTopic>(kAdmitTopic, "IRF_AdmitTopic");
 		s.giftInsulting = f.Own<RE::BGSKeyword>(kGiftInsultingKeyword, "IRF_GiftInsulting");

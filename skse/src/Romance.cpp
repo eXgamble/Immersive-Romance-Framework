@@ -659,7 +659,11 @@ namespace Romance
 			knowsTaken = ps.knowSeeing.contains(candidate->ref) || GetStage(partner) >= Stage::kEngaged;
 		}
 		const bool declines = otherPartner && knowsTaken && candidate->attributes.scruples != Candidates::Scruples::kCompete;
-		SetRank(a_actor, f.taken, stage == Stage::kFriend ? (declines ? 2 : 1) : 0);
+		// get to know her: one question a day, Friend to Married (a Friend who knows you're taken declines)
+		const bool cold = candidate->attributes.waryStyle == Candidates::WaryStyle::kCold && s.waryUntilDay > today;
+		const bool askedToday = today - s.lastKnowDay < 1.0f;
+		const bool knowable = stage >= Stage::kFriend && stage <= Stage::kMarried && !silent && !hurt && !cold && !askedToday;
+		SetRank(a_actor, f.courtFaction, stage == Stage::kFriend && declines && !silent ? 2 : knowable ? 1 : 0);
 
 		const bool locked = s.lockUntilDay > today;
 		const bool askable = approval >= r.askDateApproval && GateOpen(*candidate, Stage::kDating) && !otherPartner && !locked;
@@ -696,7 +700,9 @@ namespace Romance
 		SetRank(a_actor, f.plead, pleading ? 1 : 0);
 		const bool secretable = stage >= Stage::kCourting && stage <= Stage::kCommitted && !s.secret && !silent && !hurt && !s.confrontPending;
 		SetRank(a_actor, f.secret, secretable ? (candidate->attributes.refusesSecret ? 2 : 1) : 0);
-		SetRank(a_actor, f.talk, stage >= Stage::kFriend && stage <= Stage::kMarried && !silent && !hurt ? 1 : 0);
+		// an evening together: from Dating up, evenings, once a day
+		const bool datable = stage >= Stage::kDating && stage <= Stage::kMarried && !silent && !hurt && !cold && today - s.lastDateDay >= 1.0f;
+		SetRank(a_actor, f.date, datable && World::Evening() ? 1 : 0);
 		const bool gaveToday = today - s.lastGiftDay < 1.0f;  // one gift a day: the line waits for tomorrow
 		SetRank(a_actor, f.give, stage >= Stage::kFriend && stage <= Stage::kMarried && !silent && !gaveToday ? 1 : 0);
 		SetRank(a_actor, f.confront, s.confrontPending ? (s.confrontWorks ? 1 : 2) : 0);

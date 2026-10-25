@@ -105,13 +105,6 @@ namespace Events
 			}
 		}
 
-		bool Evening()
-		{
-			const auto calendar = RE::Calendar::GetSingleton();
-			const auto hour = calendar ? calendar->GetHour() : 12.0f;
-			return hour >= 18.0f && hour <= 23.5f;
-		}
-
 		// What a line does when it has been said
 		void OnLineSaid(RE::Actor* a_speaker, const std::string& a_key)
 		{
@@ -138,10 +131,20 @@ namespace Events
 			auto& s = State::Of(a_speaker->GetFormID());
 			const auto stage = Romance::GetStage(a_speaker);
 
-			if (a_key == "court" && stage == Stage::kFriend) {
-				Romance::SetStage(a_speaker, Stage::kCourting, "courted");
-				Romance::ModApproval(a_speaker, r.talkGain, "courting talk");
-				Romance::Strayed(a_speaker, "courting someone else");
+			if (a_key.starts_with("know.")) {
+				// a question: one you hadn't asked counts, one a day (the menu doesn't hide the option until the talk
+				// ends, so a second new one the same day counts tomorrow); asking again does nothing
+				const int  n = std::clamp(std::atoi(a_key.c_str() + 5), 1, 16) - 1;
+				const auto bit = static_cast<std::uint16_t>(1u << n);
+				if (!(s.knowAsked & bit) && today - s.lastKnowDay >= 1.0f) {
+					s.knowAsked |= bit;
+					s.lastKnowDay = today;
+					if (stage == Stage::kFriend) {
+						Romance::SetStage(a_speaker, Stage::kCourting, "getting to know them");
+						Romance::Strayed(a_speaker, "courting someone else");
+					}
+					Romance::ModApproval(a_speaker, r.knowGain, "getting to know them");
+				}
 			} else if (a_key == "askdate.yes" && stage == Stage::kCourting) {
 				Romance::SetStage(a_speaker, Stage::kDating, "asked to be together");
 			} else if (a_key == "follow.yes") {
@@ -180,20 +183,11 @@ namespace Events
 				Romance::Sync(a_speaker);
 			} else if (a_key == "secret.yes") {
 				s.secret = true;
-			} else if (a_key == "talk") {
-				const bool date = stage >= Stage::kDating && Evening();
-				const bool cold = candidate->attributes.waryStyle == Candidates::WaryStyle::kCold && s.waryUntilDay > today;
-				if (cold) {
-					logger::info("Events: {} is cold with you: the talk brings nothing", a_speaker->GetDisplayFullName());
-				} else if (date && today - s.lastDateDay >= 1.0f) {
-					s.lastDateDay = today;
-					Romance::ModApproval(a_speaker, r.dateGain, "an evening together");
-					if (Romance::Partner() == a_speaker) {
-						Spread(a_speaker, false);
-					}
-				} else if (!date && today - s.lastTalkDay >= 1.0f) {
-					s.lastTalkDay = today;
-					Romance::ModApproval(a_speaker, r.talkGain, "a talk");
+			} else if (a_key == "date" && today - s.lastDateDay >= 1.0f) {
+				s.lastDateDay = today;
+				Romance::ModApproval(a_speaker, r.dateGain, "an evening together");
+				if (Romance::Partner() == a_speaker) {
+					Spread(a_speaker, false);
 				}
 				Romance::Contact(a_speaker);
 			} else if (a_key == "deny.works") {

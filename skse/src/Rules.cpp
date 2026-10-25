@@ -45,7 +45,7 @@ namespace Rules
 		IRF_RULE(askDateApproval);
 		IRF_RULE(commitBar);
 		IRF_RULE(floorDating);
-		IRF_RULE(talkGain);
+		IRF_RULE(knowGain);
 		IRF_RULE(dateGain);
 		IRF_RULE(kissGain);
 		IRF_RULE(giftGain);

@@ -39,13 +39,15 @@ REACTION_HELLO, ABSENCE_HELLO, RECENT_HELLO, SAY = 0x823, 0x825, 0x827, 0x829
 GIFT_ANSWER = 0x846  # her goodbye after a gift
 FORCEGREET = 0x848  # IRF_ForceGreetTopic: what she comes up to tell you (stay home, confess)
 CONFESS_REPLY = 0x862  # IRF_ConfessReplyTopic: "You mean a lot to me too."
-LINKS = {"confess": CONFESS_REPLY}  # her line offers you this reply (the INFO's LinkTo)
-ASKDATE, FOLLOW, KISS, BREAKUP, AMENDS, WINBACK, SECRET, TALK, DENY, ADMIT = (
+KNOW, KNOW_MAX = 0x864, 10  # IRF_KnowTopic1-10 (0x864-0x86D): the get-to-know questions (at least one)
+CANDIDATE_F = 0x800  # IRF_CandidateFaction: every registered candidate, rank 0
+LINKS = {"confess": [CONFESS_REPLY]}  # the replies her line offers (LinkTo); "court" links to her questions (main)
+ASKDATE, FOLLOW, KISS, BREAKUP, AMENDS, WINBACK, SECRET, DATE, DENY, ADMIT = (
     0x82A, 0x82C, 0x82E, 0x830, 0x832, 0x834, 0x836, 0x838, 0x83A, 0x83C)
 # factions
 STAGE_F, GREET_F, AMULET_F, BAND_F = 0x801, 0x803, 0x80C, 0x80F
 ABSENCE_F, REACTION_F, RECENT_F, MOMENT_F = 0x812, 0x813, 0x814, 0x816
-ASKDATE_F, FOLLOW_F, KISS_F, BREAKUP_F, AMENDS_F, WINBACK_F, SECRET_F, TALK_F, CONFRONT_F, TAKEN_F = (
+ASKDATE_F, FOLLOW_F, KISS_F, BREAKUP_F, AMENDS_F, WINBACK_F, SECRET_F, DATE_F, CONFRONT_F, COURT_F = (
     0x818, 0x819, 0x81A, 0x81B, 0x81C, 0x81D, 0x81E, 0x81F, 0x820, 0x821)
 GIFT_F = 0x841  # her answer to a gift: 1 insulted, 2 disliked, 3 plain, 4 liked, 5 loved
 MOOD_F, IDLE = 0x85B, 0x85C  # her mood (IRF_MoodFaction), her idles (IRF_IdleTopic, by IRF_StageFaction)
@@ -87,8 +89,11 @@ def requirements(attributes):
     def mood_row(mood):
         return condition("GetFactionRankConditionData", "Faction", fw(MOOD_F), MOODS[mood], "EqualTo")
 
-    add("court", COURT, TAKEN_F, 1)
-    add("court.taken", COURT, TAKEN_F, 2)
+    # "I'd like to get to know you better.": her opener links to her five questions; she declines if you're taken
+    add("court", COURT, COURT_F, 1)
+    add("court.taken", COURT, COURT_F, 2)
+    for i in range(1, KNOW_MAX + 1):  # her answers, at least one: {"prompt": "<your question>", "text": "<her answer>"}
+        add(f"know.{i}", KNOW + i - 1, CANDIDATE_F, 0, required=i == 1)
     # Courting greets, says goodbye and idles as vanilla's Friend: her own everyday lines start at Dating.
     # Mood versions first (the game plays the first line that fits; hurt: idles only, the broken heart greets)
     for rank, name in enumerate(["dating", "committed", "engaged", "spouse"], start=2):
@@ -134,7 +139,7 @@ def requirements(attributes):
     add("winback.no", WINBACK, WINBACK_F, 2)
     add("secret.yes", SECRET, SECRET_F, 1)
     add("secret.no", SECRET, SECRET_F, 2)
-    add("talk", TALK, TALK_F, 1)
+    add("date", DATE, DATE_F, 1)
     add("confront", REACTION_HELLO, REACTION_F, 30)
     add("deny.works", DENY, CONFRONT_F, 1)
     add("deny.fails", DENY, CONFRONT_F, 2)
@@ -204,6 +209,7 @@ def adopted_conditions(text):
 
 def info(editor_id, topic, text, speaker_npc, faction, rank, op, goodbye, random=None, rows=None):
     extra = (rows or []) + adopted_conditions(text)
+    prompt = text.get("prompt") if isinstance(text, dict) else None
     text = text["text"] if isinstance(text, dict) else text
     ops = [
         {"field_path": "Topic", "value": fw(topic)},
@@ -212,6 +218,8 @@ def info(editor_id, topic, text, speaker_npc, faction, rank, op, goodbye, random
         {"field_path": "Conditions", "op": "Add", "composes": [
             condition("GetIsIDConditionData", "Object", speaker_npc, 1)] + rank_rows(faction, rank, op) + extra},
     ]
+    if prompt:
+        ops.append({"field_path": "Prompt", "value": prompt})  # the player's words for this line
     flags = (["Goodbye"] if goodbye else []) + (["Random"] if random else []) + (["RandomEnd"] if random == "end" else [])
     if flags:
         ops.append({"field_path": "Flags.Flags", "value": ", ".join(flags)})
@@ -242,12 +250,14 @@ def main(spec_path, out_dir):
         nonlocal next_id
         record = info(editor_id, topic, text, speaker, faction, rank, op, goodbye, random, rows)
         if key in LINKS:
-            record["ops"].append({"field_path": "LinkTo", "op": "Add", "value": fw(LINKS[key])})
+            for topic in LINKS[key]:
+                record["ops"].append({"field_path": "LinkTo", "op": "Add", "value": fw(topic)})
         records.append(record)
         lines.setdefault(key, []).append(f"{plugin}|0x{next_id:03X}")
         next_id += 1
 
     given = spec.get("lines", {})
+    LINKS["court"] = [KNOW + i - 1 for i in range(1, KNOW_MAX + 1) if f"know.{i}" in given or i == 1]
 
     def values_of(key, required):
         if key in given:

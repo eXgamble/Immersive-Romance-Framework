@@ -22,8 +22,11 @@ line they say.
 
 - **Stages:** Friend, Courting, Dating, Committed, then vanilla's Engaged and Married. An Ex and a Widowed state
   follow a breakup or a death; if you killed them and someone saw it, it's Killed instead (no condolences).
-  Approval (0..100, never shown) moves you between them: talks, evening dates, kisses, gifts (one a day),
+  Approval (0..100, never shown) moves you between them: getting to know her, evening dates, kisses, gifts (one a day),
   fighting and clearing places together raise it. A gift can also be disliked, or an insult (a human heart).
+- **Getting to know her:** "I'd like to get to know you better." (once a day, Friend to Married) opens her own
+  questions (1 to 10, her add-on writes them). A question you hadn't asked gives approval; the first one starts
+  Courting; asking again does nothing. From Dating up, "Spend the evening with me." in the evening is a date.
 - **Committed has its moment:** a day after she becomes Committed she comes up to you, somewhere safe (a town, an
   inn, a home; anywhere but a dungeon while she follows you) and out of combat, and tells you how much you mean to
   her. You answer "You mean a lot to me too." and she replies. Once per relationship (again after a win-back).
@@ -157,7 +160,8 @@ mood lines; the generator does this. A spouse's idle lines also carry `(IRF_Stag
 
 | Key | Topic (Immersive Romance Framework.esp) | Faction | Rank |
 |---|---|---|---|
-| `court` / `court.taken` | IRF_CourtTopic 0x808 | IRF_TakenFaction 0x821 | 1 / 2 (declines: taken) |
+| `court` (her opener to "I'd like to get to know you better.", once a day from Friend to Married; LinkTo her questions) / `court.taken` (a Friend declines: you're taken) | IRF_CourtTopic 0x808 | IRF_CourtFaction 0x821 | 1 / 2 |
+| `know.1` .. `know.10` (her answers to her own questions, at least one; each INFO's Prompt is the player's question. A question you hadn't asked gives approval, one a day, and the first makes a Friend Courting; asking again does nothing) | IRF_KnowTopic1-10 0x864-0x86D | IRF_CandidateFaction 0x800 | 0 |
 | `hello.<set>`, `goodbye.<set>`, `idle.<set>`: her everyday lines, in sets that build on each other (below). Courting is vanilla's Friend: her greetings, goodbyes and idles there stay vanilla's | IRF_HelloTopic 0x806 / IRF_GoodbyeTopic 0x807 / IRF_IdleTopic 0x85C | IRF_GreetFaction 0x803 (hello, goodbye) / IRF_StageFaction 0x801 (idle) | an OR group, one row `== <rank>` per stage the set plays at (2 Dating, 3 Committed, 4 Engaged, 5 Married); `maramal` also `GetQuestRunning RelationshipMarriageWedding == 0` |
 | `hello.brokenheart.silent` (Goodbye flag) | IRF_HelloTopic | IRF_GreetFaction | 10 |
 | `hello.brokenheart.hurt`, `goodbye.brokenheart` | Hello / Goodbye | IRF_GreetFaction | 11 |
@@ -173,7 +177,7 @@ mood lines; the generator does this. A spouse's idle lines also carry `(IRF_Stag
 | `amends` | 0x832 | IRF_AmendsFaction 0x81C | 1 |
 | `winback.yes` / `.no` | 0x834 | IRF_WinBackFaction 0x81D | 1 / 2 |
 | `secret.yes` / `.no` | 0x836 | IRF_SecretFaction 0x81E | 1 / 2 |
-| `talk` (a talk; in the evening it's a date) | 0x838 | IRF_TalkFaction 0x81F | 1 |
+| `date` (her answer to "Spend the evening with me.": evenings, from Dating up, once a day) | IRF_DateTopic 0x838 | IRF_DateFaction 0x81F | 1 |
 | `deny.works` / `deny.fails` | 0x83A | IRF_ConfrontFaction 0x820 | 1 / 2 |
 | `admit` | 0x83C | IRF_ConfrontFaction | **GreaterThan** 0 |
 | `idle.ex` (her idle chatter as an ex) | IRF_IdleTopic 0x85C | IRF_StageFaction 0x801 | 6 |
