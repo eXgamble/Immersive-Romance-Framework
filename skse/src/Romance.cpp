@@ -523,6 +523,10 @@ namespace Romance
 			return;
 		}
 		if (a_actor->IsDead() && stage >= Stage::kCourting && stage <= Stage::kMarried) {
+			if (s.who == Who::kPlayer && s.why == Why::kViolence) {
+				SetStage(a_actor, Stage::kEx, "you killed them");  // no widow(er) of your own victim, no condolences
+				return;
+			}
 			SetStage(a_actor, Stage::kWidowed, "died");
 			Notify(a_actor, Event::kWidowed);
 			return;

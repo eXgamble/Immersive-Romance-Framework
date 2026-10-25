@@ -112,6 +112,9 @@ namespace Crimes
 					RE::NiPointer<RE::TESObjectREFR> victim;
 					RE::LookupReferenceByHandle(Victim(crime), victim);
 					witnesses.erase(victim ? victim->As<RE::Actor>() : nullptr);
+					std::erase_if(witnesses, [&](RE::Actor* a_witness) { return crime->owner && (crime->owner == a_witness->GetActorBase() || crime->owner == a_witness); });
+					logger::info("Crimes: type {} victim {} owner {:08X}, {} witnesses", type, victim ? victim->GetDisplayFullName() : "none",
+						crime->owner ? crime->owner->GetFormID() : 0, witnesses.size());
 					const auto distance = Rules::Get().witnessDistance;
 					for (const auto witness : witnesses) {
 						// the game's list holds everyone alerted (even a cow 50 m away): they must really see it
