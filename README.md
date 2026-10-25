@@ -23,7 +23,7 @@ line they say.
 - **Stages:** Friend, Courting, Dating, Committed, then vanilla's Engaged and Married. An Ex and a Widowed state
   follow a breakup or a death; if you killed them and someone saw it, it's Killed instead (no condolences).
   Approval (0..100, never shown) moves you between them: talks, evening dates, kisses, gifts (one a day counts),
-  fighting and clearing places together raise it.
+  fighting and clearing places together raise it. A gift can also be disliked, or an insult (a human heart).
 - **Tolerances**, per candidate: being caught straying, hitting them (a stray hit in a fight vs. turning on
   them), letting them bleed out, staying away too long. Any of them can be "never": one deed ends it for good.
 - **Breakups** remember who ended it and why (cheating, violence, absence, bleedouts, crime, your choice). You can
@@ -68,7 +68,10 @@ A candidate whose manifest is missing a required line, or whose lines don't carr
     "alignment": 2,                                // -5 evil .. 0 gray .. 5 good: how she judges your crimes
     "interestedIn": "any",                         // "any", "male", "female"
     "refusesSecret": false,                        // won't keep the relationship secret
-    "lovedGifts": ["Skyrim.esm|0x03AD5B"],         // count double
+    "gifts": {                                     // an item, a keyword it carries, or a form list holding it
+      "insulted": [], "disliked": ["Skyrim.esm|0x03AD6F"],
+      "liked": ["Skyrim.esm|0x08F95A"], "loved": ["Skyrim.esm|0x064B3D"]
+    },
     "combat": { "role": "support", "combatStyle": "Plugin.esp|0x800", "confidence": 2, "aggression": 1,
                 "gear": ["Skyrim.esm|0x012EB7"], "levelCap": 10 },
     "gates": { "dating": { "quest": "Plugin.esp|0x801", "stage": 50 } }   // Dating (or "committed") waits for
@@ -87,7 +90,14 @@ A candidate whose manifest is missing a required line, or whose lines don't carr
 }
 ```
 
-Every attribute is optional; a missing one takes the default from Rules.json. A candidate's community (her
+Every attribute is optional; a missing one takes the default from Rules.json.
+
+**Gifts:** a candidate checks her own lists first (an item named outright, then a keyword or form list, the
+strongest objection first), then the framework's keyword `IRF_GiftInsulting` (0x83F): items the average person
+takes as an insult (a human heart, human flesh, a skull). The framework gives them the keyword at load from
+`SKSE/Plugins/ImmersiveRomanceFramework/Gifts/*.json`; another mod can add its own file there or give its items the
+keyword. A candidate who doesn't mind them lists the keyword under `liked` or `loved`. One liked, loved or plain
+gift a day counts; every disliked or insulting one does. A candidate's community (her
 town) comes from her editor location. `refuse.until` is `"amends"` or a number of days (no amends
 follow `killed`: a refusal over it lasts for good).
 
@@ -131,7 +141,8 @@ conditions of your own freely (time of day, location, quest stages).
 - **moments:** 1 `caught`, 2 `revive`, 3 `attacked`, 4 `crime.approve` (required when alignment < 0),
   5 `crime.disapprove` (when alignment > 0), 6 `jealous`, 10 `road.afterfight`, 11 `road.dragon`,
   12 `road.nearlydead`, 13 `road.rest`, 20 `road.nordicruin`, 21 `road.dwarvenruin`, 22 `road.cave`,
-  23 `road.dungeon`, 24 `road.town`, 25 `road.inn`, 26 `road.hometown`.
+  23 `road.dungeon`, 24 `road.town`, 25 `road.inn`, 26 `road.hometown`, 30 `gift.insulted`, 31 `gift.disliked`,
+  32 `gift`, 33 `gift.liked`, 34 `gift.loved` (her answer to the strongest gift of a visit, once the menus close).
 - **Circle lines** take the member's `GetIsID`: reactions in IRF_ReactionHelloTopic by event, the refusal in
   IRF_SayTopic with moment 7.
 

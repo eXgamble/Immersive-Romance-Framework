@@ -17,24 +17,7 @@ namespace Candidates
 
 		constexpr auto kFolder = "Data/SKSE/Plugins/ImmersiveRomanceFramework/Candidates"sv;
 
-		// "Plugin.esp|0x123456" -> the form (the id is the plugin-local part)
-		RE::TESForm* ParseForm(const std::string& a_text)
-		{
-			const auto bar = a_text.find('|');
-			if (bar == std::string::npos) {
-				return nullptr;
-			}
-			const auto plugin = a_text.substr(0, bar);
-			RE::FormID id = 0;
-			try {
-				id = static_cast<RE::FormID>(std::stoul(a_text.substr(bar + 1), nullptr, 16));
-			} catch (...) {
-				return nullptr;
-			}
-			return RE::TESDataHandler::GetSingleton()->LookupForm(id & 0xFFFFFF, plugin);
-		}
-
-		RE::TESForm* ParseForm(const nlohmann::json& a_json, const char* a_key)
+		RE::TESForm* FormAt(const nlohmann::json& a_json, const char* a_key)
 		{
 			return a_json.contains(a_key) && a_json[a_key].is_string() ? ParseForm(a_json[a_key].get<std::string>()) : nullptr;
 		}
@@ -171,6 +154,11 @@ namespace Candidates
 				{ Moment::kTown, "road.town" },
 				{ Moment::kInn, "road.inn" },
 				{ Moment::kHomeTown, "road.hometown" },
+				{ Moment::kGiftInsulted, "gift.insulted" },
+				{ Moment::kGiftDisliked, "gift.disliked" },
+				{ Moment::kGift, "gift" },
+				{ Moment::kGiftLiked, "gift.liked" },
+				{ Moment::kGiftLoved, "gift.loved" },
 			};
 			for (const auto& [moment, name] : moments) {
 				add(name, f.say, f.moment, Rank(moment));
@@ -291,17 +279,24 @@ namespace Candidates
 			out.interestedIn = interest == "male" ? Interest::kMale : interest == "female" ? Interest::kFemale : Interest::kAny;
 			out.refusesSecret = a.value("refusesSecret", false);
 
-			for (const auto& gift : a.value("lovedGifts", nlohmann::json::array())) {
-				if (const auto form = gift.is_string() ? ParseForm(gift.get<std::string>()) : nullptr) {
-					out.lovedGifts.push_back(form);
-				} else {
-					a_problems.push_back("a lovedGifts entry is not a form");
+			const auto gifts = a.value("gifts", nlohmann::json::object());
+			const std::pair<const char*, std::vector<RE::TESForm*>*> tastes[]{
+				{ "insulted", &out.gifts.insulted }, { "disliked", &out.gifts.disliked }, { "liked", &out.gifts.liked }, { "loved", &out.gifts.loved }
+			};
+			for (const auto& [name, list] : tastes) {
+				for (const auto& gift : gifts.value(name, nlohmann::json::array())) {
+					const auto form = gift.is_string() ? ParseForm(gift.get<std::string>()) : nullptr;
+					if (form && (form->IsBoundObject() || form->Is(RE::FormType::Keyword, RE::FormType::FormList))) {
+						list->push_back(form);
+					} else {
+						a_problems.push_back(std::format("gifts.{}: {} is not a loaded item, keyword or form list", name, gift.dump()));
+					}
 				}
 			}
 
 			const auto combat = a.value("combat", nlohmann::json::object());
 			out.combat.role = combat.value("role", ""s);
-			if (const auto style = ParseForm(combat, "combatStyle")) {
+			if (const auto style = FormAt(combat, "combatStyle")) {
 				out.combat.style = style->As<RE::TESCombatStyle>();
 			}
 			out.combat.confidence = combat.value("confidence", -1.0f);
@@ -322,7 +317,7 @@ namespace Candidates
 				if (!gates.contains(name)) {
 					continue;
 				}
-				const auto quest = ParseForm(gates[name], "quest");
+				const auto quest = FormAt(gates[name], "quest");
 				if (!quest || !quest->As<RE::TESQuest>()) {
 					a_problems.push_back(std::format("gates.{}.quest is not a quest", name));
 					continue;
@@ -350,9 +345,9 @@ namespace Candidates
 
 			const auto who = j.value("candidate", nlohmann::json::object());
 			candidate.name = who.value("name", file);
-			const auto npc = ParseForm(who, "npc");
+			const auto npc = FormAt(who, "npc");
 			candidate.npc = npc ? npc->As<RE::TESNPC>() : nullptr;
-			const auto ref = ParseForm(who, "ref");
+			const auto ref = FormAt(who, "ref");
 			const auto actor = ref ? ref->As<RE::Actor>() : nullptr;
 			candidate.ref = actor ? actor->GetFormID() : 0;
 			if (!candidate.npc) {
@@ -361,7 +356,7 @@ namespace Candidates
 			if (!actor) {
 				problems.push_back("candidate.ref is missing or not a placed actor");
 			}
-			if (const auto town = ParseForm(who, "community")) {
+			if (const auto town = FormAt(who, "community")) {
 				candidate.community = town->As<RE::BGSLocation>();
 			} else if (actor) {
 				candidate.community = TownOf(actor->GetEditorLocation1());
@@ -386,9 +381,9 @@ namespace Candidates
 			for (const auto& c : j.value("circle", nlohmann::json::array())) {
 				CircleMember member;
 				member.name = c.value("name", std::format("circle #{}", index));
-				const auto cnpc = ParseForm(c, "npc");
+				const auto cnpc = FormAt(c, "npc");
 				member.npc = cnpc ? cnpc->As<RE::TESNPC>() : nullptr;
-				const auto cref = ParseForm(c, "ref");
+				const auto cref = FormAt(c, "ref");
 				member.ref = cref && cref->As<RE::Actor>() ? cref->GetFormID() : 0;
 				if (!member.npc || !member.ref) {
 					problems.push_back(std::format("circle member {} needs npc and ref", member.name));
@@ -461,6 +456,22 @@ namespace Candidates
 			}
 		}
 		return habitation;
+	}
+
+	RE::TESForm* ParseForm(const std::string& a_text)
+	{
+		const auto bar = a_text.find('|');
+		if (bar == std::string::npos) {
+			return nullptr;
+		}
+		const auto plugin = a_text.substr(0, bar);
+		RE::FormID id = 0;
+		try {
+			id = static_cast<RE::FormID>(std::stoul(a_text.substr(bar + 1), nullptr, 16));
+		} catch (...) {
+			return nullptr;
+		}
+		return RE::TESDataHandler::GetSingleton()->LookupForm(id & 0xFFFFFF, plugin);
 	}
 
 	void Load()

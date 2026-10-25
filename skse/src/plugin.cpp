@@ -7,6 +7,7 @@
 #include "Events.h"
 #include "Follower.h"
 #include "Forms.h"
+#include "Gifts.h"
 #include "Papyrus.h"
 #include "Romance.h"
 #include "Rules.h"
@@ -54,6 +55,7 @@ namespace
 			if (g_ready) {
 				Rules::Load();
 				Candidates::Load();
+				Gifts::Load();
 				Events::Register();
 				Crimes::Install();
 			}

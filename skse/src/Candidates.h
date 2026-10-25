@@ -44,6 +44,15 @@ namespace Candidates
 		std::uint16_t stage{ 0 };
 	};
 
+	// Gifts by how they take them; each entry is an item, a keyword the item carries, or a form list holding it
+	struct GiftTaste
+	{
+		std::vector<RE::TESForm*> insulted;
+		std::vector<RE::TESForm*> disliked;
+		std::vector<RE::TESForm*> liked;
+		std::vector<RE::TESForm*> loved;
+	};
+
 	struct Attributes
 	{
 		Tolerance cheat;
@@ -61,7 +70,7 @@ namespace Candidates
 		Interest  interestedIn{ Interest::kAny };
 		bool      refusesSecret{ false };
 
-		std::vector<RE::TESForm*>                lovedGifts;
+		GiftTaste                                gifts;
 		Combat                                   combat;
 		std::map<IRF::Stage, Gate>               gates;  // a stage that waits for a quest stage
 	};
@@ -93,6 +102,9 @@ namespace Candidates
 	};
 
 	void Load();
+
+	// "Plugin.esp|0x123456" -> the form (the id is the plugin-local part); nullptr when it isn't loaded
+	RE::TESForm* ParseForm(const std::string& a_text);
 
 	const std::vector<Candidate>& All();
 	const Candidate*              Find(const RE::Actor* a_actor);

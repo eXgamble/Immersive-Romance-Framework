@@ -98,6 +98,7 @@ namespace Forms
 		s.talkTopic = f.Own<RE::TESTopic>(kTalkTopic, "IRF_TalkTopic");
 		s.denyTopic = f.Own<RE::TESTopic>(kDenyTopic, "IRF_DenyTopic");
 		s.admitTopic = f.Own<RE::TESTopic>(kAdmitTopic, "IRF_AdmitTopic");
+		s.giftInsulting = f.Own<RE::BGSKeyword>(kGiftInsultingKeyword, "IRF_GiftInsulting");
 
 		s.potentialMarriage = f.Vanilla<RE::TESFaction>(0x019809, "PotentialMarriageFaction");
 		s.playerMarried = f.Vanilla<RE::TESFaction>(0x0C6472, "PlayerMarriedFaction");

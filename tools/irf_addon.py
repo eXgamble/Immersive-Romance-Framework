@@ -47,7 +47,8 @@ REFUSE_MOMENT = 7  # a circle member refusing service
 MOMENTS = {"caught": 1, "revive": 2, "attacked": 3, "crime.approve": 4, "crime.disapprove": 5, "jealous": 6,
            "road.afterfight": 10, "road.dragon": 11, "road.nearlydead": 12, "road.rest": 13,
            "road.nordicruin": 20, "road.dwarvenruin": 21, "road.cave": 22, "road.dungeon": 23,
-           "road.town": 24, "road.inn": 25, "road.hometown": 26}
+           "road.town": 24, "road.inn": 25, "road.hometown": 26,
+           "gift.insulted": 30, "gift.disliked": 31, "gift": 32, "gift.liked": 33, "gift.loved": 34}
 
 
 def requirements(alignment):

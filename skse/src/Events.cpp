@@ -5,6 +5,7 @@
 #include "Candidates.h"
 #include "Follower.h"
 #include "Forms.h"
+#include "Gifts.h"
 #include "Romance.h"
 #include "Rules.h"
 #include "State.h"
@@ -230,6 +231,13 @@ namespace Events
 					});
 					g_refusing = {};
 				}
+				if (a_event && !a_event->opening) {
+					const auto& closed = a_event->menuName;
+					if (closed == RE::GiftMenu::MENU_NAME || closed == RE::ContainerMenu::MENU_NAME || closed == RE::BarterMenu::MENU_NAME ||
+						closed == RE::DialogueMenu::MENU_NAME) {
+						Queue([menu = std::string(closed.c_str())]() { Gifts::OnMenuClosed(menu); });
+					}
+				}
 				if (!a_event || !a_event->opening) {
 					return RE::BSEventNotifyControl::kContinue;
 				}
@@ -309,19 +317,9 @@ namespace Events
 				Queue([to = a_event->newContainer, item = a_event->baseObj]() {
 					const auto actor = RE::TESForm::LookupByID<RE::Actor>(to);
 					const auto candidate = Candidates::FindByRef(to);
-					if (!actor || !candidate || Romance::GetStage(actor) < Stage::kFriend) {
-						return;
-					}
-					const auto& loved = candidate->attributes.lovedGifts;
-					const bool  love = std::ranges::any_of(loved, [&](RE::TESForm* a_form) { return a_form->GetFormID() == item; });
-					auto&       s = State::Of(actor->GetFormID());
-					if (State::Today() - s.lastGiftDay >= 1.0f) {  // one gift a day counts, so a pile of gifts isn't a shortcut
-						s.lastGiftDay = State::Today();
-						Romance::ModApproval(actor, Rules::Get().giftGain * (love ? 2 : 1), love ? "a gift they love" : "a gift");
-					}
-					Romance::Contact(actor);
-					if (Romance::GetStage(actor) >= Stage::kCourting) {  // a gift to a friend is just a gift
-						Romance::Strayed(actor, "a gift for someone else");
+					const auto form = RE::TESForm::LookupByID(item);
+					if (actor && candidate && form && Romance::GetStage(actor) >= Stage::kFriend) {
+						Gifts::OnGiven(actor, *candidate, form);
 					}
 				});
 				return RE::BSEventNotifyControl::kContinue;
@@ -682,5 +680,6 @@ namespace Events
 		g_lastPlace = Moment::kNone;
 		g_jealousDay.clear();
 		g_refusing = {};
+		Gifts::OnGameLoaded();
 	}
 }

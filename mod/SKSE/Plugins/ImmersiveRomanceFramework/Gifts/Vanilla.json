@@ -1,0 +1,11 @@
+{
+  // Immersive Romance Framework: items the average person takes as an insult when given one. Each gets the keyword
+  // IRF_GiftInsulting (Immersive Romance Framework.esp 0x83F) at load. Candidates take them as insulting unless
+  // their own manifest says otherwise (an add-on can list one, or the keyword, under "liked" or "loved").
+  // Other mods: drop your own file next to this one, or give your items the keyword.
+  "insulting": [
+    "Skyrim.esm|0x0B18CD",  // Human Heart
+    "Skyrim.esm|0x1016B3",  // Human Flesh
+    "Skyrim.esm|0x0AF5FD"   // Skull
+  ]
+}

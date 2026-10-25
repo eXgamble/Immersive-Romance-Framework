@@ -36,6 +36,9 @@ namespace Forms
 		kConfrontFaction = 0x820,   // word got back: 1 your denial will work, 2 it won't
 		kTakenFaction = 0x821,      // 1 when she knows you're taken and won't be courted for it
 
+		// items
+		kGiftInsultingKeyword = 0x83F,  // IRF_GiftInsulting: an item the average person takes as an insult
+
 		// quests and topics
 		kQuest = 0x805,  // IRF_Quest, priority 105
 		kHelloTopic = 0x806,
@@ -112,6 +115,7 @@ namespace Forms
 		RE::TESTopic* talkTopic{ nullptr };
 		RE::TESTopic* denyTopic{ nullptr };
 		RE::TESTopic* admitTopic{ nullptr };
+		RE::BGSKeyword* giftInsulting{ nullptr };
 
 		// vanilla
 		RE::TESFaction*    potentialMarriage{ nullptr };  // PotentialMarriageFaction 019809

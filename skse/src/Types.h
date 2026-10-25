@@ -95,6 +95,21 @@ namespace IRF
 		kTown = 24,
 		kInn = 25,
 		kHomeTown = 26,
+		kGiftInsulted = 30,  // she answers a gift: 30 + Taste
+		kGiftDisliked = 31,
+		kGift = 32,
+		kGiftLiked = 33,
+		kGiftLoved = 34,
+	};
+
+	// How a candidate takes a gift (gift moment = 30 + this)
+	enum class Taste : std::int8_t
+	{
+		kInsulted = 0,
+		kDisliked = 1,
+		kNeutral = 2,
+		kLiked = 3,
+		kLoved = 4,
 	};
 
 	inline int Rank(auto a_enum) { return static_cast<int>(a_enum); }

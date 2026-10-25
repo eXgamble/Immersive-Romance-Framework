@@ -49,6 +49,10 @@ namespace Rules
 		IRF_RULE(dateGain);
 		IRF_RULE(kissGain);
 		IRF_RULE(giftGain);
+		IRF_RULE(giftLikedGain);
+		IRF_RULE(giftLovedGain);
+		IRF_RULE(giftDislikedCost);
+		IRF_RULE(giftInsultCost);
 		IRF_RULE(killGain);
 		IRF_RULE(killCapPerDay);
 		IRF_RULE(clearGain);
