@@ -482,6 +482,18 @@ namespace Events
 			}
 		};
 
+		// Anyone but the victim, your followers and your enemies who saw you strike the killing blow
+		bool SomeoneSawKill(RE::Actor* a_victim)
+		{
+			const auto player = RE::PlayerCharacter::GetSingleton();
+			for (const auto witness : World::Witnesses(player, Rules::Get().witnessDistance)) {
+				if (witness != a_victim && !witness->IsHostileToActor(player)) {
+					return true;
+				}
+			}
+			return false;
+		}
+
 		class Death : public RE::BSTEventSink<RE::TESDeathEvent>
 		{
 		public:
@@ -502,10 +514,15 @@ namespace Events
 						return;
 					}
 					if (Candidates::Find(d.get())) {
-						if (k && k->IsPlayerRef()) {
-							auto& s = State::Of(d->GetFormID());
-							s.who = Who::kPlayer;
-							s.why = Why::kViolence;
+						const auto stage = Romance::GetStage(d.get());
+						if (stage >= Stage::kCourting && stage <= Stage::kMarried) {
+							const bool seen = k && k->IsPlayerRef() && SomeoneSawKill(d.get());  // unseen, it's a death like any other
+							auto&      s = State::Of(d->GetFormID());
+							s.who = seen ? Who::kPlayer : Who::kNone;  // also clears an old breakup's after a win-back
+							s.why = seen ? Why::kViolence : Why::kNone;
+							if (k && k->IsPlayerRef()) {
+								logger::info("Death: you killed {}, {}", d->GetDisplayFullName(), seen ? "seen" : "unseen");
+							}
 						}
 						Romance::Sync(d.get());
 						return;
