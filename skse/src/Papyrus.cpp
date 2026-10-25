@@ -1,6 +1,7 @@
 #include "Papyrus.h"
 
 #include "Candidates.h"
+#include "Children.h"
 #include "Follower.h"
 #include "Forms.h"
 #include "Romance.h"
@@ -115,8 +116,16 @@ namespace Papyrus
 		void DebugSkipDays(RE::StaticFunctionTag*, RE::Actor* a_actor, std::int32_t a_days)
 		{
 			Later(a_actor, [a_days](RE::Actor* a) {
-				auto&      s = State::Of(a->GetFormID());
 				const auto d = static_cast<float>(a_days);
+				if (Children::IsChild(a)) {  // an adopted child: when they last saw you
+					auto& c = State::Children()[a->GetFormID()];
+					c.lastSeenDay = (c.lastSeenDay <= State::kNever ? State::Today() : c.lastSeenDay) - d;
+					c.lastMoodDay -= d;
+					logger::info("Debug: {}'s clocks moved back {} days", a->GetDisplayFullName(), a_days);
+					Children::Sync(a);
+					return;
+				}
+				auto& s = State::Of(a->GetFormID());
 				s.lastContactDay -= d;
 				s.silentUntilDay -= d;
 				s.breakupDay -= d;
@@ -201,6 +210,36 @@ namespace Papyrus
 		}
 	}
 
+	namespace
+	{
+		// A child counts as adopted (Hearthfire's free Child1/Child2 alias and its adoption faction), without
+		// Hearthfire's adoption and move: for testing the children's lines and a spouse staying home
+		void DebugAdopt(RE::StaticFunctionTag*, RE::Actor* a_child)
+		{
+			Later(a_child, [](RE::Actor* a) {
+				const auto& f = Forms::Get();
+				if (!f.adoption || !f.adoptionFaction) {
+					logger::info("Debug: Hearthfire isn't loaded");
+					return;
+				}
+				for (const auto alias : f.adoption->aliases) {
+					if (!alias || alias->GetVMTypeID() != RE::BGSRefAlias::VMTYPEID || (alias->aliasName != "Child1"sv && alias->aliasName != "Child2"sv)) {
+						continue;
+					}
+					const auto ref = static_cast<RE::BGSRefAlias*>(alias);
+					if (!ref->GetReference()) {
+						ref->ForceRefTo(a);
+						a->AddToFaction(f.adoptionFaction, 0);
+						logger::info("Debug: {} counts as adopted ({})", a->GetDisplayFullName(), alias->aliasName.c_str());
+						Children::Sync(a);
+						return;
+					}
+				}
+				logger::info("Debug: no free child alias for {}", a->GetDisplayFullName());
+			});
+		}
+	}
+
 	bool Register(VM* a_vm)
 	{
 		constexpr auto script = "IRF"sv;
@@ -220,6 +259,7 @@ namespace Papyrus
 		a_vm->RegisterFunction("DebugDeed"sv, script, DebugDeed);
 		a_vm->RegisterFunction("DebugDump"sv, script, DebugDump);
 		a_vm->RegisterFunction("DebugReset"sv, script, DebugReset);
+		a_vm->RegisterFunction("DebugAdopt"sv, script, DebugAdopt);
 		logger::info("Papyrus: IRF natives registered");
 		return true;
 	}

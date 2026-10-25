@@ -73,7 +73,7 @@ namespace Forms
 		s.taken = f.Own<RE::TESFaction>(kTakenFaction, "IRF_TakenFaction");
 
 		s.quests.clear();
-		for (const auto id : { kQuest, kReactionQuest, kAbsenceQuest, kRecentQuest, kSayQuest, kGiftQuest }) {
+		for (const auto id : { kQuest, kReactionQuest, kAbsenceQuest, kRecentQuest, kSayQuest, kGiftQuest, kChildQuest }) {
 			if (const auto quest = f.Own<RE::TESQuest>(id, "framework quest")) {
 				s.quests.push_back(quest);
 			}
@@ -103,6 +103,12 @@ namespace Forms
 		s.gift = f.Own<RE::TESFaction>(kGiftFaction, "IRF_GiftFaction");
 		s.giveTopic = f.Own<RE::TESTopic>(kGiveTopic, "IRF_GiveTopic");
 		s.giftAnswer = f.Own<RE::TESTopic>(kGiftAnswerTopic, "IRF_GiftAnswerTopic");
+		s.child = f.Own<RE::TESFaction>(kChildFaction, "IRF_ChildFaction");
+		s.childHello = f.Own<RE::TESTopic>(kChildHelloTopic, "IRF_ChildHelloTopic");
+		s.stayHomeTopic = f.Own<RE::TESTopic>(kStayHomeTopic, "IRF_StayHomeTopic");
+		s.sayQuest = f.Own<RE::TESQuest>(kSayQuest, "IRF_SayQuest");
+		s.adoption = data->LookupForm<RE::TESQuest>(0x0042B4, "HearthFires.esm"sv);
+		s.adoptionFaction = data->LookupForm<RE::TESFaction>(0x0042B0, "HearthFires.esm"sv);
 
 		s.potentialMarriage = f.Vanilla<RE::TESFaction>(0x019809, "PotentialMarriageFaction");
 		s.playerMarried = f.Vanilla<RE::TESFaction>(0x0C6472, "PlayerMarriedFaction");

@@ -55,6 +55,9 @@
   "partnerHealthPerLevel": 10,
   "partnerSkillPerLevel": 2,
 
+  // adopted children
+  "childAwayDays": 5,       // a child misses you after this many days apart (twice, three times as long: more so)
+
   // lines and sight
   "momentCooldownSeconds": 90.0,  // between two road lines
   "witnessDistance": 2048.0,      // farther than this, nobody saw it

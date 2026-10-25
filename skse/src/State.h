@@ -54,7 +54,15 @@ namespace State
 		float      untilDay{ 0.0f };  // 0 = until amends with that candidate
 	};
 
+	// An adopted child (Hearthfire): when you last saw them, when they last told you something was wrong at home
+	struct Child
+	{
+		float lastSeenDay{ kNever };  // kNever: not met since adoption; the first meeting sets it
+		float lastMoodDay{ -10.0f };  // a line about the marriage, once a day
+	};
+
 	Candidate&                                  Of(RE::FormID a_candidate);
+	std::unordered_map<RE::FormID, Child>&      Children();  // by the child's reference
 	std::unordered_map<RE::FormID, Candidate>&  All();
 	std::unordered_map<RE::FormID, Reaction>&   Reactions();  // by the reacting actor's reference
 	std::unordered_map<RE::FormID, Refusal>&    Refusals();   // by the refusing actor's reference

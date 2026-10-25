@@ -59,3 +59,6 @@ Function DebugDeed(Actor akActor, string asDeed) global native
 Function DebugDump(Actor akActor) global native
 ; Forget the candidate's relationship entirely
 Function DebugReset(Actor akActor) global native
+
+; A child counts as adopted (Hearthfire's child alias and adoption faction) without Hearthfire's adoption and move
+Function DebugAdopt(Actor akChild) global native

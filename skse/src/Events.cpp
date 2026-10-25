@@ -1,5 +1,6 @@
 #include "Events.h"
 
+#include "Children.h"
 #include "Crimes.h"
 
 #include "Candidates.h"
@@ -116,6 +117,10 @@ namespace Events
 			const auto& f = Forms::Get();
 			const auto  today = State::Today();
 			const auto  candidate = Candidates::Find(a_speaker);
+			if (a_key == "stayhome") {
+				Children::OnStayHomeSaid(a_speaker);
+				return;
+			}
 			auto        clearReaction = [&]() {
                 State::Reactions().erase(a_speaker->GetFormID());
                 a_speaker->AddToFaction(f.reaction, 0);
@@ -203,6 +208,7 @@ namespace Events
 					const bool meeting = player->GetPosition().GetDistance(actor->GetPosition()) < 400.0f;
 					Queue([handle = actor->GetHandle(), meeting]() {
 						if (const auto a = handle.get()) {
+							Children::Sync(a.get());
 							Romance::Sync(a.get(), meeting);
 							if (meeting && a.get() == Romance::Partner()) {
 								CheckJealous(a.get());
@@ -217,6 +223,7 @@ namespace Events
 		// a refusal line waits for the dialogue menu to close and 1.5 s more (a line said while it is open, or up to
 		// about a second after it closes, never plays; measured 2026-10-25)
 		RE::ActorHandle g_refusing{};
+		RE::ActorHandle g_talkingChild{};  // an adopted child you're talking to
 
 		class Menus : public RE::BSTEventSink<RE::MenuOpenCloseEvent>
 		{
@@ -231,6 +238,17 @@ namespace Events
 					});
 					g_refusing = {};
 				}
+				if (a_event && !a_event->opening && a_event->menuName == RE::DialogueMenu::MENU_NAME && g_talkingChild) {
+					Queue([handle = g_talkingChild]() {
+						if (const auto a = handle.get()) {
+							Children::OnTalked(a.get());
+						}
+					});
+					g_talkingChild = {};
+				}
+				if (a_event && !a_event->opening && a_event->menuName == RE::LoadingMenu::MENU_NAME) {
+					Queue([]() { Children::OnLoadingDone(); });
+				}
 				if (!a_event || !a_event->opening) {
 					return RE::BSEventNotifyControl::kContinue;
 				}
@@ -242,6 +260,9 @@ namespace Events
 				}
 				const auto& name = a_event->menuName;
 				if (name == RE::DialogueMenu::MENU_NAME) {
+					if (Children::IsChild(speaker)) {
+						g_talkingChild = speaker->GetHandle();
+					}
 					Queue([handle = speaker->GetHandle()]() {
 						if (const auto a = handle.get()) {
 							Romance::Sync(a.get(), true);
@@ -266,6 +287,18 @@ namespace Events
 			{
 				// kTopicEnd comes when the line has finished (about 6 s for a silent placeholder line)
 				std::string key;
+				if (a_event && a_event->type == RE::TESTopicInfoEvent::TopicInfoEventType::kTopicEnd && a_event->speakerRef) {
+					const auto info = RE::TESForm::LookupByID<RE::TESTopicInfo>(a_event->topicInfoFormID);
+					const auto child = a_event->speakerRef->As<RE::Actor>();
+					if (info && info->parentTopic == Forms::Get().childHello && Children::IsChild(child) && child->GetFactionRank(Forms::Get().child, false) > 0) {
+						Queue([handle = child->GetHandle()]() {
+							if (const auto a = handle.get()) {
+								Children::OnGreeted(a.get());
+							}
+						});
+						return RE::BSEventNotifyControl::kContinue;
+					}
+				}
 				if (!a_event || !Candidates::FindLine(a_event->topicInfoFormID, &key)) {
 					return RE::BSEventNotifyControl::kContinue;
 				}
@@ -552,7 +585,11 @@ namespace Events
 		public:
 			RE::BSEventNotifyControl ProcessEvent(const RE::TESActorLocationChangeEvent* a_event, RE::BSTEventSource<RE::TESActorLocationChangeEvent>*) override
 			{
-				if (!a_event || !a_event->actor || !a_event->actor->IsPlayerRef() || !a_event->newLoc) {
+				if (!a_event || !a_event->actor || !a_event->actor->IsPlayerRef()) {
+					return RE::BSEventNotifyControl::kContinue;
+				}
+				Queue([loc = a_event->newLoc]() { Children::OnPlayerLocation(loc); });  // the wilds have no location at all
+				if (!a_event->newLoc) {
 					return RE::BSEventNotifyControl::kContinue;
 				}
 				Queue([loc = a_event->newLoc]() {
@@ -572,6 +609,16 @@ namespace Events
 						Spread(partner, false);  // seen together in her town
 					}
 				});
+				return RE::BSEventNotifyControl::kContinue;
+			}
+		};
+
+		class FastTravel : public RE::BSTEventSink<RE::TESFastTravelEndEvent>
+		{
+		public:
+			RE::BSEventNotifyControl ProcessEvent(const RE::TESFastTravelEndEvent*, RE::BSTEventSource<RE::TESFastTravelEndEvent>*) override
+			{
+				Queue([]() { Children::OnFastTravelEnd(); });
 				return RE::BSEventNotifyControl::kContinue;
 			}
 		};
@@ -636,6 +683,7 @@ namespace Events
 		static Cleared        cleared;
 		static LocationChange location;
 		static Sleep          sleep;
+		static FastTravel     fastTravel;
 		static MagicApply     magic;
 		const auto            holder = RE::ScriptEventSourceHolder::GetSingleton();
 		SKSE::GetCrosshairRefEventSource()->AddEventSink(&crosshair);
@@ -648,6 +696,7 @@ namespace Events
 		holder->AddEventSink<RE::TESDeathEvent>(&death);
 		holder->AddEventSink<RE::TESActorLocationChangeEvent>(&location);
 		holder->AddEventSink<RE::TESSleepStopEvent>(&sleep);
+		holder->AddEventSink<RE::TESFastTravelEndEvent>(&fastTravel);
 		holder->AddEventSink<RE::TESMagicEffectApplyEvent>(&magic);
 		if (const auto source = RE::LocationCleared::GetEventSource()) {
 			source->AddEventSink(&cleared);
@@ -662,6 +711,8 @@ namespace Events
 		g_lastPlace = Moment::kNone;
 		g_jealousDay.clear();
 		g_refusing = {};
+		g_talkingChild = {};
 		Gifts::OnGameLoaded();
+		Children::OnGameLoaded();
 	}
 }

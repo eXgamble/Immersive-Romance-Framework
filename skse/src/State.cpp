@@ -8,10 +8,11 @@ namespace State
 		std::unordered_map<RE::FormID, Reaction>  g_reactions;
 		std::unordered_map<RE::FormID, Refusal>   g_refusals;
 		std::string                               g_interest;
+		std::unordered_map<RE::FormID, Child>     g_children;
 
 		constexpr std::uint32_t kId = 'IRF0';
 		constexpr std::uint32_t kRecord = 'IRFS';
-		constexpr std::uint32_t kVersion = 2;
+		constexpr std::uint32_t kVersion = 3;
 
 		template <class T>
 		void Write(SKSE::SerializationInterface* a_intfc, const T& a_value)
@@ -102,6 +103,12 @@ namespace State
 			}
 			Write(a_intfc, static_cast<std::uint32_t>(g_interest.size()));
 			a_intfc->WriteRecordData(g_interest.data(), static_cast<std::uint32_t>(g_interest.size()));
+			Write(a_intfc, static_cast<std::uint32_t>(g_children.size()));
+			for (const auto& [id, c] : g_children) {
+				Write(a_intfc, id);
+				Write(a_intfc, c.lastSeenDay);
+				Write(a_intfc, c.lastMoodDay);
+			}
 		}
 
 		bool ReadCandidate(SKSE::SerializationInterface* a_intfc, Candidate& c)
@@ -163,6 +170,17 @@ namespace State
 					g_interest.resize(size);
 					a_intfc->ReadRecordData(g_interest.data(), size);
 				}
+				Read(a_intfc, count);
+				for (std::uint32_t i = 0; i < count; ++i) {
+					RE::FormID id = 0, resolved = 0;
+					Child      c;
+					if (!Read(a_intfc, id) || !Read(a_intfc, c.lastSeenDay) || !Read(a_intfc, c.lastMoodDay)) {
+						return;
+					}
+					if (a_intfc->ResolveFormID(id, resolved)) {
+						g_children[resolved] = c;
+					}
+				}
 			}
 			logger::info("State: loaded {} candidates, {} reactions, {} refusals", g_candidates.size(), g_reactions.size(), g_refusals.size());
 		}
@@ -173,6 +191,7 @@ namespace State
 			g_reactions.clear();
 			g_refusals.clear();
 			g_interest.clear();
+			g_children.clear();
 		}
 	}
 
@@ -194,6 +213,11 @@ namespace State
 	std::unordered_map<RE::FormID, Refusal>& Refusals()
 	{
 		return g_refusals;
+	}
+
+	std::unordered_map<RE::FormID, Child>& Children()
+	{
+		return g_children;
 	}
 
 	std::string& PlayerInterest()

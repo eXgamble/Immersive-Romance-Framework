@@ -158,6 +158,8 @@ namespace Candidates
 			for (const auto& [moment, name] : moments) {
 				add(name, f.say, f.moment, Rank(moment));
 			}
+			// with adopted children she won't leave town: her force greet at the edge (the line ends the talk)
+			add("stayhome", f.stayHomeTopic, f.moment, Rank(Moment::kStayHome));
 			// her answer to a gift, as her goodbye
 			add("gift.insulted", f.giftAnswer, f.gift, Rank(Taste::kInsulted) + 1);
 			add("gift.disliked", f.giftAnswer, f.gift, Rank(Taste::kDisliked) + 1);

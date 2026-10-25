@@ -24,6 +24,10 @@ line they say.
   follow a breakup or a death; if you killed them and someone saw it, it's Killed instead (no condolences).
   Approval (0..100, never shown) moves you between them: talks, evening dates, kisses, gifts (one a day),
   fighting and clearing places together raise it. A gift can also be disliked, or an insult (a human heart).
+- **Adopted children** (Hearthfire's adoption, unchanged), once you're married to a candidate: their greeting tells
+  you when something is wrong at home (you were away long, or the marriage is in a bad way); when all is well they
+  keep vanilla's. Your spouse stays home with them: she follows you inside the family's town, but at its edge she
+  comes up to you, says why she can't come and goes home; after a fast travel a message says it.
 - **Gifts:** "I have something for you." opens the gift menu (gold included) for a candidate from Friend up; she
   answers as she says goodbye. Stolen and quest items can't be given, and an insult isn't taken.
 - **Tolerances**, per candidate: being caught straying, hitting them (a stray hit in a fight vs. turning on
@@ -131,6 +135,7 @@ conditions of your own freely (time of day, location, quest stages).
 | `talk` (a talk; in the evening it's a date) | 0x838 | IRF_TalkFaction 0x81F | 1 |
 | `deny.works` / `deny.fails` | 0x83A | IRF_ConfrontFaction 0x820 | 1 / 2 |
 | `admit` | 0x83C | IRF_ConfrontFaction | **GreaterThan** 0 |
+| `stayhome` (married, with children: why she won't leave town; Goodbye flag) | IRF_StayHomeTopic 0x848 | IRF_MomentFaction 0x816 | 8 |
 | `gift.insulted` / `.disliked` / `gift` / `.liked` / `.loved` (her answer, as her goodbye) | IRF_GiftAnswerTopic 0x846 | IRF_GiftFaction 0x841 | 1 / 2 / 3 / 4 / 5 |
 | `absence.1`..`3` (back after a long time) | IRF_AbsenceHelloTopic 0x825 | IRF_AbsenceFaction 0x812 | 1..3 |
 | moments (below) | IRF_SayTopic 0x829 | IRF_MomentFaction 0x816 | the moment |
@@ -142,7 +147,7 @@ conditions of your own freely (time of day, location, quest stages).
   9 brokenHeart, 10 seeingSomeone (said by other candidates who know), 11 widowed, 12 wonBack, 13 killed (you
   killed them, seen). A reaction plays once, at the next meeting, within a week; a recent line plays for a while
   after the event.
-- **moments:** 1 `caught`, 2 `revive`, 3 `attacked`, 4 `crime.approve` (required when alignment < 0),
+- **moments:** 1 `caught`, 2 `revive`, 3 `attacked`, 8 `stayhome` (in its own topic, above), 4 `crime.approve` (required when alignment < 0),
   5 `crime.disapprove` (when alignment > 0), 6 `jealous`, 10 `road.afterfight`, 11 `road.dragon`,
   12 `road.nearlydead`, 13 `road.rest`, 20 `road.nordicruin`, 21 `road.dwarvenruin`, 22 `road.cave`,
   23 `road.dungeon`, 24 `road.town`, 25 `road.inn`, 26 `road.hometown`.
@@ -162,14 +167,16 @@ conditions of your own freely (time of day, location, quest stages).
 Conditions on any line, run on the candidate: `GetFactionRank` with `IRF_StageFaction` 0x801 (-1 not a Friend
 yet, 0 Friend, 1 Courting, 2 Dating, 3 Committed, 4 Engaged, 5 Married, 6 Ex, 7 Widowed, 8 Killed), `IRF_ApprovalFaction`
 0x802 (0..100), `IRF_WhyFaction` 0x810 and `IRF_WhoFaction` 0x811 (1 you, 2 them) for an Ex,
-`IRF_SecretFaction`, `IRF_RecentFaction` with `IRF_RecentDaysFaction` 0x815 (days since).
+`IRF_SecretFaction`, `IRF_RecentFaction` with `IRF_RecentDaysFaction` 0x815 (days since). On an adopted child,
+`IRF_ChildFaction` 0x847: what their greeting is about (1-3 you were away, 11 strained, 12 bad, 13 heartbroken, 0 all
+well); the framework's own lines for it live in IRF_ChildHelloTopic 0x852.
 
 ### Papyrus
 
 `Scripts/Source/IRF.psc` (MIT): `IsCandidate`, `GetStage`, `GetApproval`, `GetPartner`, `GetWhy`, `GetWho`,
 `IsBrokenHearted`, `IsIntimacyAllowed` (for mods that start scenes), `RequestStage` (story beats from your own
 quests), `ModApproval`, `SetPlayerInterest`, and debug tools (`DebugSetApproval`, `DebugSkipDays`, `DebugDeed`,
-`DebugDump`, `DebugReset`). Mod events: `IRF_StageChanged` (sender = candidate, numArg = new stage, strArg = cause),
+`DebugDump`, `DebugReset`, `DebugAdopt`: a child counts as adopted without Hearthfire's move). Mod events: `IRF_StageChanged` (sender = candidate, numArg = new stage, strArg = cause),
 `IRF_Strayed` (sender = the partner strayed from, numArg = 1 if caught, strArg = the deed).
 
 ## Building

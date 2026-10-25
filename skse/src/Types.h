@@ -84,6 +84,7 @@ namespace IRF
 		kCrimeDisapprove = 5,  // she saw a crime and didn't (alignment above 0)
 		kJealous = 6,          // you travel with another candidate
 		kRefuse = 7,           // a circle member refuses you service
+		kStayHome = 8,         // a spouse with children won't leave town (her force greet at the town's edge)
 		kAfterFight = 10,
 		kDragon = 11,
 		kNearlyDead = 12,
@@ -95,6 +96,18 @@ namespace IRF
 		kTown = 24,
 		kInn = 25,
 		kHomeTown = 26,
+	};
+
+	// IRF_ChildFaction: what an adopted child's greeting is about (the framework's own lines)
+	enum class ChildMood : std::int8_t
+	{
+		kNone = 0,          // all is well: vanilla's greeting
+		kAway1 = 1,         // you were away a while .. 3 a very long time
+		kAway2 = 2,
+		kAway3 = 3,
+		kStrained = 11,     // the marriage is strained (spouse approval band 2)
+		kBad = 12,          // the marriage is in a bad way (band 1)
+		kHeartbroken = 13,  // the spouse is heartbroken (caught you)
 	};
 
 	// How a candidate takes a gift; IRF_GiftFaction carries it (+ 1) for her answer, her goodbye

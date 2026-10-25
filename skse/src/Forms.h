@@ -46,6 +46,13 @@ namespace Forms
 		kGiftQuest = 0x845,        // IRF_GiftQuest, priority 110: above every quest's goodbyes
 		kGiftAnswerTopic = 0x846,  // IRF_GiftAnswerTopic, a goodbye topic
 
+		// adopted children (Hearthfire): their greetings, and a spouse who stays home with them
+		kChildFaction = 0x847,       // rank = ChildMood, what an adopted child's greeting is about (0 = vanilla's)
+		kStayHomeTopic = 0x848,      // IRF_StayHomeTopic, the force greet's topic: her line at the town's edge
+		kStayHomePackage = 0x84A,    // IRF_StayHomeForceGreet, on IRF_SayQuest's StayHome alias
+		kChildQuest = 0x851,         // IRF_ChildQuest, priority 105, speaks only for a child with something to say
+		kChildHelloTopic = 0x852,    // IRF_ChildHelloTopic: the children's greetings (IRF_ChildFaction 1-3, 11-13)
+
 		// quests and topics
 		kQuest = 0x805,  // IRF_Quest, priority 105
 		kHelloTopic = 0x806,
@@ -127,6 +134,14 @@ namespace Forms
 		RE::TESFaction* gift{ nullptr };
 		RE::TESTopic*   giveTopic{ nullptr };
 		RE::TESTopic*   giftAnswer{ nullptr };
+		RE::TESFaction* child{ nullptr };
+		RE::TESTopic*   childHello{ nullptr };
+		RE::TESTopic*   stayHomeTopic{ nullptr };
+		RE::TESQuest*   sayQuest{ nullptr };     // IRF_SayQuest: its alias 0, StayHome, holds the force greet
+
+		// Hearthfire (looked up softly: without it there are no adopted children)
+		RE::TESQuest*   adoption{ nullptr };         // BYOHRelationshipAdoption 0042B4
+		RE::TESFaction* adoptionFaction{ nullptr };  // BYOHRelationshipAdoptionFaction 0042B0, every adopted child
 
 		// vanilla
 		RE::TESFaction*    potentialMarriage{ nullptr };  // PotentialMarriageFaction 019809

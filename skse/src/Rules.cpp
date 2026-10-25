@@ -81,6 +81,7 @@ namespace Rules
 		IRF_RULE(partnerXpClear);
 		IRF_RULE(partnerHealthPerLevel);
 		IRF_RULE(partnerSkillPerLevel);
+		IRF_RULE(childAwayDays);
 		IRF_RULE(momentCooldownSeconds);
 		IRF_RULE(witnessDistance);
 		IRF_RULE(caughtDistance);
