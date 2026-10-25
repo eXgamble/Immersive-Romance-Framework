@@ -1,6 +1,7 @@
 #include "Events.h"
 
 #include "Children.h"
+#include "Confess.h"
 #include "Crimes.h"
 
 #include "Candidates.h"
@@ -228,6 +229,9 @@ namespace Events
 							if (meeting && a.get() == Romance::Partner()) {
 								CheckJealous(a.get());
 							}
+							if (a.get() == Romance::Partner()) {
+								Confess::Check();
+							}
 						}
 					});
 				}
@@ -261,8 +265,14 @@ namespace Events
 					});
 					g_talkingChild = {};
 				}
+				if (a_event && !a_event->opening && a_event->menuName == RE::DialogueMenu::MENU_NAME) {
+					Queue([]() { Confess::OnDialogueClosed(); });
+				}
 				if (a_event && !a_event->opening && a_event->menuName == RE::LoadingMenu::MENU_NAME) {
-					Queue([]() { Children::OnLoadingDone(); });
+					Queue([]() {
+						Children::OnLoadingDone();
+						Confess::Check();
+					});
 				}
 				if (!a_event || !a_event->opening) {
 					return RE::BSEventNotifyControl::kContinue;
@@ -320,6 +330,13 @@ namespace Events
 				logger::info("Events: line '{}' {} ({:08X})", key, a_event->type == RE::TESTopicInfoEvent::TopicInfoEventType::kTopicEnd ? "ended" : "began",
 					a_event->topicInfoFormID);
 				if (a_event->type != RE::TESTopicInfoEvent::TopicInfoEventType::kTopicEnd) {
+					if (key == "confess" && a_event->speakerRef) {
+						Queue([handle = a_event->speakerRef->GetHandle()]() {
+							if (const auto ref = handle.get(); ref && ref->As<RE::Actor>()) {
+								Confess::OnSaid(ref->As<RE::Actor>());
+							}
+						});
+					}
 					if (key == "stayhome" && a_event->speakerRef) {  // said once: a second force greet finds nothing to say
 						Queue([handle = a_event->speakerRef->GetHandle()]() {
 							if (const auto ref = handle.get(); ref && ref->As<RE::Actor>()) {
@@ -497,6 +514,7 @@ namespace Events
 						if (a->IsPlayerTeammate() && !RE::PlayerCharacter::GetSingleton()->IsInCombat()) {
 							Moment_(a.get(), Moment::kAfterFight);
 						}
+						Confess::Check();
 					}
 				});
 				return RE::BSEventNotifyControl::kContinue;
@@ -596,7 +614,10 @@ namespace Events
 				if (!a_event || !a_event->actor || !a_event->actor->IsPlayerRef()) {
 					return RE::BSEventNotifyControl::kContinue;
 				}
-				Queue([loc = a_event->newLoc]() { Children::OnPlayerLocation(loc); });  // the wilds have no location at all
+				Queue([loc = a_event->newLoc]() {
+					Children::OnPlayerLocation(loc);  // the wilds have no location at all
+					Confess::Check();
+				});
 				if (!a_event->newLoc) {
 					return RE::BSEventNotifyControl::kContinue;
 				}
@@ -640,6 +661,7 @@ namespace Events
 					if (const auto partner = FollowingPartner()) {
 						Moment_(partner, Moment::kRest);
 					}
+					Confess::Check();
 				});
 				return RE::BSEventNotifyControl::kContinue;
 			}
@@ -745,5 +767,6 @@ namespace Events
 		g_talkingChild = {};
 		Gifts::OnGameLoaded();
 		Children::OnGameLoaded();
+		Confess::OnGameLoaded();
 	}
 }

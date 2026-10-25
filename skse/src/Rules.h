@@ -56,6 +56,8 @@ namespace Rules
 		int partnerHealthPerLevel = 10;
 		int partnerSkillPerLevel = 2;
 
+		float confessDelayDays = 1.0f;        // newly Committed, she tells you how much you mean to her after this long
+		float confessDistance = 3000.0f;      // ... when you're this close (she walks over)
 		int   childAwayDays = 5;              // an adopted child misses you after this many days apart (2x, 3x: more)
 		float momentCooldownSeconds = 90.0f;  // between two road lines
 		float witnessDistance = 2048.0f;      // ~30 m: farther than this, nobody "saw" it

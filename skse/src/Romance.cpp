@@ -260,6 +260,13 @@ namespace Romance
 		logger::info("Romance: {} {} -> {} ({})", a_actor->GetDisplayFullName(), IRF::Rank(old), IRF::Rank(a_stage), a_cause);
 
 		auto& s = State::Of(a_actor->GetFormID());
+		if (a_stage == Stage::kCommitted && old < Stage::kCommitted) {
+			s.committedDay = State::Today();  // she tells you how much you mean to her a little later (Confess)
+		} else if (a_stage > Stage::kCommitted && a_stage <= Stage::kMarried) {
+			s.confessed = true;  // past that moment
+		} else if (a_stage == Stage::kEx) {
+			s.confessed = false;  // a new relationship (a win-back) gets its own
+		}
 		if (a_stage == Stage::kEngaged || a_stage == Stage::kMarried) {
 			s.secret = false;  // an engagement or a wedding ends a secret: everyone knows
 			for (const auto& other : Candidates::All()) {

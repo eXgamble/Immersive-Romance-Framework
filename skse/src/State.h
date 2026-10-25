@@ -42,6 +42,8 @@ namespace State
 		float jealousUntilDay{ 0.0f };
 		int   pleadsLeft{ 0 };           // a pleading ex you left: times she'll still ask you back ...
 		float nextPleadDay{ 0.0f };      // ... from this day
+		float committedDay{ 0.0f };      // when she last became Committed
+		bool  confessed{ false };        // she told you how much you mean to her (once per relationship)
 	};
 
 	// A reaction waiting for the next time you meet someone

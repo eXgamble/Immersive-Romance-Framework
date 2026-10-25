@@ -86,6 +86,7 @@ namespace IRF
 		kJealous = 6,          // you travel with another candidate
 		kRefuse = 7,           // a circle member refuses you service
 		kStayHome = 8,         // a spouse with children won't leave town (her force greet at the town's edge)
+		kConfess = 9,          // newly Committed: she comes up to you and tells you how much you mean to her
 		kAfterFight = 10,
 		kDragon = 11,
 		kNearlyDead = 12,

@@ -24,6 +24,9 @@ line they say.
   follow a breakup or a death; if you killed them and someone saw it, it's Killed instead (no condolences).
   Approval (0..100, never shown) moves you between them: talks, evening dates, kisses, gifts (one a day),
   fighting and clearing places together raise it. A gift can also be disliked, or an insult (a human heart).
+- **Committed has its moment:** a day after she becomes Committed she comes up to you, somewhere safe (a town, an
+  inn, a home; anywhere but a dungeon while she follows you) and out of combat, and tells you how much you mean to
+  her. You answer "You mean a lot to me too." and she replies. Once per relationship (again after a win-back).
 - **Adopted children** (Hearthfire's adoption, unchanged), once you're married to a candidate: their greeting tells
   you when something is wrong at home (you were away long, or the marriage is in a bad way); when all is well they
   keep vanilla's. Your spouse stays home with them: she follows you inside the family's town, but at its edge she
@@ -170,7 +173,9 @@ mood lines; the generator does this. A spouse's idle lines also carry `(IRF_Stag
 | mood versions (optional): `hello.<state>.<mood>`, `goodbye.<state>.<mood>` (strained, jealous, wary) and `idle.<stage>.<mood>` (also hurt); one more row, `GetFactionRank IRF_MoodFaction == <mood>`, and listed BEFORE the plain line (the game plays the first that fits) | as the plain line | as the plain line, plus IRF_MoodFaction 0x85B | + mood: strained 2, jealous 3, hurt 4, wary 5 |
 | `plead` (a pleading ex you left asks you back; required for "pleading") | IRF_HelloTopic | IRF_GreetFaction | 30 |
 | `plead.yes` / `plead.no` (her answers to "Alright. Let's try again." / "No. It's over.") | 0x85E / 0x860 | IRF_PleadFaction 0x85D | 1 |
-| `stayhome` (married, with children: why she won't leave town; Goodbye flag) | IRF_StayHomeTopic 0x848 | IRF_MomentFaction 0x816 | 8 |
+| `stayhome` (married, with children: why she won't leave town; Goodbye flag) | IRF_ForceGreetTopic 0x848 | IRF_MomentFaction 0x816 | 8 |
+| `confess` (newly Committed she comes up to you: how much you mean to her, no marriage hint; LinkTo IRF_ConfessReplyTopic 0x862) | IRF_ForceGreetTopic 0x848 | IRF_MomentFaction 0x816 | 9 |
+| `confess.reply` (her answer to "You mean a lot to me too."; Goodbye flag) | IRF_ConfessReplyTopic 0x862 | IRF_MomentFaction 0x816 | 9 |
 | `gift.insulted` / `.disliked` / `gift` / `.liked` / `.loved` (her answer, as her goodbye) | IRF_GiftAnswerTopic 0x846 | IRF_GiftFaction 0x841 | 1 / 2 / 3 / 4 / 5 |
 | `absence.1`..`3` (back after a long time) | IRF_AbsenceHelloTopic 0x825 | IRF_AbsenceFaction 0x812 | 1..3 |
 | moments (below) | IRF_SayTopic 0x829 | IRF_MomentFaction 0x816 | the moment |

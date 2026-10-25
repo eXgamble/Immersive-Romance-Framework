@@ -48,8 +48,9 @@ namespace Forms
 
 		// adopted children (Hearthfire): their greetings, and a spouse who stays home with them
 		kChildFaction = 0x847,       // rank = ChildMood, what an adopted child's greeting is about (0 = vanilla's)
-		kStayHomeTopic = 0x848,      // IRF_StayHomeTopic, the force greet's topic: her line at the town's edge
-		kStayHomePackage = 0x84A,    // IRF_StayHomeForceGreet, on IRF_SayQuest's StayHome alias
+		kForceGreetTopic = 0x848,    // IRF_ForceGreetTopic: what she comes up to tell you (IRF_MomentFaction: stay home, confess)
+		kForceGreetPackage = 0x84A,  // IRF_ForceGreet, on IRF_SayQuest's ForceGreet alias
+		kConfessReplyTopic = 0x862,  // IRF_ConfessReplyTopic: "You mean a lot to me too." (linked from her confession)
 		kChildQuest = 0x851,         // IRF_ChildQuest, priority 105, speaks only for a child with something to say
 		kChildHelloTopic = 0x852,    // IRF_ChildHelloTopic: the children's greetings (IRF_ChildFaction 1-3, 11-13)
 		kAdoptedBoys = 0x859,        // IRF_AdoptedBoys: how many boys Hearthfire has you raising (for any line's conditions)
@@ -154,8 +155,9 @@ namespace Forms
 		RE::TESFaction* plead{ nullptr };
 		RE::TESTopic*   pleadYes{ nullptr };
 		RE::TESTopic*   pleadNo{ nullptr };
-		RE::TESTopic*   stayHomeTopic{ nullptr };
-		RE::TESQuest*   sayQuest{ nullptr };     // IRF_SayQuest: its alias 0, StayHome, holds the force greet
+		RE::TESTopic*   forceGreetTopic{ nullptr };
+		RE::TESTopic*   confessReply{ nullptr };
+		RE::TESQuest*   sayQuest{ nullptr };     // IRF_SayQuest: its alias 0, ForceGreet, holds the force greet
 
 		// Hearthfire (looked up softly: without it there are no adopted children)
 		RE::TESQuest*   adoption{ nullptr };         // BYOHRelationshipAdoption 0042B4

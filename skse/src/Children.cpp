@@ -115,7 +115,7 @@ namespace Children
 		void StayHomeOff()
 		{
 			if (const auto spouse = g_stayHome.get()) {
-				Script::CallStatic("IRF_Internal"sv, "StayHome"sv, Forms::Get().sayQuest, spouse.get(), false);
+				Script::CallStatic("IRF_Internal"sv, "ForceGreet"sv, Forms::Get().sayQuest, spouse.get(), false);
 			}
 			g_stayHome = {};
 		}
@@ -125,7 +125,7 @@ namespace Children
 		{
 			Follower::Dismiss(a_spouse);
 			a_spouse->AddToFaction(Forms::Get().moment, static_cast<std::int8_t>(Rank(Moment::kStayHome)));
-			Script::CallStatic("IRF_Internal"sv, "StayHome"sv, Forms::Get().sayQuest, a_spouse, true);
+			Script::CallStatic("IRF_Internal"sv, "ForceGreet"sv, Forms::Get().sayQuest, a_spouse, true);
 			g_stayHome = a_spouse->GetHandle();
 			g_stayHomeDay = State::Today();
 			logger::info("Children: {} won't leave the children, she comes to tell you", a_spouse->GetDisplayFullName());

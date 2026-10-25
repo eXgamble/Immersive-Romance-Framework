@@ -135,6 +135,7 @@ namespace Papyrus
 				s.waryUntilDay -= d;
 				s.jealousUntilDay -= d;
 				s.nextPleadDay -= d;
+				s.committedDay -= d;
 				s.recentDay -= d;
 				s.lastTalkDay -= d;
 				s.lastDateDay -= d;

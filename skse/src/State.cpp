@@ -12,7 +12,7 @@ namespace State
 
 		constexpr std::uint32_t kId = 'IRF0';
 		constexpr std::uint32_t kRecord = 'IRFS';
-		constexpr std::uint32_t kVersion = 6;
+		constexpr std::uint32_t kVersion = 7;
 
 		template <class T>
 		void Write(SKSE::SerializationInterface* a_intfc, const T& a_value)
@@ -90,6 +90,8 @@ namespace State
 				Write(a_intfc, c.jealousUntilDay);
 				Write(a_intfc, c.pleadsLeft);
 				Write(a_intfc, c.nextPleadDay);
+				Write(a_intfc, c.committedDay);
+				Write(a_intfc, c.confessed);
 				WriteSet(a_intfc, c.knowSeeing);
 				WriteSet(a_intfc, c.sawStraying);
 			}
@@ -124,7 +126,7 @@ namespace State
 			       Read(a_intfc, c.partnerXp) && Read(a_intfc, c.appliedLevels) && Read(a_intfc, c.profileApplied) &&
 			       Read(a_intfc, c.savedConfidence) && Read(a_intfc, c.savedAggression) && Read(a_intfc, c.pendingBreakup) &&
 			       Read(a_intfc, c.confrontPending) && Read(a_intfc, c.confrontWorks) && Read(a_intfc, c.waryUntilDay) &&
-			       Read(a_intfc, c.jealousUntilDay) && Read(a_intfc, c.pleadsLeft) && Read(a_intfc, c.nextPleadDay) && ReadSet(a_intfc, c.knowSeeing) &&
+			       Read(a_intfc, c.jealousUntilDay) && Read(a_intfc, c.pleadsLeft) && Read(a_intfc, c.nextPleadDay) && Read(a_intfc, c.committedDay) && Read(a_intfc, c.confessed) && ReadSet(a_intfc, c.knowSeeing) &&
 			       ReadSet(a_intfc, c.sawStraying);
 		}
 

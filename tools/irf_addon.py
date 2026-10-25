@@ -37,7 +37,9 @@ FRAMEWORK = "Immersive Romance Framework.esp"
 HELLO, GOODBYE, COURT, HOWAREWE, AMULET = 0x806, 0x807, 0x808, 0x80A, 0x80D
 REACTION_HELLO, ABSENCE_HELLO, RECENT_HELLO, SAY = 0x823, 0x825, 0x827, 0x829
 GIFT_ANSWER = 0x846  # her goodbye after a gift
-STAYHOME = 0x848  # the force greet at the town's edge (spouse with children)
+FORCEGREET = 0x848  # IRF_ForceGreetTopic: what she comes up to tell you (stay home, confess)
+CONFESS_REPLY = 0x862  # IRF_ConfessReplyTopic: "You mean a lot to me too."
+LINKS = {"confess": CONFESS_REPLY}  # her line offers you this reply (the INFO's LinkTo)
 ASKDATE, FOLLOW, KISS, BREAKUP, AMENDS, WINBACK, SECRET, TALK, DENY, ADMIT = (
     0x82A, 0x82C, 0x82E, 0x830, 0x832, 0x834, 0x836, 0x838, 0x83A, 0x83C)
 # factions
@@ -64,6 +66,7 @@ EVENTS = {"courting": 1, "dating": 2, "committed": 3, "engaged": 4, "married": 5
 WHYS = {"cheating": 1, "violence": 2, "absence": 3, "bleedouts": 4, "crime": 5, "choice": 6}
 REFUSE_MOMENT = 7  # a circle member refusing service
 STAYHOME_MOMENT = 8  # a spouse with children won't leave town
+CONFESS_MOMENT = 9  # newly Committed: she tells you how much you mean to her
 MOMENTS = {"caught": 1, "revive": 2, "attacked": 3, "crime.approve": 4, "crime.disapprove": 5, "jealous": 6,
            "road.afterfight": 10, "road.dragon": 11, "road.nearlydead": 12, "road.rest": 13,
            "road.nordicruin": 20, "road.dwarvenruin": 21, "road.cave": 22, "road.dungeon": 23,
@@ -138,7 +141,9 @@ def requirements(attributes):
     add("admit", ADMIT, CONFRONT_F, 0, op="GreaterThan")
     for band in range(1, 4):
         add(f"absence.{band}", ABSENCE_HELLO, ABSENCE_F, band)
-    add("stayhome", STAYHOME, MOMENT_F, STAYHOME_MOMENT, goodbye=True)
+    add("stayhome", FORCEGREET, MOMENT_F, STAYHOME_MOMENT, goodbye=True)
+    add("confess", FORCEGREET, MOMENT_F, CONFESS_MOMENT)
+    add("confess.reply", CONFESS_REPLY, MOMENT_F, CONFESS_MOMENT, goodbye=True)
     for rank, name in enumerate(["gift.insulted", "gift.disliked", "gift", "gift.liked", "gift.loved"], start=1):
         add(name, GIFT_ANSWER, GIFT_F, rank)
     for name, code in MOMENTS.items():
@@ -235,7 +240,10 @@ def main(spec_path, out_dir):
 
     def emit(key, editor_id, topic, text, speaker, faction, rank, op="EqualTo", goodbye=False, random=None, rows=None):
         nonlocal next_id
-        records.append(info(editor_id, topic, text, speaker, faction, rank, op, goodbye, random, rows))
+        record = info(editor_id, topic, text, speaker, faction, rank, op, goodbye, random, rows)
+        if key in LINKS:
+            record["ops"].append({"field_path": "LinkTo", "op": "Add", "value": fw(LINKS[key])})
+        records.append(record)
         lines.setdefault(key, []).append(f"{plugin}|0x{next_id:03X}")
         next_id += 1
 

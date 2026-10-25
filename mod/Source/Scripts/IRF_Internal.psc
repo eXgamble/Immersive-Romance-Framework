@@ -9,8 +9,9 @@ Function SayLater(ObjectReference akSpeaker, Topic akTopic, float afSeconds) glo
 	EndIf
 EndFunction
 
-; A spouse who stays home with the children: IRF_SayQuest's StayHome alias (alias 0, its force greet) on or off
-Function StayHome(Quest akQuest, Actor akSpouse, bool abOn) global
+; Someone coming up to tell you something (IRF_MomentFaction says what: a spouse who stays home with the children,
+; a confession): IRF_SayQuest's ForceGreet alias (alias 0, its force greet) on or off
+Function ForceGreet(Quest akQuest, Actor akSpouse, bool abOn) global
 	ReferenceAlias home = akQuest.GetAlias(0) as ReferenceAlias
 	If abOn
 		home.ForceRefTo(akSpouse)

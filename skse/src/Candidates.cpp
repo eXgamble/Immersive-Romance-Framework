@@ -214,7 +214,11 @@ namespace Candidates
 				add(name, f.say, f.moment, Rank(moment));
 			}
 			// with adopted children she won't leave town: her force greet at the edge (the line ends the talk)
-			add("stayhome", f.stayHomeTopic, f.moment, Rank(Moment::kStayHome));
+			add("stayhome", f.forceGreetTopic, f.moment, Rank(Moment::kStayHome));
+			// newly Committed she comes up to you to say how much you mean to her; her answer to your reply ends it
+			add("confess", f.forceGreetTopic, f.moment, Rank(Moment::kConfess));
+			add("confess.reply", f.confessReply, f.moment, Rank(Moment::kConfess));
+			list.back().goodbye = true;
 			// her answer to a gift, as her goodbye
 			add("gift.insulted", f.giftAnswer, f.gift, Rank(Taste::kInsulted) + 1);
 			add("gift.disliked", f.giftAnswer, f.gift, Rank(Taste::kDisliked) + 1);

@@ -112,7 +112,8 @@ namespace Forms
 		s.plead = f.Own<RE::TESFaction>(kPleadFaction, "IRF_PleadFaction");
 		s.pleadYes = f.Own<RE::TESTopic>(kPleadYesTopic, "IRF_PleadYesTopic");
 		s.pleadNo = f.Own<RE::TESTopic>(kPleadNoTopic, "IRF_PleadNoTopic");
-		s.stayHomeTopic = f.Own<RE::TESTopic>(kStayHomeTopic, "IRF_StayHomeTopic");
+		s.forceGreetTopic = f.Own<RE::TESTopic>(kForceGreetTopic, "IRF_ForceGreetTopic");
+		s.confessReply = f.Own<RE::TESTopic>(kConfessReplyTopic, "IRF_ConfessReplyTopic");
 		s.sayQuest = f.Own<RE::TESQuest>(kSayQuest, "IRF_SayQuest");
 		s.adoption = data->LookupForm<RE::TESQuest>(0x0042B4, "HearthFires.esm"sv);
 		s.adoptionFaction = data->LookupForm<RE::TESFaction>(0x0042B0, "HearthFires.esm"sv);
