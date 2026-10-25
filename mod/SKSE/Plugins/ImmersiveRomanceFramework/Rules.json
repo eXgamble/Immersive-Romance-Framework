@@ -15,11 +15,11 @@
   "talkGain": 2,            // a talk, once a day
   "dateGain": 4,            // a talk in the evening (18:00-23:00) counts as a date, once a day
   "kissGain": 1,            // once a day
-  "giftGain": 3,            // a gift; one a day counts (neutral, liked or loved)
+  "giftGain": 3,            // a gift (one a day: the line waits until a day has passed)
   "giftLikedGain": 5,       // a gift they like, instead
   "giftLovedGain": 8,       // a gift they love, instead
-  "giftDislikedCost": 3,    // a gift they dislike; every one counts
-  "giftInsultCost": 15,     // a gift they take as an insult (a human heart); every one counts, and they won't take it
+  "giftDislikedCost": 3,    // a gift they dislike
+  "giftInsultCost": 15,     // a gift they take as an insult (a human heart); they won't take it
   "giftGoldLiked": 10,      // gold: less than this they dislike, from this they like ...
   "giftGoldLoved": 300,     // ... and from this they love
   "killGain": 1,            // an enemy killed while they follow ...

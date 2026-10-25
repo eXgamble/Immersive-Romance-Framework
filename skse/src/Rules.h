@@ -14,11 +14,11 @@ namespace Rules
 		int talkGain = 2;       // once a day
 		int dateGain = 4;       // a talk in the evening (18:00-23:00) counts as a date, once a day
 		int kissGain = 1;       // once a day
-		int giftGain = 3;          // a gift, one a day counts
+		int giftGain = 3;          // a gift (one a day)
 		int giftLikedGain = 5;     // a gift they like (instead)
 		int giftLovedGain = 8;     // a gift they love (instead)
-		int giftDislikedCost = 3;  // a gift they dislike, every one counts
-		int giftInsultCost = 15;   // a gift they take as an insult, every one counts
+		int giftDislikedCost = 3;  // a gift they dislike
+		int giftInsultCost = 15;   // a gift they take as an insult (not taken)
 		int giftGoldLiked = 10;    // gold: below this they dislike it, from this they like it
 		int giftGoldLoved = 300;   // gold: from this they love it
 		int killGain = 1;       // an enemy killed while they follow, up to killCapPerDay a day

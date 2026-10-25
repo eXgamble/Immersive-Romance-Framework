@@ -116,17 +116,15 @@ namespace Gifts
 					player->RemoveItem(a_object, count - moved, RE::ITEM_REMOVE_REASON::kStoreInContainer, nullptr, a_actor);
 				}
 			}
+			// one gift a day, so a pile of gifts isn't a shortcut: the line is gone until tomorrow (Romance::Sync)
+			State::Of(a_actor->GetFormID()).lastGiftDay = State::Today();
 			if (taste == Taste::kInsulted) {
-				Romance::ModApproval(a_actor, -r.giftInsultCost, "an insulting gift");  // every one counts
+				Romance::ModApproval(a_actor, -r.giftInsultCost, "an insulting gift");
 			} else if (taste == Taste::kDisliked) {
 				Romance::ModApproval(a_actor, -r.giftDislikedCost, "a gift they dislike");
 			} else {
-				auto& s = State::Of(a_actor->GetFormID());
-				if (State::Today() - s.lastGiftDay >= 1.0f) {  // one gift a day counts, so a pile of gifts isn't a shortcut
-					s.lastGiftDay = State::Today();
-					const int gain = taste == Taste::kLoved ? r.giftLovedGain : taste == Taste::kLiked ? r.giftLikedGain : r.giftGain;
-					Romance::ModApproval(a_actor, gain, taste == Taste::kLoved ? "a gift they love" : taste == Taste::kLiked ? "a gift they like" : "a gift");
-				}
+				const int gain = taste == Taste::kLoved ? r.giftLovedGain : taste == Taste::kLiked ? r.giftLikedGain : r.giftGain;
+				Romance::ModApproval(a_actor, gain, taste == Taste::kLoved ? "a gift they love" : taste == Taste::kLiked ? "a gift they like" : "a gift");
 				if (Romance::GetStage(a_actor) >= Stage::kCourting) {
 					Romance::Strayed(a_actor, "a gift for someone else");  // a gift to a friend is just a gift
 				}

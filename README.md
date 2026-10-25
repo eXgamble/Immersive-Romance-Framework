@@ -22,7 +22,7 @@ line they say.
 
 - **Stages:** Friend, Courting, Dating, Committed, then vanilla's Engaged and Married. An Ex and a Widowed state
   follow a breakup or a death; if you killed them and someone saw it, it's Killed instead (no condolences).
-  Approval (0..100, never shown) moves you between them: talks, evening dates, kisses, gifts (one a day counts),
+  Approval (0..100, never shown) moves you between them: talks, evening dates, kisses, gifts (one a day),
   fighting and clearing places together raise it. A gift can also be disliked, or an insult (a human heart).
 - **Gifts:** "I have something for you." opens the gift menu (gold included) for a candidate from Friend up; she
   answers as she says goodbye. Stolen and quest items can't be given, and an insult isn't taken.
@@ -99,8 +99,8 @@ strongest objection first), then the framework's keyword `IRF_GiftInsulting` (0x
 takes as an insult (a human heart, human flesh, a skull). The framework gives them the keyword at load from
 `SKSE/Plugins/ImmersiveRomanceFramework/Gifts/*.json`; another mod can add its own file there or give its items the
 keyword. A candidate who doesn't mind them lists the keyword under `liked` or `loved`. Gold goes by the amount: under
-10 disliked, 10 to 299 liked, 300 or more loved (Rules.json). One liked, loved or plain gift a day counts; every
-disliked or insulting one does, and an insulting one isn't taken. A candidate's community (her
+10 disliked, 10 to 299 liked, 300 or more loved (Rules.json). One gift a day: after one, "I have something for
+you." is gone until a day has passed, so nothing is given away for nothing. An insulting gift isn't taken. A candidate's community (her
 town) comes from her editor location. `refuse.until` is `"amends"` or a number of days (no amends
 follow `killed`: a refusal over it lasts for good).
 

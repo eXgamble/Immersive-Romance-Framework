@@ -22,7 +22,7 @@ namespace State
 		float lastTalkDay{ -10.0f };
 		float lastDateDay{ -10.0f };
 		float lastKissDay{ -10.0f };
-		float lastGiftDay{ -10.0f };     // one gift a day counts for approval
+		float lastGiftDay{ -10.0f };     // one gift a day: "I have something for you." waits until a day has passed
 		float killDay{ -10.0f };
 		int   killsToday{ 0 };
 		int   strayHits{ 0 };            // in the current fight
