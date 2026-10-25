@@ -53,11 +53,12 @@ namespace Events
 		public:
 			RE::BSEventNotifyControl ProcessEvent(const RE::TESTopicInfoEvent* a_event, RE::BSTEventSource<RE::TESTopicInfoEvent>*) override
 			{
-				if (!a_event || a_event->type != RE::TESTopicInfoEvent::TopicInfoEventType::kTopicEnd) {
+				if (!a_event) {
 					return RE::BSEventNotifyControl::kContinue;
 				}
+				// kTopicEnd comes when the line has finished (about 6 s for a silent placeholder line)
 				std::string key;
-				if (!Candidates::FindLine(a_event->topicInfoFormID, &key)) {
+				if (a_event->type != RE::TESTopicInfoEvent::TopicInfoEventType::kTopicEnd || !Candidates::FindLine(a_event->topicInfoFormID, &key)) {
 					return RE::BSEventNotifyControl::kContinue;
 				}
 				const auto speaker = a_event->speakerRef ? a_event->speakerRef->As<RE::Actor>() : nullptr;

@@ -10,3 +10,6 @@ mod/meta.ini
 .vs/
 .vscode/
 Thumbs.db
+
+# Built DLL (skse/build.bat copies it here)
+mod/SKSE/Plugins/*.dll
