@@ -51,6 +51,28 @@ namespace Romance
 			}
 		}
 
+		// Running the way the game means it (Papyrus IsRunning / GetQuestRunning): enabled and not stopping.
+		// CommonLib's TESQuest::IsRunning() is also true for a stopped quest (measured 2026-10-25).
+		bool Running(const RE::TESQuest* a_quest)
+		{
+			return a_quest && a_quest->IsEnabled() && !a_quest->IsStopping();
+		}
+
+		// When vanilla would offer its amulet line: the player wears the Amulet of Mara, Maramal has told them about
+		// marriage (RelationshipMarriage at stage 10 or later), they aren't married and no wedding is running
+		bool AmuletOffered()
+		{
+			const auto& f = Forms::Get();
+			const auto  player = RE::PlayerCharacter::GetSingleton();
+			if (!player || !player->GetWornArmor(f.amuletOfMara->GetFormID())) {
+				return false;
+			}
+			if (player->IsInFaction(f.playerMarried) || Running(f.wedding)) {
+				return false;
+			}
+			return Running(f.marriage) && f.marriage->GetCurrentStageID() >= 10;
+		}
+
 		void SendStageEvent(RE::Actor* a_actor, Stage a_stage, std::string_view a_cause)
 		{
 			SKSE::ModCallbackEvent event{ "IRF_StageChanged"sv, RE::BSFixedString(a_cause), static_cast<float>(a_stage), a_actor };
@@ -68,6 +90,16 @@ namespace Romance
 			{ GreetState::kSpouse, "spouse" },
 		};
 		return states;
+	}
+
+	const std::vector<std::pair<Stage, const char*>>& AmuletStages()
+	{
+		static const std::vector<std::pair<Stage, const char*>> stages{
+			{ Stage::kFriend, "friend" },
+			{ Stage::kCourting, "courting" },
+			{ Stage::kDating, "dating" },
+		};
+		return stages;
 	}
 
 	Stage GetStage(RE::Actor* a_actor)
@@ -129,6 +161,14 @@ namespace Romance
 			SetRank(a_actor, f.approval, kStartApproval);
 		}
 		SetRank(a_actor, f.greet, static_cast<int>(GreetFor(stage)));
+
+		// Below Committed the amulet line is the framework's own topic, answered by the add-on's rejection for the stage
+		const bool rejects = stage >= Stage::kFriend && stage < Stage::kCommitted;
+		const int amulet = rejects && AmuletOffered() ? AmuletRank(stage) : 0;
+		if (Rank(a_actor, f.amulet) != amulet) {
+			logger::info("Romance: {} amulet line {}", a_actor->GetDisplayFullName(), amulet ? "offered (rejection)" : "off");
+		}
+		SetRank(a_actor, f.amulet, amulet);
 
 		// The amulet gate: vanilla's proposal needs PotentialMarriageFaction, so a candidate is out of it until
 		// Committed. Vanilla scripts add it back now and then (Lydia's housecarl line, the 1.5 update quest).

@@ -36,7 +36,13 @@ namespace Forms
 		g_set.goodbye = Find<RE::TESTopic>(data, kGoodbyeTopic, kPlugin, "IRF_GoodbyeTopic", ok);
 		g_set.court = Find<RE::TESTopic>(data, kCourtTopic, kPlugin, "IRF_CourtTopic", ok);
 		g_set.howAreWe = Find<RE::TESTopic>(data, kHowAreWeTopic, kPlugin, "IRF_HowAreWeTopic", ok);
+		g_set.amulet = Find<RE::TESFaction>(data, kAmuletFaction, kPlugin, "IRF_AmuletFaction", ok);
+		g_set.amuletTopic = Find<RE::TESTopic>(data, kAmuletTopic, kPlugin, "IRF_AmuletTopic", ok);
 		g_set.potentialMarriage = Find<RE::TESFaction>(data, 0x019809, "Skyrim.esm"sv, "PotentialMarriageFaction", ok);
+		g_set.playerMarried = Find<RE::TESFaction>(data, 0x0C6472, "Skyrim.esm"sv, "PlayerMarriedFaction", ok);
+		g_set.marriage = Find<RE::TESQuest>(data, 0x074793, "Skyrim.esm"sv, "RelationshipMarriage", ok);
+		g_set.wedding = Find<RE::TESQuest>(data, 0x07404E, "Skyrim.esm"sv, "RelationshipMarriageWedding", ok);
+		g_set.amuletOfMara = Find<RE::TESObjectARMO>(data, 0x0C891B, "Skyrim.esm"sv, "ReligiousSymbolMaraLove", ok);
 		return ok;
 	}
 

@@ -119,6 +119,9 @@ namespace Candidates
 					}
 				};
 				require("court", f.court, f.stage, static_cast<int>(Romance::Stage::kFriend));
+				for (const auto& [stage, name] : Romance::AmuletStages()) {
+					require("amulet."s + name, f.amuletTopic, f.amulet, Romance::AmuletRank(stage));
+				}
 				for (const auto& [state, name] : Romance::GreetStates()) {
 					require("hello."s + name, f.hello, f.greet, static_cast<int>(state));
 					require("goodbye."s + name, f.goodbye, f.greet, static_cast<int>(state));

@@ -19,6 +19,8 @@ namespace Forms
 		kGoodbyeTopic = 0x807,
 		kCourtTopic = 0x808,     // "I'd like to get to know you better."
 		kHowAreWeTopic = 0x80A,  // "How are we?"
+		kAmuletFaction = 0x80C,  // rank = stage + 1 while vanilla would offer the amulet line (below Committed)
+		kAmuletTopic = 0x80D,    // "Interested in me, are you?", the framework's copy of vanilla's amulet line
 	};
 
 	struct Set
@@ -33,7 +35,13 @@ namespace Forms
 		RE::TESTopic*   goodbye{ nullptr };
 		RE::TESTopic*   court{ nullptr };
 		RE::TESTopic*   howAreWe{ nullptr };
+		RE::TESFaction* amulet{ nullptr };
+		RE::TESTopic*   amuletTopic{ nullptr };
 		RE::TESFaction* potentialMarriage{ nullptr };  // vanilla PotentialMarriageFaction 019809
+		RE::TESFaction* playerMarried{ nullptr };      // vanilla PlayerMarriedFaction 0C6472
+		RE::TESQuest*   marriage{ nullptr };           // vanilla RelationshipMarriage 074793
+		RE::TESQuest*   wedding{ nullptr };            // vanilla RelationshipMarriageWedding 07404E
+		RE::TESObjectARMO* amuletOfMara{ nullptr };    // vanilla ReligiousSymbolMaraLove 0C891B
 	};
 
 	// Looks everything up once at kDataLoaded; false when the plugin is missing or a record is

@@ -32,6 +32,10 @@ namespace Romance
 	// The states that need lines, with the name the manifest uses ("hello.<name>", "goodbye.<name>")
 	const std::vector<std::pair<GreetState, const char*>>& GreetStates();
 
+	// The stages that answer the amulet line with a rejection ("amulet.<name>"), and IRF_AmuletFaction's rank for each
+	const std::vector<std::pair<Stage, const char*>>& AmuletStages();
+	inline int AmuletRank(Stage a_stage) { return static_cast<int>(a_stage) + 1; }
+
 	inline constexpr int kStartApproval = 20;
 
 	Stage GetStage(RE::Actor* a_actor);
