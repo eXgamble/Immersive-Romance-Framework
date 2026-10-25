@@ -365,8 +365,7 @@ namespace Events
 			const auto seconds = std::chrono::duration<float>(Clock::now() - it->second).count();
 			g_down.erase(it);
 			if (!a_actor->IsDead() && seconds <= Rules::Get().reviveSeconds) {
-				State::Of(a_actor->GetFormID()).warmUntilDay = State::Today() + static_cast<float>(Rules::Get().warmDays);
-				Romance::ModApproval(a_actor, Rules::Get().reviveBack, "you got them back up quickly");  // syncs her mood too
+				Romance::ModApproval(a_actor, Rules::Get().reviveBack, "you got them back up quickly");
 				World::SayMoment(a_actor, Moment::kRevive);
 			}
 		}

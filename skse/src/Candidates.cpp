@@ -89,7 +89,7 @@ namespace Candidates
 			// her moods: optional versions of the stage's greetings, goodbyes and idles (hurt: idles only, the broken
 			// heart has its own greetings)
 			const std::pair<Mood, const char*> moods[]{
-				{ Mood::kWarm, "warm" }, { Mood::kStrained, "strained" }, { Mood::kJealous, "jealous" }, { Mood::kHurt, "hurt" }, { Mood::kWary, "wary" }
+				{ Mood::kStrained, "strained" }, { Mood::kJealous, "jealous" }, { Mood::kHurt, "hurt" }, { Mood::kWary, "wary" }
 			};
 			auto addMood = [&](std::string a_key, RE::TESTopic* a_topic, RE::TESFaction* a_faction, int a_rank, Mood a_mood) {
 				add(std::move(a_key), a_topic, a_faction, a_rank, false);

@@ -99,11 +99,11 @@ namespace IRF
 	};
 
 	// IRF_MoodFaction: her mood on top of the stage (Courting to Married), for the mood versions of her greetings,
-	// goodbyes and idles; the strongest wins
+	// goodbyes and idles; the strongest wins. No mood is the happy default: her plain stage lines (a spouse's idles
+	// mix with vanilla's). 1 was warm, removed (user, 2026-10-25): not reused
 	enum class Mood : std::int8_t
 	{
-		kNone = 0,      // plain stage lines (a spouse's idles mix with vanilla's)
-		kWarm = 1,      // approval high, or something good just happened
+		kNone = 0,
 		kStrained = 2,  // approval low
 		kJealous = 3,   // she saw you travelling with another candidate lately
 		kHurt = 4,      // broken heart (idles only: her greetings already have their own)

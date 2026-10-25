@@ -31,7 +31,7 @@ line they say.
 - **Gifts:** "I have something for you." opens the gift menu (gold included) for a candidate from Friend up; she
   answers as she says goodbye. Stolen and quest items can't be given, and an insult isn't taken.
 - **Moods** on top of the stage: wary (you attacked her lately), hurt (broken heart), jealous (seen you with
-  another candidate), strained (low approval), warm (high approval, or something good just happened). Her
+  another candidate), strained (low approval). No mood is the happy default: her plain lines. Her
   greetings, goodbyes and idle chatter can follow them; her idles follow every stage, so a partner never falls
   back to a friend's chatter.
 - **Tolerances**, per candidate: being caught straying, hitting them (a stray hit in a fight vs. turning on
@@ -145,7 +145,7 @@ generator does this.
 | `deny.works` / `deny.fails` | 0x83A | IRF_ConfrontFaction 0x820 | 1 / 2 |
 | `admit` | 0x83C | IRF_ConfrontFaction | **GreaterThan** 0 |
 | `idle.courting` / `.dating` / `.committed` / `.engaged` / `.spouse` / `idle.ex` (her idle chatter; a spouse's plain idles carry `GetRandomPercent < 50` so vanilla's spouse chatter mixes in) | IRF_IdleTopic 0x85C | IRF_StageFaction 0x801 | 1 / 2 / 3 / 4 / 5 / 6 |
-| mood versions (optional): `hello.<state>.<mood>`, `goodbye.<state>.<mood>` (warm, strained, jealous, wary) and `idle.<stage>.<mood>` (also hurt); one more row, `GetFactionRank IRF_MoodFaction == <mood>`, and listed BEFORE the plain line (the game plays the first that fits) | as the plain line | as the plain line, plus IRF_MoodFaction 0x85B | + mood: warm 1, strained 2, jealous 3, hurt 4, wary 5 |
+| mood versions (optional): `hello.<state>.<mood>`, `goodbye.<state>.<mood>` (strained, jealous, wary) and `idle.<stage>.<mood>` (also hurt); one more row, `GetFactionRank IRF_MoodFaction == <mood>`, and listed BEFORE the plain line (the game plays the first that fits) | as the plain line | as the plain line, plus IRF_MoodFaction 0x85B | + mood: strained 2, jealous 3, hurt 4, wary 5 |
 | `stayhome` (married, with children: why she won't leave town; Goodbye flag) | IRF_StayHomeTopic 0x848 | IRF_MomentFaction 0x816 | 8 |
 | `gift.insulted` / `.disliked` / `gift` / `.liked` / `.loved` (her answer, as her goodbye) | IRF_GiftAnswerTopic 0x846 | IRF_GiftFaction 0x841 | 1 / 2 / 3 / 4 / 5 |
 | `absence.1`..`3` (back after a long time) | IRF_AbsenceHelloTopic 0x825 | IRF_AbsenceFaction 0x812 | 1..3 |

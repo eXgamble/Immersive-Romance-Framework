@@ -429,10 +429,6 @@ namespace Romance
 				}
 			}
 		}
-		// something good: her warm mood for a while
-		if (a_event == Event::kAmends || a_event == Event::kWonBack || a_event == Event::kMarried) {
-			s.warmUntilDay = today + static_cast<float>(Rules::Get().warmDays);
-		}
 		// amends and a win-back end refusals that wait for amends
 		if (a_event == Event::kAmends || a_event == Event::kWonBack) {
 			std::erase_if(State::Refusals(), [&](const auto& a_pair) { return a_pair.second.because == candidate->ref && a_pair.second.untilDay == 0.0f; });
@@ -630,7 +626,6 @@ namespace Romance
 			       s.hurt || silent                                  ? Mood::kHurt :
 			       s.jealousUntilDay > today                         ? Mood::kJealous :
 			       approval < r.strainedBelow                        ? Mood::kStrained :
-			       approval >= r.warmFrom || s.warmUntilDay > today ? Mood::kWarm :
 			                                                           Mood::kNone;
 		}
 		SetRank(a_actor, f.moodFaction, Rank(mood));
