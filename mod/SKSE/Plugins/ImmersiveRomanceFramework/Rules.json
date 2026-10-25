@@ -49,6 +49,7 @@
   "heartbreakSilentDays": 5, // bitter: won't talk to you this long (also when she catches you)
   "pleads": 3,              // pleading: asks you back this many times ...
   "pleadEvery": 2,          // ... this many days apart
+  "spouseBonusBelow": 40,   // her spouse perk pauses while approval is below this (a strained marriage)
   "crimeScale": 1,          // a crime they see: alignment x severity x this (theft 1, pickpocket 2, assault 4, murder 10)
 
   // breakups and reactions

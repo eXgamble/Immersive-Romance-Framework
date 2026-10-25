@@ -76,6 +76,7 @@ namespace Rules
 		IRF_RULE(heartbreakSilentDays);
 		IRF_RULE(pleads);
 		IRF_RULE(pleadEvery);
+		IRF_RULE(spouseBonusBelow);
 		IRF_RULE(crimeScale);
 		IRF_RULE(winBackDays);
 		IRF_RULE(winBackApproval);

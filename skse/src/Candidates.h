@@ -93,6 +93,7 @@ namespace Candidates
 		int       alignment{ 0 };   // -5 evil .. 5 good
 		Interest  interestedIn{ Interest::kAny };
 		bool      refusesSecret{ false };
+		RE::TESForm* spouseBonus{ nullptr };  // her own spouse perk: an ability (SPEL) or a perk the player has while married
 
 		GiftTaste                                gifts;
 		Combat                                   combat;

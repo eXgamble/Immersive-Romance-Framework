@@ -110,6 +110,7 @@ namespace Forms
 		s.moodFaction = f.Own<RE::TESFaction>(kMoodFaction, "IRF_MoodFaction");
 		s.idle = f.Own<RE::TESTopic>(kIdleTopic, "IRF_IdleTopic");
 		s.plead = f.Own<RE::TESFaction>(kPleadFaction, "IRF_PleadFaction");
+		s.spouseBonus = f.Own<RE::TESFaction>(kSpouseBonusFaction, "IRF_SpouseBonusFaction");
 		s.pleadYes = f.Own<RE::TESTopic>(kPleadYesTopic, "IRF_PleadYesTopic");
 		s.pleadNo = f.Own<RE::TESTopic>(kPleadNoTopic, "IRF_PleadNoTopic");
 		s.forceGreetTopic = f.Own<RE::TESTopic>(kForceGreetTopic, "IRF_ForceGreetTopic");

@@ -350,6 +350,14 @@ namespace Candidates
 			out.silentDays = heartbreak.value("silentDays", r.heartbreakSilentDays);
 			out.pleads = heartbreak.value("pleads", r.pleads);
 			out.pleadEvery = heartbreak.value("every", r.pleadEvery);
+			if (a.contains("spouseBonus")) {
+				const auto bonus = FormAt(a, "spouseBonus");
+				if (bonus && (bonus->Is(RE::FormType::Spell) || bonus->Is(RE::FormType::Perk))) {
+					out.spouseBonus = bonus;
+				} else {
+					a_problems.push_back("spouseBonus is not a loaded spell or perk");
+				}
+			}
 			out.bleedout = ReadTolerance(a.value("bleedoutTolerance", nlohmann::json()), r.bleedoutCost);
 			const auto absence = a.value("absenceTolerance", nlohmann::json());
 			out.absence = ReadTolerance(absence, r.absenceCost);

@@ -505,6 +505,33 @@ namespace Romance
 		}
 	}
 
+	namespace
+	{
+		// Her own spouse perk (her add-on's spouseBonus): on while you're married and the marriage is in good standing,
+		// paused while she's hurt or approval is below spouseBonusBelow, gone if she dies (Widowed). The framework owns
+		// when; the add-on owns what. IRF_SpouseBonusFaction (1 = on) lets lines read it, and the IRF_SpouseBonus mod
+		// event ("on" / "off") tells add-on scripts
+		void SyncSpouseBonus(RE::Actor* a_actor, const Candidates::Candidate& a_candidate, Stage a_stage, const State::Candidate& a_state)
+		{
+			const auto& f = Forms::Get();
+			const bool  wanted = a_stage == Stage::kMarried && !a_actor->IsDead() && !a_state.hurt && a_state.silentUntilDay <= State::Today() &&
+			                    GetApproval(a_actor) >= Rules::Get().spouseBonusBelow;
+			const bool  now = InFaction(a_actor, f.spouseBonus) && Rank(a_actor, f.spouseBonus) > 0;
+			if (wanted == now) {
+				return;
+			}
+			SetRank(a_actor, f.spouseBonus, wanted ? 1 : 0);
+			const auto player = RE::PlayerCharacter::GetSingleton();
+			if (const auto spell = a_candidate.attributes.spouseBonus ? a_candidate.attributes.spouseBonus->As<RE::SpellItem>() : nullptr) {
+				wanted ? player->AddSpell(spell) : player->RemoveSpell(spell);
+			} else if (const auto perk = a_candidate.attributes.spouseBonus ? a_candidate.attributes.spouseBonus->As<RE::BGSPerk>() : nullptr) {
+				wanted ? player->AddPerk(perk) : player->RemovePerk(perk);
+			}
+			logger::info("Romance: {}'s spouse perk {}", a_actor->GetDisplayFullName(), wanted ? "on" : "off");
+			SendModEvent("IRF_SpouseBonus"sv, a_actor, wanted ? "on"sv : "off"sv, wanted ? 1.0f : 0.0f);
+		}
+	}
+
 	void Sync(RE::Actor* a_actor, bool a_talking)
 	{
 		const auto candidate = Candidates::Find(a_actor);
@@ -689,6 +716,7 @@ namespace Romance
 			Follower::Dismiss(a_actor);
 		}
 		Follower::SyncProfile(a_actor);
+		SyncSpouseBonus(a_actor, *candidate, stage, s);
 	}
 
 	void SyncAll()

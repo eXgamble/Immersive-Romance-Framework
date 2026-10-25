@@ -43,6 +43,7 @@ namespace Rules
 		int heartbreakSilentDays = 5;  // a bitter candidate you left (or who caught you) won't talk this long
 		int pleads = 3;             // a pleading candidate you left asks you back this many times ...
 		int pleadEvery = 2;         // ... this many days apart
+		int spouseBonusBelow = 40;  // her spouse perk pauses while approval is below this (the marriage is strained)
 		int crimeScale = 1;         // approval per alignment point per crime severity point
 		int winBackDays = 7;
 		int winBackApproval = 15;   // approval they start from when they take you back

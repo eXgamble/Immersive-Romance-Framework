@@ -27,6 +27,11 @@ line they say.
 - **Committed has its moment:** a day after she becomes Committed she comes up to you, somewhere safe (a town, an
   inn, a home; anywhere but a dungeon while she follows you) and out of combat, and tells you how much you mean to
   her. You answer "You mean a lot to me too." and she replies. Once per relationship (again after a win-back).
+- **Spouse perks:** each spouse can have her own perk (her add-on decides what it is). The framework decides when:
+  on while you're married and the marriage is good, paused while she's hurt or approval is below 40, gone if she
+  dies. An add-on can name an ability or perk (`spouseBonus`), condition lines on `IRF_SpouseBonusFaction 0x863`
+  == 1 (a circle member's service, like Eorlund tempering your weapons), or listen for `IRF_SpouseBonus` in a
+  script (Ysolda's store profits). Vanilla's own spouse perks stay as they are.
 - **Adopted children** (Hearthfire's adoption, unchanged), once you're married to a candidate: their greeting tells
   you when something is wrong at home (you were away long, or the marriage is in a bad way); when all is well they
   keep vanilla's. Your spouse stays home with them: she follows you inside the family's town, but at its edge she
@@ -77,6 +82,8 @@ A candidate whose manifest is missing a required line, or whose lines don't carr
     "wary": { "days": 5, "style": "afraid" },      // after an attack: days she's wary; "afraid" keeps away (no
                                                    // following, no dates), "angry" takes any hit as an attack,
                                                    // "cold" gives talks and dates nothing; none kisses you
+    "spouseBonus": "Plugin.esp|0x810",               // her own spouse perk: an ability (SPEL) or a perk you have
+                                                   // while married to her and the marriage is good (optional)
     "heartbreak": { "style": "pleading", "pleads": 3, "every": 2 },  // when YOU end it: "accepting" (an ex at once),
                                                    // "bitter" (won't talk to you for "silentDays", also when she
                                                    // catches you; the win-back wait starts after), "pleading" (asks
@@ -222,7 +229,8 @@ The generator takes them per text: `{ "text": "...", "girls": 1, "boys": ">=1" }
 `IsBrokenHearted`, `IsIntimacyAllowed` (for mods that start scenes), `RequestStage` (story beats from your own
 quests), `ModApproval`, `SetPlayerInterest`, and debug tools (`DebugSetApproval`, `DebugSkipDays`, `DebugDeed`,
 `GetAdoptedBoys`, `GetAdoptedGirls`, `DebugDump`, `DebugReset`, `DebugAdopt`: a child counts as adopted without Hearthfire's move). Mod events: `IRF_StageChanged` (sender = candidate, numArg = new stage, strArg = cause),
-`IRF_Strayed` (sender = the partner strayed from, numArg = 1 if caught, strArg = the deed).
+`IRF_Strayed` (sender = the partner strayed from, numArg = 1 if caught, strArg = the deed), `IRF_SpouseBonus` (sender = the
+spouse, strArg = "on" / "off", numArg = 1 / 0).
 
 ## Building
 
