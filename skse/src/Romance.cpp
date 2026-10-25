@@ -339,7 +339,10 @@ namespace Romance
 		}
 		auto& s = State::Of(a_partner->GetFormID());
 		logger::info("Romance: {} caught you ({})", a_partner->GetDisplayFullName(), a_cause);
-		World::SayMoment(a_partner, Moment::kCaught);
+		// in a talk her answer is the line (deny.fails, admit); a moment line said then would never play
+		if (!RE::UI::GetSingleton()->IsMenuOpen(RE::DialogueMenu::MENU_NAME)) {
+			World::SayMoment(a_partner, Moment::kCaught);
+		}
 		s.silentUntilDay = State::Today() + static_cast<float>(candidate->attributes.brokenHeartDays);
 		s.hurt = true;
 		Follower::Dismiss(a_partner);
@@ -619,7 +622,7 @@ namespace Romance
 		SetRank(a_actor, f.amends, hurt && !s.unforgivable ? 1 : 0);
 		const bool winBackable = !s.unforgivable && today - s.breakupDay >= static_cast<float>(r.winBackDays);
 		SetRank(a_actor, f.winBack, stage == Stage::kEx ? (winBackable ? 1 : 2) : 0);
-		const bool secretable = stage >= Stage::kCourting && stage <= Stage::kCommitted && !s.secret && !silent && !hurt;
+		const bool secretable = stage >= Stage::kCourting && stage <= Stage::kCommitted && !s.secret && !silent && !hurt && !s.confrontPending;
 		SetRank(a_actor, f.secret, secretable ? (candidate->attributes.refusesSecret ? 2 : 1) : 0);
 		SetRank(a_actor, f.talk, stage >= Stage::kFriend && stage <= Stage::kMarried && !silent && !hurt ? 1 : 0);
 		SetRank(a_actor, f.confront, s.confrontPending ? (s.confrontWorks ? 1 : 2) : 0);

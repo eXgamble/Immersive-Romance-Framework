@@ -320,7 +320,9 @@ namespace Events
 						Romance::ModApproval(actor, Rules::Get().giftGain * (love ? 2 : 1), love ? "a gift they love" : "a gift");
 					}
 					Romance::Contact(actor);
-					Romance::Strayed(actor, "a gift for someone else");
+					if (Romance::GetStage(actor) >= Stage::kCourting) {  // a gift to a friend is just a gift
+						Romance::Strayed(actor, "a gift for someone else");
+					}
 				});
 				return RE::BSEventNotifyControl::kContinue;
 			}
