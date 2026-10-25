@@ -73,7 +73,7 @@ namespace Forms
 		s.taken = f.Own<RE::TESFaction>(kTakenFaction, "IRF_TakenFaction");
 
 		s.quests.clear();
-		for (const auto id : { kQuest, kReactionQuest, kAbsenceQuest, kRecentQuest, kSayQuest }) {
+		for (const auto id : { kQuest, kReactionQuest, kAbsenceQuest, kRecentQuest, kSayQuest, kGiftQuest }) {
 			if (const auto quest = f.Own<RE::TESQuest>(id, "framework quest")) {
 				s.quests.push_back(quest);
 			}
@@ -99,6 +99,10 @@ namespace Forms
 		s.denyTopic = f.Own<RE::TESTopic>(kDenyTopic, "IRF_DenyTopic");
 		s.admitTopic = f.Own<RE::TESTopic>(kAdmitTopic, "IRF_AdmitTopic");
 		s.giftInsulting = f.Own<RE::BGSKeyword>(kGiftInsultingKeyword, "IRF_GiftInsulting");
+		s.give = f.Own<RE::TESFaction>(kGiveFaction, "IRF_GiveFaction");
+		s.gift = f.Own<RE::TESFaction>(kGiftFaction, "IRF_GiftFaction");
+		s.giveTopic = f.Own<RE::TESTopic>(kGiveTopic, "IRF_GiveTopic");
+		s.giftAnswer = f.Own<RE::TESTopic>(kGiftAnswerTopic, "IRF_GiftAnswerTopic");
 
 		s.potentialMarriage = f.Vanilla<RE::TESFaction>(0x019809, "PotentialMarriageFaction");
 		s.playerMarried = f.Vanilla<RE::TESFaction>(0x0C6472, "PlayerMarriedFaction");

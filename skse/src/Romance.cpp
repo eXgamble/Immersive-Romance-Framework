@@ -630,6 +630,7 @@ namespace Romance
 		const bool secretable = stage >= Stage::kCourting && stage <= Stage::kCommitted && !s.secret && !silent && !hurt && !s.confrontPending;
 		SetRank(a_actor, f.secret, secretable ? (candidate->attributes.refusesSecret ? 2 : 1) : 0);
 		SetRank(a_actor, f.talk, stage >= Stage::kFriend && stage <= Stage::kMarried && !silent && !hurt ? 1 : 0);
+		SetRank(a_actor, f.give, stage >= Stage::kFriend && stage <= Stage::kMarried && !silent ? 1 : 0);
 		SetRank(a_actor, f.confront, s.confrontPending ? (s.confrontWorks ? 1 : 2) : 0);
 
 		// the amulet: below Committed the framework's own line and a rejection; from Committed vanilla's

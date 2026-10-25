@@ -95,14 +95,9 @@ namespace IRF
 		kTown = 24,
 		kInn = 25,
 		kHomeTown = 26,
-		kGiftInsulted = 30,  // she answers a gift: 30 + Taste
-		kGiftDisliked = 31,
-		kGift = 32,
-		kGiftLiked = 33,
-		kGiftLoved = 34,
 	};
 
-	// How a candidate takes a gift (gift moment = 30 + this)
+	// How a candidate takes a gift; IRF_GiftFaction carries it (+ 1) for her answer, her goodbye
 	enum class Taste : std::int8_t
 	{
 		kInsulted = 0,

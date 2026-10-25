@@ -19,7 +19,9 @@
   "giftLikedGain": 5,       // a gift they like, instead
   "giftLovedGain": 8,       // a gift they love, instead
   "giftDislikedCost": 3,    // a gift they dislike; every one counts
-  "giftInsultCost": 15,     // a gift they take as an insult (a human heart); every one counts
+  "giftInsultCost": 15,     // a gift they take as an insult (a human heart); every one counts, and they won't take it
+  "giftGoldLiked": 10,      // gold: less than this they dislike, from this they like ...
+  "giftGoldLoved": 300,     // ... and from this they love
   "killGain": 1,            // an enemy killed while they follow ...
   "killCapPerDay": 5,       // ... up to this many a day
   "clearGain": 5,           // a location cleared together

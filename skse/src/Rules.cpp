@@ -53,6 +53,8 @@ namespace Rules
 		IRF_RULE(giftLovedGain);
 		IRF_RULE(giftDislikedCost);
 		IRF_RULE(giftInsultCost);
+		IRF_RULE(giftGoldLiked);
+		IRF_RULE(giftGoldLoved);
 		IRF_RULE(killGain);
 		IRF_RULE(killCapPerDay);
 		IRF_RULE(clearGain);

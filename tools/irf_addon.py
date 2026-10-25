@@ -32,6 +32,7 @@ FRAMEWORK = "Immersive Romance Framework.esp"
 # topics (Immersive Romance Framework.esp)
 HELLO, GOODBYE, COURT, HOWAREWE, AMULET = 0x806, 0x807, 0x808, 0x80A, 0x80D
 REACTION_HELLO, ABSENCE_HELLO, RECENT_HELLO, SAY = 0x823, 0x825, 0x827, 0x829
+GIFT_ANSWER = 0x846  # her goodbye after a gift
 ASKDATE, FOLLOW, KISS, BREAKUP, AMENDS, WINBACK, SECRET, TALK, DENY, ADMIT = (
     0x82A, 0x82C, 0x82E, 0x830, 0x832, 0x834, 0x836, 0x838, 0x83A, 0x83C)
 # factions
@@ -39,6 +40,7 @@ STAGE_F, GREET_F, AMULET_F, BAND_F = 0x801, 0x803, 0x80C, 0x80F
 ABSENCE_F, REACTION_F, RECENT_F, MOMENT_F = 0x812, 0x813, 0x814, 0x816
 ASKDATE_F, FOLLOW_F, KISS_F, BREAKUP_F, AMENDS_F, WINBACK_F, SECRET_F, TALK_F, CONFRONT_F, TAKEN_F = (
     0x818, 0x819, 0x81A, 0x81B, 0x81C, 0x81D, 0x81E, 0x81F, 0x820, 0x821)
+GIFT_F = 0x841  # her answer to a gift: 1 insulted, 2 disliked, 3 plain, 4 liked, 5 loved
 
 EVENTS = {"courting": 1, "dating": 2, "committed": 3, "engaged": 4, "married": 5, "amends": 6,
           "playerEnded": 7, "theyEnded": 8, "brokenHeart": 9, "seeingSomeone": 10, "widowed": 11, "wonBack": 12, "killed": 13}
@@ -47,8 +49,7 @@ REFUSE_MOMENT = 7  # a circle member refusing service
 MOMENTS = {"caught": 1, "revive": 2, "attacked": 3, "crime.approve": 4, "crime.disapprove": 5, "jealous": 6,
            "road.afterfight": 10, "road.dragon": 11, "road.nearlydead": 12, "road.rest": 13,
            "road.nordicruin": 20, "road.dwarvenruin": 21, "road.cave": 22, "road.dungeon": 23,
-           "road.town": 24, "road.inn": 25, "road.hometown": 26,
-           "gift.insulted": 30, "gift.disliked": 31, "gift": 32, "gift.liked": 33, "gift.loved": 34}
+           "road.town": 24, "road.inn": 25, "road.hometown": 26}
 
 
 def requirements(alignment):
@@ -96,6 +97,8 @@ def requirements(alignment):
     add("admit", ADMIT, CONFRONT_F, 0, op="GreaterThan")
     for band in range(1, 4):
         add(f"absence.{band}", ABSENCE_HELLO, ABSENCE_F, band)
+    for rank, name in enumerate(["gift.insulted", "gift.disliked", "gift", "gift.liked", "gift.loved"], start=1):
+        add(name, GIFT_ANSWER, GIFT_F, rank)
     for name, code in MOMENTS.items():
         required = True
         if name == "crime.approve":

@@ -231,13 +231,6 @@ namespace Events
 					});
 					g_refusing = {};
 				}
-				if (a_event && !a_event->opening) {
-					const auto& closed = a_event->menuName;
-					if (closed == RE::GiftMenu::MENU_NAME || closed == RE::ContainerMenu::MENU_NAME || closed == RE::BarterMenu::MENU_NAME ||
-						closed == RE::DialogueMenu::MENU_NAME) {
-						Queue([menu = std::string(closed.c_str())]() { Gifts::OnMenuClosed(menu); });
-					}
-				}
 				if (!a_event || !a_event->opening) {
 					return RE::BSEventNotifyControl::kContinue;
 				}
@@ -311,17 +304,6 @@ namespace Events
 					return RE::BSEventNotifyControl::kContinue;
 				}
 				Queue([item = a_event->baseObj]() { Crimes::OnItemGiven(item); });
-				if (!Candidates::FindByRef(a_event->newContainer)) {
-					return RE::BSEventNotifyControl::kContinue;
-				}
-				Queue([to = a_event->newContainer, item = a_event->baseObj]() {
-					const auto actor = RE::TESForm::LookupByID<RE::Actor>(to);
-					const auto candidate = Candidates::FindByRef(to);
-					const auto form = RE::TESForm::LookupByID(item);
-					if (actor && candidate && form && Romance::GetStage(actor) >= Stage::kFriend) {
-						Gifts::OnGiven(actor, *candidate, form);
-					}
-				});
 				return RE::BSEventNotifyControl::kContinue;
 			}
 		};

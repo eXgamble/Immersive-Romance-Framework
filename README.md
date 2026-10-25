@@ -24,6 +24,8 @@ line they say.
   follow a breakup or a death; if you killed them and someone saw it, it's Killed instead (no condolences).
   Approval (0..100, never shown) moves you between them: talks, evening dates, kisses, gifts (one a day counts),
   fighting and clearing places together raise it. A gift can also be disliked, or an insult (a human heart).
+- **Gifts:** "I have something for you." opens the gift menu (gold included) for a candidate from Friend up; she
+  answers as she says goodbye. Stolen and quest items can't be given, and an insult isn't taken.
 - **Tolerances**, per candidate: being caught straying, hitting them (a stray hit in a fight vs. turning on
   them), letting them bleed out, staying away too long. Any of them can be "never": one deed ends it for good.
 - **Breakups** remember who ended it and why (cheating, violence, absence, bleedouts, crime, your choice). You can
@@ -96,8 +98,9 @@ Every attribute is optional; a missing one takes the default from Rules.json.
 strongest objection first), then the framework's keyword `IRF_GiftInsulting` (0x83F): items the average person
 takes as an insult (a human heart, human flesh, a skull). The framework gives them the keyword at load from
 `SKSE/Plugins/ImmersiveRomanceFramework/Gifts/*.json`; another mod can add its own file there or give its items the
-keyword. A candidate who doesn't mind them lists the keyword under `liked` or `loved`. One liked, loved or plain
-gift a day counts; every disliked or insulting one does. A candidate's community (her
+keyword. A candidate who doesn't mind them lists the keyword under `liked` or `loved`. Gold goes by the amount: under
+10 disliked, 10 to 299 liked, 300 or more loved (Rules.json). One liked, loved or plain gift a day counts; every
+disliked or insulting one does, and an insulting one isn't taken. A candidate's community (her
 town) comes from her editor location. `refuse.until` is `"amends"` or a number of days (no amends
 follow `killed`: a refusal over it lasts for good).
 
@@ -128,6 +131,7 @@ conditions of your own freely (time of day, location, quest stages).
 | `talk` (a talk; in the evening it's a date) | 0x838 | IRF_TalkFaction 0x81F | 1 |
 | `deny.works` / `deny.fails` | 0x83A | IRF_ConfrontFaction 0x820 | 1 / 2 |
 | `admit` | 0x83C | IRF_ConfrontFaction | **GreaterThan** 0 |
+| `gift.insulted` / `.disliked` / `gift` / `.liked` / `.loved` (her answer, as her goodbye) | IRF_GiftAnswerTopic 0x846 | IRF_GiftFaction 0x841 | 1 / 2 / 3 / 4 / 5 |
 | `absence.1`..`3` (back after a long time) | IRF_AbsenceHelloTopic 0x825 | IRF_AbsenceFaction 0x812 | 1..3 |
 | moments (below) | IRF_SayTopic 0x829 | IRF_MomentFaction 0x816 | the moment |
 | `reaction.<event>` (optional) | IRF_ReactionHelloTopic | IRF_ReactionFaction | the event |
@@ -141,8 +145,7 @@ conditions of your own freely (time of day, location, quest stages).
 - **moments:** 1 `caught`, 2 `revive`, 3 `attacked`, 4 `crime.approve` (required when alignment < 0),
   5 `crime.disapprove` (when alignment > 0), 6 `jealous`, 10 `road.afterfight`, 11 `road.dragon`,
   12 `road.nearlydead`, 13 `road.rest`, 20 `road.nordicruin`, 21 `road.dwarvenruin`, 22 `road.cave`,
-  23 `road.dungeon`, 24 `road.town`, 25 `road.inn`, 26 `road.hometown`, 30 `gift.insulted`, 31 `gift.disliked`,
-  32 `gift`, 33 `gift.liked`, 34 `gift.loved` (her answer to the strongest gift of a visit, once the menus close).
+  23 `road.dungeon`, 24 `road.town`, 25 `road.inn`, 26 `road.hometown`.
 - **Circle lines** take the member's `GetIsID`: reactions in IRF_ReactionHelloTopic by event, the refusal in
   IRF_SayTopic with moment 7.
 

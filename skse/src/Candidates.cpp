@@ -154,15 +154,16 @@ namespace Candidates
 				{ Moment::kTown, "road.town" },
 				{ Moment::kInn, "road.inn" },
 				{ Moment::kHomeTown, "road.hometown" },
-				{ Moment::kGiftInsulted, "gift.insulted" },
-				{ Moment::kGiftDisliked, "gift.disliked" },
-				{ Moment::kGift, "gift" },
-				{ Moment::kGiftLiked, "gift.liked" },
-				{ Moment::kGiftLoved, "gift.loved" },
 			};
 			for (const auto& [moment, name] : moments) {
 				add(name, f.say, f.moment, Rank(moment));
 			}
+			// her answer to a gift, as her goodbye
+			add("gift.insulted", f.giftAnswer, f.gift, Rank(Taste::kInsulted) + 1);
+			add("gift.disliked", f.giftAnswer, f.gift, Rank(Taste::kDisliked) + 1);
+			add("gift", f.giftAnswer, f.gift, Rank(Taste::kNeutral) + 1);
+			add("gift.liked", f.giftAnswer, f.gift, Rank(Taste::kLiked) + 1);
+			add("gift.loved", f.giftAnswer, f.gift, Rank(Taste::kLoved) + 1);
 			add("crime.approve", f.say, f.moment, Rank(Moment::kCrimeApprove), a_attributes.alignment < 0);
 			add("crime.disapprove", f.say, f.moment, Rank(Moment::kCrimeDisapprove), a_attributes.alignment > 0);
 

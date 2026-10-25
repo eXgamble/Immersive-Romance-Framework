@@ -19,6 +19,8 @@ namespace Rules
 		int giftLovedGain = 8;     // a gift they love (instead)
 		int giftDislikedCost = 3;  // a gift they dislike, every one counts
 		int giftInsultCost = 15;   // a gift they take as an insult, every one counts
+		int giftGoldLiked = 10;    // gold: below this they dislike it, from this they like it
+		int giftGoldLoved = 300;   // gold: from this they love it
 		int killGain = 1;       // an enemy killed while they follow, up to killCapPerDay a day
 		int killCapPerDay = 5;
 		int clearGain = 5;      // a location cleared together

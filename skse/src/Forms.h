@@ -39,6 +39,13 @@ namespace Forms
 		// items
 		kGiftInsultingKeyword = 0x83F,  // IRF_GiftInsulting: an item the average person takes as an insult
 
+		// gifts: "I have something for you." opens the gift menu, her answer is her goodbye
+		kGiveFaction = 0x840,      // 1 while she'd take a gift (the line is offered)
+		kGiftFaction = 0x841,      // her answer to the gift just given: Taste + 1 (1 insulted .. 5 loved), 0 otherwise
+		kGiveTopic = 0x842,        // IRF_GiveTopic (in IRF_Quest), its blank line opens the gift menu
+		kGiftQuest = 0x845,        // IRF_GiftQuest, priority 110: above every quest's goodbyes
+		kGiftAnswerTopic = 0x846,  // IRF_GiftAnswerTopic, a goodbye topic
+
 		// quests and topics
 		kQuest = 0x805,  // IRF_Quest, priority 105
 		kHelloTopic = 0x806,
@@ -116,6 +123,10 @@ namespace Forms
 		RE::TESTopic* denyTopic{ nullptr };
 		RE::TESTopic* admitTopic{ nullptr };
 		RE::BGSKeyword* giftInsulting{ nullptr };
+		RE::TESFaction* give{ nullptr };
+		RE::TESFaction* gift{ nullptr };
+		RE::TESTopic*   giveTopic{ nullptr };
+		RE::TESTopic*   giftAnswer{ nullptr };
 
 		// vanilla
 		RE::TESFaction*    potentialMarriage{ nullptr };  // PotentialMarriageFaction 019809

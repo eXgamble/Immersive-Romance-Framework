@@ -2,23 +2,20 @@
 
 #include "Candidates.h"
 
-// Gifts: how a candidate takes one (insulted, disliked, neutral, liked, loved), what it does to approval, and her
-// answer once the menus close. Items the average person takes as an insult carry IRF_GiftInsulting: the framework
-// tags the ones listed in Data/SKSE/Plugins/ImmersiveRomanceFramework/Gifts/*.json at load, other mods may add the
-// keyword to their own items.
+// Gifts (moved from eXrim, 2026-10-25): the player's "I have something for you." (IRF_GiveTopic, offered to a
+// candidate from Friend to Married who isn't giving you the silent treatment) opens the game's own gift menu over the
+// conversation, the player's things with stolen and quest items refused and a gold row added. A pick is handed over,
+// the menus close and her goodbye is her answer (IRF_GiftAnswerTopic, by IRF_GiftFaction). How she takes it:
+// insulted, disliked, neutral, liked or loved, from her manifest's lists, then IRF_GiftInsulting (items the average
+// person takes as an insult; the framework tags the ones listed in Gifts/*.json at load, other mods may add the
+// keyword to their own), and gold by the amount (Rules.json giftGoldLiked, giftGoldLoved). An insult isn't taken.
 namespace Gifts
 {
+	// kDataLoaded: tag the insulting items, the dialogue and menu event sinks
 	void Load();
 
-	// How this candidate takes this item: her own lists first (an item named outright, then a keyword or form list),
-	// then IRF_GiftInsulting
-	IRF::Taste TasteOf(const Candidates::Candidate& a_candidate, RE::TESForm* a_item);
-
-	// The player gave a_item to a candidate who is at least a Friend
-	void OnGiven(RE::Actor* a_actor, const Candidates::Candidate& a_candidate, RE::TESForm* a_item);
-
-	// A menu closed: her answer to the strongest gift of the visit, once no dialogue is open any more
-	void OnMenuClosed(std::string_view a_menu);
+	// How this candidate takes a_count of this item
+	IRF::Taste TasteOf(const Candidates::Candidate& a_candidate, RE::TESForm* a_item, std::int32_t a_count);
 
 	void OnGameLoaded();
 }
