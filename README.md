@@ -132,8 +132,9 @@ takes as an insult (a human heart, human flesh, a skull). The framework gives th
 keyword. A candidate who doesn't mind them lists the keyword under `liked` or `loved`. Gold goes by the amount: under
 10 disliked, 10 to 299 liked, 300 or more loved (Rules.json). One gift a day: after one, "I have something for
 you." is gone until a day has passed, so nothing is given away for nothing. An insulting gift isn't taken. A candidate's community (her
-town) comes from her editor location. `refuse.until` is `"amends"` or a number of days (no amends
-follow `killed`: a refusal over it lasts for good).
+town) comes from her editor location. `refuse.on` takes the events below, or `theyEnded.<why>` for only the
+breakups she began for that reason (e.g. `theyEnded.violence`). `refuse.until` is `"amends"` (amends with her, or
+winning her back) or a number of days (no amends follow `killed`: a refusal over it lasts for good).
 
 ### The lines
 

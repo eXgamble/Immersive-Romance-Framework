@@ -42,6 +42,18 @@ namespace Candidates
 			return names;
 		}
 
+		std::optional<Why> WhyByName(std::string_view a_name)
+		{
+			static const std::pair<Why, const char*> names[]{ { Why::kCheating, "cheating" }, { Why::kViolence, "violence" },
+				{ Why::kAbsence, "absence" }, { Why::kBleedouts, "bleedouts" }, { Why::kCrime, "crime" } };
+			for (const auto& [why, name] : names) {
+				if (a_name == name) {
+					return why;
+				}
+			}
+			return std::nullopt;
+		}
+
 		std::optional<Event> EventByName(const std::string& a_name)
 		{
 			for (const auto& [event, name] : EventNames()) {
@@ -503,8 +515,13 @@ namespace Candidates
 				if (c.contains("refuse")) {
 					const auto refuse = c["refuse"];
 					for (const auto& name : refuse.value("on", nlohmann::json::array())) {
-						if (const auto event = name.is_string() ? EventByName(name.get<std::string>()) : std::nullopt) {
+						const auto text = name.is_string() ? name.get<std::string>() : std::string{};
+						if (const auto event = EventByName(text)) {
 							member.refuseOn.insert(*event);
+						} else if (const auto why = text.starts_with("theyEnded.") ? WhyByName(std::string_view(text).substr(10)) : std::nullopt) {
+							member.refuseOnBreakup.insert(*why);  // she left you for this reason
+						} else {
+							problems.push_back(std::format("circle member {}: unknown refuse event '{}'", member.name, text));
 						}
 					}
 					const auto until = refuse.value("until", nlohmann::json("amends"));

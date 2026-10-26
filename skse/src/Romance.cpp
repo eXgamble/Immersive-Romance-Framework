@@ -437,7 +437,7 @@ namespace Romance
 			if (candidate->lines.contains(key)) {
 				pend(member.ref, a_event);
 			}
-			if (member.refuseOn.contains(a_event)) {
+			if (member.refuseOn.contains(a_event) || (a_event == Event::kTheyEnded && member.refuseOnBreakup.contains(s.why))) {
 				State::Refusals()[member.ref] = { candidate->ref, member.refuseDays > 0 ? today + static_cast<float>(member.refuseDays) : 0.0f };
 				logger::info("Romance: {} refuses you service over {}", member.name, candidate->name);
 				if (const auto actor = RE::TESForm::LookupByID<RE::Actor>(member.ref)) {

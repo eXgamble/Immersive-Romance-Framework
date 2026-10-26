@@ -107,6 +107,7 @@ namespace Candidates
 		RE::TESNPC*                                            npc{ nullptr };
 		RE::FormID                                             ref{ 0 };
 		std::set<IRF::Event>                                   refuseOn;          // events that make them refuse service
+		std::set<IRF::Why>                                     refuseOnBreakup;   // "theyEnded.<why>": she left you for this
 		int                                                    refuseDays{ 0 };   // 0 = until amends
 		bool                                                   refuseTrade{ true };
 		bool                                                   refuseTraining{ true };
