@@ -21,6 +21,10 @@ Spec (JSON):
              a text may also carry "alive": "Skyrim.esm|0x013487" or "dead": ... (a placed reference): played only
              while that person lives (or after they died), e.g. lines about her brother; these join the random pick
              a text's "text" may be a list: one line said as several responses in a row (a longer answer)
+             a text may carry "rank": "<0" (the speaker's relationship rank with you; "<0" = your rival) or
+             {"toward": "Skyrim.esm|0x013491", "is": "<0"} (with someone else), and "stageDone": "Skyrim.esm|0x074A83:310"
+             (that quest stage is done); give the other texts of that key the opposite, or (circle reactions, which
+             play the first that fits) list the plain one last
   "placeholders": true,                      fill every required key that has no text
   "records": [ {houseCARL create record}, ... ]  her own other records (a spouse perk, ...), created FIRST so their
                                              FormIDs never move; an attribute value "@EditorID" names one of them
@@ -244,13 +248,33 @@ def life_conditions(text):
     return rows
 
 
+def feeling_conditions(text):
+    """{"rank": "<0" | {"toward": ref, "is": "<0"}} -> GetRelationshipRank of the speaker; {"stageDone": "Q|0x..:n"}"""
+    rows = []
+    if not isinstance(text, dict):
+        return rows
+    if "rank" in text:
+        want = text["rank"] if isinstance(text["rank"], dict) else {"toward": "Skyrim.esm|0x000014", "is": text["rank"]}
+        compare = str(want["is"]).strip()
+        op = next(o for o in sorted(OPS, key=len, reverse=True) if compare.startswith(o))
+        rows.append({"type": "ConditionFloat", "fields": {"CompareOperator": OPS[op], "ComparisonValue": compare[len(op):].strip()},
+                     "sets": [{"path": "Data", "compose": {"type": "GetRelationshipRankConditionData", "fields": {"RunOnType": "Subject"},
+                                                           "sets": [{"path": "TargetNpc", "value": form_key(want["toward"])}]}}]})
+    if "stageDone" in text:
+        quest, stage = text["stageDone"].rsplit(":", 1)
+        rows.append({"type": "ConditionFloat", "fields": {"CompareOperator": "EqualTo", "ComparisonValue": "1"},
+                     "sets": [{"path": "Data", "compose": {"type": "GetStageDoneConditionData", "fields": {"RunOnType": "Subject", "Stage": stage},
+                                                           "sets": [{"path": "Quest", "value": form_key(quest)}]}}]})
+    return rows
+
+
 def specific(text):
     """a boys/girls text: first-fit, before the random pick"""
     return isinstance(text, dict) and any(name in text for name in ADOPTED)
 
 
 def info(editor_id, topic, text, speaker_npc, faction, rank, op, goodbye, random=None, rows=None):
-    extra = (rows or []) + adopted_conditions(text) + life_conditions(text)
+    extra = (rows or []) + adopted_conditions(text) + life_conditions(text) + feeling_conditions(text)
     prompt = text.get("prompt") if isinstance(text, dict) else None
     text = text["text"] if isinstance(text, dict) else text
     parts = text if isinstance(text, list) else [text]  # several responses: said one after another
@@ -369,9 +393,11 @@ def main(spec_path, out_dir, relock=False):
         before = dict(lines)
         reactions = {}
         for event, value in member.get("reactions", {}).items():
-            for text in texts(value):
+            variants = texts(value)  # first that fits (no random pick): a rival's or a winner's line before the plain one
+            for i, text in enumerate(variants):
                 key = f"circle.{index}.reaction.{event}"
-                emit(key, f"IRF{short}_{mshort}_{event}", REACTION_HELLO, text, mnpc, REACTION_F, EVENTS[event])
+                eid = f"IRF{short}_{mshort}_{event}" + (f"_{i + 1}" if len(variants) > 1 else "")
+                emit(key, eid, REACTION_HELLO, text, mnpc, REACTION_F, EVENTS[event])
                 reactions.setdefault(event, []).append(lines[key][-1])
         if reactions:
             entry["reactions"] = reactions
