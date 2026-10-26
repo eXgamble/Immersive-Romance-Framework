@@ -31,6 +31,7 @@ Spec (JSON):
              the game only works out when one of the two is the player: never between two NPCs), "once": "day" (Say
              Once, again after 24 hours), "set": "dating" (the speaker's own stage set: for her replies),
              "happy": true / false (she's happy with you: her IRF_BandFaction 4 or 5, as her "I'm happy", and no mood)
+             "player": "male" / "female" (the player's sex: for the few lines that name it; give the other sex its own text)
              a text may carry "reply": "Text" | [{"text": ..., "set": "spouse"}, ...]: she answers it aloud right after
              (the first version that fits); give the line "near" her so she's there to hear it
   "placeholders": true,                      fill every required key that has no text
@@ -320,7 +321,7 @@ def stage_rows_on(ref, ranks):
 
 def place_conditions(text):
     """{"following": bool} -> GetPlayerTeammate on her; {"near": {...}} -> GetDistance (+ GetLineOfSight) to them;
-    {"set": name} -> the speaker's own IRF_StageFaction rank (an OR group)"""
+    {"set": name} -> the speaker's own IRF_StageFaction rank (an OR group); {"player": "male"} -> GetPCIsSex"""
     rows = []
     if not isinstance(text, dict):
         return rows
@@ -340,6 +341,10 @@ def place_conditions(text):
                                                                "sets": [{"path": "Target", "value": who}]}}]})
     if "set" in text:
         rows += rank_rows(STAGE_F, SETS[text["set"]], "EqualTo")
+    if "player" in text:
+        rows.append({"type": "ConditionFloat", "fields": {"CompareOperator": "EqualTo", "ComparisonValue": "1"},
+                     "sets": [{"path": "Data", "compose": {"type": "GetPCIsSexConditionData",
+                                                           "fields": {"RunOnType": "Subject", "MaleFemaleGender": text["player"].capitalize()}}}]})
     if "happy" in text:
         def her_rank(faction, value, op, or_next=False):
             return {"type": "ConditionFloat", "fields": {"CompareOperator": op, "ComparisonValue": str(value), **({"Flags": "OR"} if or_next else {})},
