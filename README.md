@@ -20,13 +20,21 @@ line they say.
 
 ### What it does
 
-- **Stages:** Friend, Courting, Dating, Committed, then vanilla's Engaged and Married. An Ex and a Widowed state
+- **Stages:** Friend, Dating, Committed, then vanilla's Engaged and Married. A Friend is the courting phase. An Ex and a Widowed state
   follow a breakup or a death; if you killed them and someone saw it, it's Killed instead (no condolences).
   Approval (0..100, never shown) moves you between them: getting to know her, evening dates, kisses, gifts (one a day),
   fighting and clearing places together raise it. A gift can also be disliked, or an insult (a human heart).
 - **Getting to know her:** "I'd like to get to know you better." (once a day, Friend to Married) opens her own
   questions (1 to 10, her add-on writes them). A question you hadn't asked gives approval; asking again does nothing.
   It's only talk: it never starts courting and never counts as straying. From Dating up, "Spend the evening with me." in the evening is a date.
+- **Asking her out:** "Will you go on a date with me?" is always there for a Friend. Below askDateApproval she
+  says not yet; a Friend who knows you're taken (and won't compete for you) says no; from it she says yes and names
+  her place. Once she'd say yes, about half her greetings hint at it. Yes starts **the first date**: the journal says
+  "Meet <her> at <her place> after sunset", she goes there and waits; come in the evening and she comes over, you
+  answer "Of course I came.", it ends in a kiss and you're Dating. Not there by the end of that evening: you stood
+  her up (approval, and she tells you about it next time); ask again another day. One date at a time.
+- **Straying** (only once you have a partner): going on a date with someone else, kissing someone else (and
+  intimate scenes, for mods that add them). Talking and gifts never count.
 - **Committed has its moment:** a day after she becomes Committed she comes up to you, somewhere safe (a town, an
   inn, a home; anywhere but a dungeon while she follows you) and out of combat, and tells you how much you mean to
   her. You answer "You mean a lot to me too." and she replies. Once per relationship (again after a win-back).
@@ -40,9 +48,7 @@ line they say.
   keep vanilla's. Your spouse stays home with them: she follows you inside the family's town, but at its edge she
   comes up to you, says why she can't come and goes home; after a fast travel a message says it.
 - **Gifts:** "I have something for you." opens the gift menu (gold included) for a candidate from Friend up; she
-  answers as she says goodbye. Stolen and quest items can't be given, and an insult isn't taken. A gift is courting:
-  the first one a Friend likes starts Courting, and with a partner a gift to someone else is straying (a Friend who
-  knows you're taken and won't compete for you takes it as a friend's gift).
+  answers as she says goodbye. Stolen and quest items can't be given, and an insult isn't taken.
 - **Moods** on top of the stage: wary (you attacked her lately), hurt (broken heart), jealous (seen you with
   another candidate), strained (low approval). No mood is the happy default: her plain lines. Her
   greetings, goodbyes and idle chatter can follow them; her idles follow every stage, so a partner never falls
@@ -87,6 +93,9 @@ A candidate whose manifest is missing a required line, or whose lines don't carr
     "wary": { "days": 5, "style": "afraid" },      // after an attack: days she's wary; "afraid" keeps away (no
                                                    // following, no dates), "angry" takes any hit as an attack,
                                                    // "cold" gives talks and dates nothing; none kisses you
+    "firstDate": { "spot": "Skyrim.esm|0x08AFC4" },  // required: where she waits for your first date (a placed
+                                                   // marker or furniture); "place" (a location) names it in the
+                                                   // journal, by default the spot's cell's location
     "spouseBonus": "Plugin.esp|0x810",               // her own spouse perk: an ability (SPEL) or a perk you have
                                                    // while married to her and the marriage is good (optional)
     "heartbreak": { "style": "pleading", "pleads": 3, "every": 2 },  // when YOU end it: "accepting" (an ex at once),
@@ -167,15 +176,20 @@ mood lines; the generator does this. A spouse's idle lines also carry `(IRF_Stag
 |---|---|---|---|
 | `court` (her opener to "I'd like to get to know you better.", once a day from Friend to Married; LinkTo her questions) (only talk: never courting, never straying) | IRF_CourtTopic 0x808 | IRF_CourtFaction 0x821 | 1 |
 | `know.1` .. `know.10` (her answers to her own questions, at least one; each INFO's Prompt is the player's question. A question you hadn't asked gives approval, one a day; asking again does nothing) | IRF_KnowTopic1-10 0x864-0x86D | IRF_CandidateFaction 0x800 | 0 |
-| `hello.<set>`, `goodbye.<set>`, `idle.<set>`: her everyday lines, in sets that build on each other (below). Courting is vanilla's Friend: her greetings, goodbyes and idles there stay vanilla's | IRF_HelloTopic 0x806 / IRF_GoodbyeTopic 0x807 / IRF_IdleTopic 0x85C | IRF_GreetFaction 0x803 (hello, goodbye) / IRF_StageFaction 0x801 (idle) | an OR group, one row `== <rank>` per stage the set plays at (2 Dating, 3 Committed, 4 Engaged, 5 Married); `maramal` also `GetQuestRunning RelationshipMarriageWedding == 0` |
+| `hello.<set>`, `goodbye.<set>`, `idle.<set>`: her everyday lines, in sets that build on each other (below). A Friend greets, says goodbye and idles as vanilla's (but see `hello.hint`) | IRF_HelloTopic 0x806 / IRF_GoodbyeTopic 0x807 / IRF_IdleTopic 0x85C | IRF_GreetFaction 0x803 (hello, goodbye) / IRF_StageFaction 0x801 (idle) | an OR group, one row `== <rank>` per stage the set plays at (2 Dating, 3 Committed, 4 Engaged, 5 Married); `maramal` also `GetQuestRunning RelationshipMarriageWedding == 0` |
 | `hello.brokenheart.silent` (Goodbye flag) | IRF_HelloTopic | IRF_GreetFaction | 10 |
 | `hello.brokenheart.hurt`, `goodbye.brokenheart` | Hello / Goodbye | IRF_GreetFaction | 11 |
 | `hello.ex.<why>`, `goodbye.ex.<why>` | Hello / Goodbye | IRF_GreetFaction | 20 + why |
 | `breakup.<why>` (her speech as she leaves you; not `choice`) | IRF_ReactionHelloTopic 0x823 | IRF_ReactionFaction 0x813 | 20 + why |
 | `confront` (word got back) | IRF_ReactionHelloTopic | IRF_ReactionFaction | 30 |
-| `amulet.friend` / `.courting` / `.dating` (turns the amulet down) | IRF_AmuletTopic 0x80D | IRF_AmuletFaction 0x80C | 1 / 2 / 3 |
+| `amulet.friend` / `.dating` (turns the amulet down) | IRF_AmuletTopic 0x80D | IRF_AmuletFaction 0x80C | 1 / 3 |
 | `howarewe.1`..`5` (worst to best) | IRF_HowAreWeTopic 0x80A | IRF_BandFaction 0x80F | 1..5 |
-| `askdate.yes` / `.notyet` | 0x82A | IRF_AskDateFaction 0x818 | 1 / 2 |
+| `askdate.yes` (she names her place and time) / `.notyet` / `.taken` ("Will you go on a date with me?", a Friend) | IRF_AskDateTopic 0x82A | IRF_AskDateFaction 0x818 | 1 / 2 / 3 |
+| `hello.hint`, `goodbye.hint` (she'd say yes: add `GetRandomPercent < 50` so vanilla's greetings still come up; the generator does) | Hello / Goodbye | IRF_GreetFaction | 1 |
+| `firstdate` (at her spot after sunset she comes up to you; LinkTo IRF_FirstDateReplyTopic 0x871) | IRF_ForceGreetTopic 0x848 | IRF_MomentFaction | 14 |
+| `firstdate.reply` (her answer to "Of course I came."; Goodbye flag: the kiss follows) | IRF_FirstDateReplyTopic 0x871 | IRF_MomentFaction | 14 |
+| `firstdate.after` (after the kiss) | IRF_SayTopic 0x829 | IRF_MomentFaction | 15 |
+| `stoodup` (you didn't come: at your next meeting) | IRF_ReactionHelloTopic 0x823 | IRF_ReactionFaction | 14 |
 | `follow.yes` / `.no` | 0x82C | IRF_FollowAnswerFaction 0x819 | 1 / 2 |
 | `kiss.yes` / `.nothere` / `.no` | 0x82E | IRF_KissFaction 0x81A | 1 / 2 / 3 |
 | `breakup` (answers you ending it) | 0x830 | IRF_BreakUpFaction 0x81B | 1 |
@@ -199,9 +213,9 @@ mood lines; the generator does this. A spouse's idle lines also carry `(IRF_Stag
 | `recent.<event>` (optional) | IRF_RecentHelloTopic 0x827 | IRF_RecentFaction 0x814 | the event |
 
 - **why:** 1 cheating, 2 violence, 3 absence, 4 bleedouts, 5 crime, 6 choice (you ended it).
-- **events:** 1 courting, 2 dating, 3 committed, 4 engaged, 5 married, 6 amends, 7 playerEnded, 8 theyEnded,
+- **events:** 2 dating, 3 committed, 4 engaged, 5 married, 6 amends, 7 playerEnded, 8 theyEnded,
   9 brokenHeart, 10 seeingSomeone (said by other candidates who know), 11 widowed, 12 wonBack, 13 killed (you
-  killed them, seen). A reaction plays once, at the next meeting, within a week; a recent line plays for a while
+  killed them, seen), 14 stoodUp (you missed the first date). A reaction plays once, at the next meeting, within a week; a recent line plays for a while
   after the event.
 - **moments:** 1 `caught`, 2 `revive`, 3 `attacked`, 8 `stayhome` (in its own topic, above), 4 `crime.approve` (required when alignment < 0),
   5 `crime.disapprove` (when alignment > 0), 6 `jealous`, 10 `road.afterfight`, 11 `road.dragon`,
@@ -221,7 +235,7 @@ mood lines; the generator does this. A spouse's idle lines also carry `(IRF_Stag
 ### Reading the state
 
 Conditions on any line, run on the candidate: `GetFactionRank` with `IRF_StageFaction` 0x801 (-1 not a Friend
-yet, 0 Friend, 1 Courting, 2 Dating, 3 Committed, 4 Engaged, 5 Married, 6 Ex, 7 Widowed, 8 Killed), `IRF_ApprovalFaction`
+yet, 0 Friend, 2 Dating, 3 Committed, 4 Engaged, 5 Married, 6 Ex, 7 Widowed, 8 Killed), `IRF_ApprovalFaction`
 0x802 (0..100), `IRF_WhyFaction` 0x810 and `IRF_WhoFaction` 0x811 (1 you, 2 them) for an Ex,
 `IRF_SecretFaction`, `IRF_RecentFaction` with `IRF_RecentDaysFaction` 0x815 (days since). On an adopted child,
 `IRF_ChildFaction` 0x847: what their greeting is about (1-3 you were away, 11 strained, 12 bad, 13 heartbroken, 0 all
