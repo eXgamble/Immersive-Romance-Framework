@@ -22,12 +22,17 @@ Spec (JSON):
              while that person lives (or after they died), e.g. lines about her brother; these join the random pick
              a text's "text" may be a list: one line said as several responses in a row (a longer answer)
   "placeholders": true,                      fill every required key that has no text
+  "records": [ {houseCARL create record}, ... ]  her own other records (a spouse perk, ...), created FIRST so their
+                                             FormIDs never move; an attribute value "@EditorID" names one of them
+  "lock": "camilla.ids.json"                 (beside the spec) every record's FormID as first built; a rebuild that
+                                             would move one stops, because voice files are named by FormID. Pass
+                                             --relock only while no voice files exist yet
   "circle": [ { "name": "Lucan", "npc": "...", "ref": "...",
                 "reactions": { "amends": "Text" },
                 "refuse": { "on": ["brokenHeart"], "until": "amends", "services": ["trade"], "lines": "Text" } } ]
 }
 
-Usage: python irf_addon.py spec.json out_folder
+Usage: python irf_addon.py spec.json out_folder [--relock]
 """
 
 import json
@@ -274,7 +279,7 @@ def texts(value):
     return value if isinstance(value, list) else [value]
 
 
-def main(spec_path, out_dir):
+def main(spec_path, out_dir, relock=False):
     spec = json.loads(Path(spec_path).read_text(encoding="utf-8"))
     plugin = spec["plugin"]
     who = spec["candidate"]
@@ -283,6 +288,16 @@ def main(spec_path, out_dir):
     reqs = requirements(spec.get("attributes", {}))
     records, lines = [], {}
     next_id = 0x800
+    # her own other records first: their FormIDs stay put whatever happens to the lines
+    own = {}
+    for record in spec.get("records", []):
+        records.append(record)
+        own[record["editorid"]] = f"{plugin}|0x{next_id:03X}"
+        next_id += 1
+    attributes = json.loads(json.dumps(spec.get("attributes", {})))
+    for name, value in attributes.items():
+        if isinstance(value, str) and value.startswith("@"):
+            attributes[name] = own[value[1:]]
 
     def emit(key, editor_id, topic, text, speaker, faction, rank, op="EqualTo", goodbye=False, random=None, rows=None):
         nonlocal next_id
@@ -374,9 +389,21 @@ def main(spec_path, out_dir):
             if key.startswith("circle.") and key not in before:
                 del lines[key]  # circle lines live under the circle entry, not in "lines"
 
-    manifest = {"format": 1, "candidate": who, "attributes": spec.get("attributes", {}), "lines": lines}
+    manifest = {"format": 1, "candidate": who, "attributes": attributes, "lines": lines}
     if manifest_circle:
         manifest["circle"] = manifest_circle
+    # voice files are named by FormID: a rebuild must not move a record that already has one
+    ids = {r["editorid"]: f"0x{0x800 + i:03X}" for i, r in enumerate(records)}
+    if spec.get("lock"):
+        lock = Path(spec_path).parent / spec["lock"]
+        old = json.loads(lock.read_text(encoding="utf-8")) if lock.exists() else {}
+        moved = [f"{e}: {old[e]} -> {ids.get(e, 'gone')}" for e in old if ids.get(e) != old[e]]
+        if moved and not relock:
+            print("STOP: these records would get another FormID (their voice files would no longer match):")
+            print("\n".join("  " + m for m in moved[:20]) + ("\n  ..." if len(moved) > 20 else ""))
+            print("Changing a line's words keeps its FormID; adding or removing lines moves the ones after it. Pass --relock only if no voice files exist yet (or rename those files).")
+            sys.exit(2)
+        lock.write_text(json.dumps(ids, indent=1) + "\n", encoding="utf-8")
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
     (out / "records.json").write_text(json.dumps(records, indent=1), encoding="utf-8")
@@ -385,7 +412,7 @@ def main(spec_path, out_dir):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 3:
+    if len(sys.argv) not in (3, 4) or (len(sys.argv) == 4 and sys.argv[3] != "--relock"):
         print(__doc__)
         sys.exit(1)
-    main(sys.argv[1], sys.argv[2])
+    main(sys.argv[1], sys.argv[2], len(sys.argv) == 4)
