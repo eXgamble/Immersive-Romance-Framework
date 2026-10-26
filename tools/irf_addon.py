@@ -36,9 +36,13 @@ Spec (JSON):
   "placeholders": true,                      fill every required key that has no text
   "records": [ {houseCARL create record}, ... ]  her own other records (a spouse perk, ...), created FIRST so their
                                              FormIDs never move; an attribute value "@EditorID" names one of them
-  "lock": "camilla.ids.json"                 (beside the spec) every record's FormID as first built; a rebuild that
-                                             would move one stops, because voice files are named by FormID. Pass
-                                             --relock only while no voice files exist yet
+  "lock": "camilla.ids.json"                 (beside the spec) every record's FormID, for good: voice files are named
+                                             by FormID. A line is known by its spoken words (its EditorID ends in a
+                                             hash of them): the same words keep their FormID wherever the line moves;
+                                             new or reworded lines take the next free FormIDs; a removed line's FormID
+                                             is kept by a placeholder global and never reused. Each line's PNAM
+                                             (previous line) puts it in its place in the topic: the game slots a line
+                                             after its PNAM when that line loaded before it (measured 2026-10-26)
   "circle": [ { "name": "Lucan", "npc": "...", "ref": "...",
                 "reactions": { "amends": "Text" },
                 "greetings": { "goodbye.spouse": ["Text", {"text": "...", "kids": ">=1"}] },   their everyday hellos
@@ -48,9 +52,14 @@ Spec (JSON):
                 "refuse": { "on": ["brokenHeart"], "until": "amends", "services": ["trade"], "lines": "Text" } } ]
 }
 
-Usage: python irf_addon.py spec.json out_folder [--relock]
+Usage: python irf_addon.py spec.json out_folder [--relock] [--into Build.esp]
+  out_folder gets records.json (create them, in that order, into a new empty ESL), order.json (then apply it there:
+  each line's PNAM) and manifest.json. --into names the plugin they're built in when that isn't the spec's (the
+  FormIDs in order.json name it). --relock numbers everything afresh: only while no voice files exist.
 """
 
+import argparse
+import hashlib
 import json
 import sys
 from pathlib import Path
@@ -382,53 +391,60 @@ def texts(value):
     return value if isinstance(value, list) else [value]
 
 
-def main(spec_path, out_dir, relock=False):
+def spoken(text):
+    """the words a line says (what its voice file records): its text, or its responses joined"""
+    words = text["text"] if isinstance(text, dict) else text
+    return "\n".join(words) if isinstance(words, list) else words
+
+
+def main(spec_path, out_dir, relock=False, into=None):
     spec = json.loads(Path(spec_path).read_text(encoding="utf-8"))
     plugin = spec["plugin"]
+    into = into or plugin  # the file the records are built in (a temporary name, renamed after)
     who = spec["candidate"]
     short = "".join(ch for ch in who["name"].split()[0] if ch.isalnum())
     npc = form_key(who["npc"])
     HER[0] = form_key(who["ref"])
     reqs = requirements(spec.get("attributes", {}))
-    records, lines = [], {}
-    next_id = 0x800
-    # her own other records first: their FormIDs stay put whatever happens to the lines
-    own = {}
+    records, lines = [], {}  # until the end, lines name records by EditorID
+    used = set()
+    # her own other records first (a spouse perk): built like any record, named by their EditorID
     for record in spec.get("records", []):
         records.append(record)
-        own[record["editorid"]] = f"{plugin}|0x{next_id:03X}"
-        next_id += 1
+        used.add(record["editorid"])
     attributes = json.loads(json.dumps(spec.get("attributes", {})))
-    for name, value in attributes.items():
-        if isinstance(value, str) and value.startswith("@"):
-            attributes[name] = own[value[1:]]
 
-    def emit(key, editor_id, topic, text, speaker, faction, rank, op="EqualTo", goodbye=False, random=None, rows=None):
-        nonlocal next_id
-        record = info(editor_id, topic, text, speaker, faction, rank, op, goodbye, random, rows)
+    def word_id(base, text):
+        """a line's EditorID: what it is + a hash of its words, so the same words keep the same FormID"""
+        h = hashlib.sha1(spoken(text).encode("utf-8")).hexdigest()[:6]
+        eid, n = f"{base}_{h}", 2
+        while eid in used:  # the same words twice for one key
+            eid, n = f"{base}_{h}_{n}", n + 1
+        used.add(eid)
+        return eid
+
+    def emit(key, base, topic, text, speaker, faction, rank, op="EqualTo", goodbye=False, random=None, rows=None):
+        record = info(word_id(base, text), topic, text, speaker, faction, rank, op, goodbye, random, rows)
         if key in LINKS:
             for topic in LINKS[key]:
                 record["ops"].append({"field_path": "LinkTo", "op": "Add", "value": fw(topic)})
         records.append(record)
-        lines.setdefault(key, []).append(f"{plugin}|0x{next_id:03X}")
-        next_id += 1
-        add_reply(lines[key][-1], text)
+        lines.setdefault(key, []).append(record["editorid"])
+        add_reply(record["editorid"], text)
 
     replies = []  # [{"after": [line], "lines": [her answers]}]: the manifest's
 
     def add_reply(after, text):
         """her answer to the line just made (a "reply" on its text): IRF_SayTopic, moment kReply, IRF_ReplyFaction == n"""
-        nonlocal next_id
         if not isinstance(text, dict) or "reply" not in text:
             return
         n = len(replies) + 1
         answers = []
-        for i, answer in enumerate(texts(text["reply"])):
-            records.append(info(f"IRF{short}_reply_{n}" + (f"_{i + 1}" if len(texts(text["reply"])) > 1 else ""), SAY, answer, npc,
+        for answer in texts(text["reply"]):
+            records.append(info(word_id(f"IRF{short}_reply", answer), SAY, answer, npc,
                                 MOMENT_F, REPLY_MOMENT, "EqualTo", False, None,
                                 [condition("GetFactionRankConditionData", "Faction", fw(REPLY_F), n, "EqualTo")]))
-            answers.append(f"{plugin}|0x{next_id:03X}")
-            next_id += 1
+            answers.append(records[-1]["editorid"])
         replies.append({"after": [after], "lines": answers})
 
     given = spec.get("lines", {})
@@ -450,8 +466,8 @@ def main(spec_path, out_dir, relock=False):
         run = []
         for k in [k for k in set_keys if reqs[k][0] == topic]:
             vs = values_of(k, reqs[k][5])
-            for i, text in enumerate(vs):
-                run.append((k, f"IRF{short}_{k.replace('.', '_')}" + (f"_{i + 1}" if len(vs) > 1 else ""), text))
+            for text in vs:
+                run.append((k, f"IRF{short}_{k.replace('.', '_')}", text))
         married = sum(1 for k, _, _ in run if MARRIED in reqs[k][2])
         percent = None
         if topic == IDLE and married:
@@ -477,7 +493,7 @@ def main(spec_path, out_dir, relock=False):
         values = [v for v in values if specific(v)] + [v for v in values if not specific(v)]
         plain = [i for i, v in enumerate(values) if not specific(v)]
         for i, text in enumerate(values):
-            eid = f"IRF{short}_{key.replace('.', '_')}" + (f"_{i + 1}" if len(values) > 1 else "")
+            eid = f"IRF{short}_{key.replace('.', '_')}"
             random = None
             if len(plain) > 1 and i in plain:
                 random = "end" if i == plain[-1] else "start"
@@ -492,10 +508,9 @@ def main(spec_path, out_dir, relock=False):
         reactions = {}
         for event, value in member.get("reactions", {}).items():
             variants = texts(value)  # first that fits (no random pick): a rival's or a winner's line before the plain one
-            for i, text in enumerate(variants):
+            for text in variants:
                 key = f"circle.{index}.reaction.{event}"
-                eid = f"IRF{short}_{mshort}_{event}" + (f"_{i + 1}" if len(variants) > 1 else "")
-                emit(key, eid, REACTION_HELLO, text, mnpc, REACTION_F, EVENTS[event])
+                emit(key, f"IRF{short}_{mshort}_{event}", REACTION_HELLO, text, mnpc, REACTION_F, EVENTS[event])
                 reactions.setdefault(event, []).append(lines[key][-1])
         if reactions:
             entry["reactions"] = reactions
@@ -516,14 +531,13 @@ def main(spec_path, out_dir, relock=False):
                 ranks = CIRCLE_SETS[name[len(prefix):]]
                 booked = [condition("GetQuestRunningConditionData", "Quest", WEDDING, 0)] if name.endswith(".maramal") else []
                 key = f"circle.{index}.{name}"
-                eid = f"IRF{short}_{mshort}_{name.replace('.', '_')}_{i + 1}"
+                eid = word_id(f"IRF{short}_{mshort}_{name.replace('.', '_')}", text)
                 random = None if len(run) < 2 else ("end" if i == len(run) - 1 else "start")
                 record = info(eid, topic, text, mnpc, None, None, None, False, random,
                               stage_rows_on(her, ranks) + booked + [random_row(percent)])
                 records.append(record)
-                lines.setdefault(key, []).append(f"{plugin}|0x{next_id:03X}")
-                next_id += 1
-                greetings.setdefault(name, []).append(lines[key][-1])
+                lines.setdefault(key, []).append(eid)
+                greetings.setdefault(name, []).append(eid)
                 add_reply(lines[key][-1], text)
         if greetings:
             entry["greetings"] = greetings
@@ -541,32 +555,97 @@ def main(spec_path, out_dir, relock=False):
             if key.startswith("circle.") and key not in before:
                 del lines[key]  # circle lines live under the circle entry, not in "lines"
 
-    manifest = {"format": 1, "candidate": who, "attributes": attributes, "lines": lines}
+    # FormIDs: the lock's for every record it knows (voice files are named by them), the next free ones for the rest
+    lock_path = Path(spec_path).parent / spec["lock"] if spec.get("lock") else None
+    lock = {} if relock or not lock_path or not lock_path.exists() else \
+        {e: int(v, 16) for e, v in json.loads(lock_path.read_text(encoding="utf-8")).items()}
+    ids, nxt = {}, max(lock.values(), default=0x7FF) + 1
+    for record in records:
+        eid = record["editorid"]
+        if eid in lock:
+            ids[eid] = lock[eid]
+        else:
+            ids[eid], nxt = nxt, nxt + 1
+    retired = {e: i for e, i in lock.items() if e not in ids}  # removed or reworded: their FormID stays taken
+    taken = sorted(list(ids.values()) + list(retired.values()))
+    if taken != list(range(0x800, 0x800 + len(taken))):
+        sys.exit(f"STOP: the FormIDs aren't 0x800..0x{0x800 + len(taken) - 1:03X} without gaps; the lock is damaged")
+
+    # each line's place in its topic: PNAM = the line before it there. The game reads the plugin in FormID order
+    # and slots a line after its PNAM when that one is already read, else adds it at the end: check that this
+    # gives the wanted order before anything is built
+    order_ops, problems = [], []
+    topics = {}
+    for record in records:
+        if record.get("record_type") == "DialogResponses":
+            topics.setdefault(record["parent"], []).append(record["editorid"])
+    for topic, wanted in topics.items():
+        prev = {e: (wanted[i - 1] if i else None) for i, e in enumerate(wanted)}
+        placed = []
+        for eid in sorted(wanted, key=lambda e: ids[e]):
+            p = prev[eid]
+            placed.insert(placed.index(p) + 1 if p in placed else len(placed), eid)
+        if placed != wanted:
+            problems.append(f"{topic}: the game would read its lines in another order than the spec's "
+                            f"(a new line can't go first in a topic that already has older lines)")
+        for eid in wanted:
+            if prev[eid]:
+                order_ops.append({"formid": f"{ids[eid]:06X}:{into}", "field_path": "PreviousDialog",
+                                  "value": f"{ids[prev[eid]]:06X}:{into}"})
+    if problems:
+        print("STOP: some lines wouldn't land where the spec puts them:\n  " + "\n  ".join(problems))
+        print("Move the new line below an older one, or pass --relock (only while no voice files exist).")
+        sys.exit(2)
+
+    # build order: by FormID, a placeholder global holding each retired FormID
+    by_id = {ids[r["editorid"]]: r for r in records}
+    for eid, i in retired.items():
+        by_id[i] = {"record_type": "GlobalShort", "editorid": f"{eid}_retired",
+                    "ops": [{"field_path": "Data", "value": "0"}]}  # a global needs its value (FLTV) to read back
+    build = [by_id[i] for i in sorted(by_id)]
+
+    def ref(eid):
+        return f"{plugin}|0x{ids[eid]:03X}"
+
+    def refs(value):
+        if isinstance(value, list):
+            return [refs(v) for v in value]
+        if isinstance(value, dict):
+            return {k: refs(v) for k, v in value.items()}
+        return ref(value) if isinstance(value, str) and value in ids else value
+
+    for name, value in attributes.items():
+        if isinstance(value, str) and value.startswith("@"):
+            attributes[name] = ref(value[1:])
+    manifest = {"format": 1, "candidate": who, "attributes": attributes, "lines": refs(lines)}
     if manifest_circle:
-        manifest["circle"] = manifest_circle
+        manifest["circle"] = []
+        for m in manifest_circle:
+            m = {k: (refs(v) if k in ("reactions", "greetings") else v) for k, v in m.items()}
+            if "refuse" in m:
+                m["refuse"] = {**m["refuse"], "lines": refs(m["refuse"]["lines"])}
+            manifest["circle"].append(m)
     if replies:
-        manifest["replies"] = replies
-    # voice files are named by FormID: a rebuild must not move a record that already has one
-    ids = {r["editorid"]: f"0x{0x800 + i:03X}" for i, r in enumerate(records)}
-    if spec.get("lock"):
-        lock = Path(spec_path).parent / spec["lock"]
-        old = json.loads(lock.read_text(encoding="utf-8")) if lock.exists() else {}
-        moved = [f"{e}: {old[e]} -> {ids.get(e, 'gone')}" for e in old if ids.get(e) != old[e]]
-        if moved and not relock:
-            print("STOP: these records would get another FormID (their voice files would no longer match):")
-            print("\n".join("  " + m for m in moved[:20]) + ("\n  ..." if len(moved) > 20 else ""))
-            print("Changing a line's words keeps its FormID; adding or removing lines moves the ones after it. Pass --relock only if no voice files exist yet (or rename those files).")
-            sys.exit(2)
-        lock.write_text(json.dumps(ids, indent=1) + "\n", encoding="utf-8")
+        manifest["replies"] = refs(replies)
+    if lock_path:
+        new_lock = {**lock, **ids}
+        lock_path.write_text(json.dumps({e: f"0x{i:03X}" for e, i in sorted(new_lock.items(), key=lambda x: x[1])}, indent=1) + "\n",
+                             encoding="utf-8")
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
-    (out / "records.json").write_text(json.dumps(records, indent=1), encoding="utf-8")
+    (out / "records.json").write_text(json.dumps(build, indent=1), encoding="utf-8")
+    (out / "order.json").write_text(json.dumps(order_ops, indent=1), encoding="utf-8")
     (out / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
-    print(f"{len(records)} lines -> {out / 'records.json'}; manifest -> {out / 'manifest.json'}")
+    new = [e for e in ids if e not in lock]
+    print(f"{len(build)} records ({len(new)} new, {len(retired)} retired placeholders) -> {out / 'records.json'}; "
+          f"{len(order_ops)} PNAMs -> {out / 'order.json'}; manifest -> {out / 'manifest.json'}")
 
 
 if __name__ == "__main__":
-    if len(sys.argv) not in (3, 4) or (len(sys.argv) == 4 and sys.argv[3] != "--relock"):
-        print(__doc__)
-        sys.exit(1)
-    main(sys.argv[1], sys.argv[2], len(sys.argv) == 4)
+    parser = argparse.ArgumentParser(usage=__doc__)
+    parser.add_argument("spec")
+    parser.add_argument("out")
+    parser.add_argument("--relock", action="store_true")
+    parser.add_argument("--into")
+    a = parser.parse_args()
+    main(a.spec, a.out, a.relock, a.into)

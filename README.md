@@ -76,7 +76,12 @@ line they say.
 
 An add-on is one plugin (ESL-flagged) with the dialogue lines and their voice files, plus one JSON manifest per
 candidate in `SKSE/Plugins/ImmersiveRomanceFramework/Candidates/`. No scripts are required. The generator
-`tools/irf_addon.py` turns a short spec into the records and the manifest (see its header).
+`tools/irf_addon.py` turns a short spec into the records and the manifest (see its header). Voice files are named by
+a line's FormID, so with a `lock` file a line keeps its FormID for good: lines are known by their words, new or
+reworded ones take the next free FormIDs, a removed line's FormID stays taken (a placeholder global), and each line's
+PNAM puts it in its place in its topic. Build: `irf_addon.py spec.json out --into Build.esp`, then into a new empty
+ESL named Build.esp create `out/records.json` and apply `out/order.json`, rename it to the add-on's plugin, and ship
+`out/manifest.json` as its manifest. Close MO2 while the plugin is swapped (it unticks a plugin that goes missing).
 
 A candidate whose manifest is missing a required line, or whose lines don't carry the right conditions, is
 **rejected**: not registered, stays vanilla, and the log says exactly what is wrong.
