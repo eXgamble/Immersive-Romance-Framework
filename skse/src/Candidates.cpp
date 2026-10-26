@@ -253,6 +253,25 @@ namespace Candidates
 			add("gift", f.giftAnswer, f.gift, Rank(Taste::kNeutral) + 1);
 			add("gift.liked", f.giftAnswer, f.gift, Rank(Taste::kLiked) + 1);
 			add("gift.loved", f.giftAnswer, f.gift, Rank(Taste::kLoved) + 1);
+			// two partners have it out (Expose): every line optional, the scene plays only when both add-ons have theirs
+			add("expose.ask", f.say, f.moment, Rank(Moment::kExposeAsk), false);
+			for (const auto set : { "dating", "committed", "engaged", "spouse" }) {
+				add(std::format("expose.claim.{}", set), f.say, f.moment, Rank(Moment::kExposeClaim), false);
+				add(std::format("expose.counter.{}", set), f.say, f.moment, Rank(Moment::kExposeCounter), false);
+			}
+			add("expose.question", f.forceGreetTopic, f.moment, Rank(Moment::kExposeQuestion), false);
+			add("expose.reply.disowned", f.exposeSideA, f.moment, Rank(Moment::kExposeQuestion), false);
+			list.back().goodbye = true;
+			add("expose.reply.believed", f.exposeSideB, f.expose, 1, false);
+			list.back().goodbye = true;
+			add("expose.reply.disbelieved", f.exposeSideB, f.expose, 2, false);
+			list.back().goodbye = true;
+			add("expose.reply.true", f.exposeTrue, f.moment, Rank(Moment::kExposeQuestion), false);
+			list.back().goodbye = true;
+			add("expose.believed", f.say, f.expose, 1, false);
+			add("expose.disbelieved", f.say, f.expose, 2, false);
+			add("expose.disowned", f.say, f.expose, 3, false);
+			add("expose.true", f.say, f.expose, 4, false);
 			add("crime.approve", f.say, f.moment, Rank(Moment::kCrimeApprove), a_attributes.alignment < 0);
 			add("crime.disapprove", f.say, f.moment, Rank(Moment::kCrimeDisapprove), a_attributes.alignment > 0);
 

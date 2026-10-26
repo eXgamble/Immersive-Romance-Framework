@@ -79,5 +79,9 @@
   "caughtDistance": 2048.0,       // your partner sees you stray within this
   "jealousDistance": 1536.0,      // your partner sees you and her within this
   "exposeDistance": 1024.0,       // another partner this close hears one greet you as hers: both catch you
-  "caughtLineGap": 4.0            // seconds between two partners' caught lines in one scene
+  "caughtLineGap": 4.0,           // seconds between two partners' caught lines in one scene
+  "exposeLeaveDistance": 4096.0,  // when two partners have it out: walk this far off and it's broken off
+  "exposePersuade": 50,           // ... the Speech that carries your lie (fixed)
+  "exposeDoubtCost": 5,           // ... approval the one who believed you still loses
+  "disownedSpouseMult": 3         // ... a wife you denied: her broken heart lasts this many times as long
 }

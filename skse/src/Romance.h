@@ -42,6 +42,10 @@ namespace Romance
 	// a_with: the one she caught you with, when known: from now on she knows about her
 	void Caught(RE::Actor* a_partner, std::string_view a_cause, float a_delay = 0.0f, RE::Actor* a_with = nullptr);
 
+	// Her heart is broken (as when she catches you): hurt, silent for her broken-heart days x a_times, cheat-tolerance
+	// cost; no line. For a wife who can't leave, too
+	void Heartbroken(RE::Actor* a_partner, std::string_view a_cause, int a_times = 1);
+
 	// The player strayed with a_other (a kiss, a date): every other partner who sees it catches you, and if a_other is
 	// a partner too and one of them was there, a_other catches you as well; who else saw it may tell them later
 	void Strayed(RE::Actor* a_other, std::string_view a_deed);

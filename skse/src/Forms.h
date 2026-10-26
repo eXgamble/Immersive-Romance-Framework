@@ -70,6 +70,10 @@ namespace Forms
 		kCircleGoodbyeTopic = 0x874,  // a circle member's everyday greetings about the two of you
 		kReplyFaction = 0x875,        // IRF_ReplyFaction: which reply she's saying (moment kReply)
 		kJealousOfFaction = 0x876,    // IRF_JealousOfFaction: who she last got jealous of: 1 a fighter, 2 not
+		kExposeFaction = 0x877,       // IRF_ExposeFaction: which outcome line (Expose): 1 believed, 2 not, 3 disowned, 4 true
+		kExposeSideATopic = 0x878,    // your answers to "Is this true?" (IRF_SayQuest, linked from her question):
+		kExposeSideBTopic = 0x879,    //   "(Persuade) I don't know who you are. Let's get out of here, <Alias=ExposeA>."
+		kExposeTrueTopic = 0x87A,     //   "(Persuade) It's not true. I don't even know this person."   "It's true." 
 		kPleadYesTopic = 0x85E,
 		kPleadNoTopic = 0x860,
 
@@ -119,6 +123,10 @@ namespace Forms
 		RE::TESFaction* moment{ nullptr };
 		RE::TESFaction* reply{ nullptr };
 		RE::TESFaction* jealousOf{ nullptr };
+		RE::TESFaction* expose{ nullptr };
+		RE::TESTopic*   exposeSideA{ nullptr };
+		RE::TESTopic*   exposeSideB{ nullptr };
+		RE::TESTopic*   exposeTrue{ nullptr };
 		RE::TESFaction* refuse{ nullptr };
 		RE::TESFaction* askDate{ nullptr };
 		RE::TESFaction* follow{ nullptr };

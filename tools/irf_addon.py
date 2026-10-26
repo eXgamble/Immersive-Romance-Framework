@@ -38,6 +38,10 @@ Spec (JSON):
              come first
              a text may carry "reply": "Text" | [{"text": ..., "set": "spouse"}, ...]: she answers it aloud right after
              (the first version that fits); give the line "near" her so she's there to hear it
+  two partners having it out (optional, both add-ons need them for the scene): "expose.ask", "expose.claim.<dating|
+             committed|engaged|spouse>", "expose.counter.<same>", "expose.question", "expose.believed",
+             "expose.disbelieved", "expose.disowned", "expose.true" (and "expose.reply.<outcome>" when her answer in the
+             talk should differ from her line after it)
   "placeholders": true,                      fill every required key that has no text
   "records": [ {houseCARL create record}, ... ]  her own other records (a spouse perk, ...), created FIRST so their
                                              FormIDs never move; an attribute value "@EditorID" names one of them
@@ -84,7 +88,12 @@ REPLY_F, REPLY_MOMENT = 0x875, 16  # her answer to someone's line: IRF_ReplyFact
 HER = [None]  # her reference (houseCARL form), for conditions about her
 FIRSTDATE_REPLY = 0x871  # IRF_FirstDateReplyTopic: "Of course I came."
 CIRCLE_HELLO, CIRCLE_GOODBYE = 0x873, 0x874  # a circle member's everyday greetings (IRF_CircleQuest: any speaker)
-LINKS = {"confess": [CONFESS_REPLY], "firstdate": [FIRSTDATE_REPLY]}  # the replies her line offers (LinkTo); "court" links to her questions (main)
+# two partners have it out (the framework's Expose): moments, the outcome faction, your three answers to her question
+EXPOSE_ASK, EXPOSE_CLAIM, EXPOSE_COUNTER, EXPOSE_QUESTION, EXPOSE_OUTCOME = 27, 28, 29, 30, 31
+EXPOSE_F = 0x877  # IRF_ExposeFaction: 1 she believes you, 2 she doesn't, 3 you denied her, 4 you told the truth
+EXPOSE_SIDE_A, EXPOSE_SIDE_B, EXPOSE_TRUE = 0x878, 0x879, 0x87A
+EXPOSE_OUTCOMES = ["believed", "disbelieved", "disowned", "true"]
+LINKS = {"confess": [CONFESS_REPLY], "firstdate": [FIRSTDATE_REPLY], "expose.question": [EXPOSE_SIDE_A, EXPOSE_SIDE_B, EXPOSE_TRUE]}  # the replies her line offers (LinkTo); "court" links to her questions (main)
 ASKDATE, FOLLOW, KISS, BREAKUP, AMENDS, WINBACK, SECRET, DATE, DENY, ADMIT = (
     0x82A, 0x82C, 0x82E, 0x830, 0x832, 0x834, 0x836, 0x838, 0x83A, 0x83C)
 # factions
@@ -216,6 +225,27 @@ def requirements(attributes):
         elif name == "crime.disapprove":
             required = alignment > 0
         add(name, SAY, MOMENT_F, code, required)
+    # two partners have it out (optional: the scene plays only when both add-ons have their lines). In either role:
+    # A (heard or saw it) asks, B claims you, A answers, B asks you "Is this true?" and answers yours, A's last word.
+    # Claims and answers go by the speaker's own stage. The "expose.reply.*" lines (hers to your answer, in the talk)
+    # take the plain outcome's words when an add-on gives none.
+    def moment_row(code):
+        return condition("GetFactionRankConditionData", "Faction", fw(MOMENT_F), code, "EqualTo")
+
+    def stage_row(stage):
+        return condition("GetFactionRankConditionData", "Faction", fw(STAGE_F), stage, "EqualTo")
+
+    add("expose.ask", SAY, MOMENT_F, EXPOSE_ASK, required=False)
+    for stage, name in enumerate(["dating", "committed", "engaged", "spouse"], start=2):
+        add(f"expose.claim.{name}", SAY, MOMENT_F, EXPOSE_CLAIM, required=False, extra=[stage_row(stage)])
+        add(f"expose.counter.{name}", SAY, MOMENT_F, EXPOSE_COUNTER, required=False, extra=[stage_row(stage)])
+    add("expose.question", FORCEGREET, MOMENT_F, EXPOSE_QUESTION, required=False)
+    add("expose.reply.disowned", EXPOSE_SIDE_A, MOMENT_F, EXPOSE_QUESTION, required=False, goodbye=True)
+    add("expose.reply.believed", EXPOSE_SIDE_B, EXPOSE_F, 1, required=False, goodbye=True, extra=[moment_row(EXPOSE_QUESTION)])
+    add("expose.reply.disbelieved", EXPOSE_SIDE_B, EXPOSE_F, 2, required=False, goodbye=True, extra=[moment_row(EXPOSE_QUESTION)])
+    add("expose.reply.true", EXPOSE_TRUE, MOMENT_F, EXPOSE_QUESTION, required=False, goodbye=True)
+    for rank, name in enumerate(EXPOSE_OUTCOMES, start=1):
+        add(f"expose.{name}", SAY, EXPOSE_F, rank, required=False, extra=[moment_row(EXPOSE_OUTCOME)])
     for name, code in EVENTS.items():
         add(f"reaction.{name}", REACTION_HELLO, REACTION_F, code, required=False)
         add(f"recent.{name}", RECENT_HELLO, RECENT_F, code, required=False)
@@ -463,6 +493,9 @@ def main(spec_path, out_dir, relock=False, into=None):
         replies.append({"after": [after], "lines": answers})
 
     given = spec.get("lines", {})
+    for name in EXPOSE_OUTCOMES:  # her answer in the talk: the plain outcome's words unless the add-on gives its own
+        if f"expose.{name}" in given and f"expose.reply.{name}" not in given:
+            given[f"expose.reply.{name}"] = given[f"expose.{name}"]
     LINKS["court"] = [KNOW + i - 1 for i in range(1, KNOW_MAX + 1) if f"know.{i}" in given or i == 1]
 
     def values_of(key, required):

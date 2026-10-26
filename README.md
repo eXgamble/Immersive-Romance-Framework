@@ -71,6 +71,15 @@ line they say.
   - you get engaged to or marry one: word gets back to the other, and there's no denying it.
   Travelling with both is only jealousy. The main partner (home, children, Papyrus `GetPartner`) is the one at the
   highest stage.
+- **When it comes out in front of both, they have it out** (when both add-ons have the scene's lines; otherwise both
+  simply catch you). The one who heard or saw it (A) walks up to the other (B): A asks who she is to you, B claims you
+  (by her stage), A answers (by hers), and B comes up to you: "Is this true?" Your answers:
+  - "(Persuade) I don't know who you are. Let's get out of here, <A>." B is gone for good. A must believe you (your
+    Speech against `exposePersuade`): she does and stays (a little approval lost), or she doesn't and leaves too.
+  - "(Persuade) It's not true. I don't even know this person." The same, the other way round.
+  - "It's true." Both leave you; both can be won back. Walking away from the question counts as this.
+  A wife you deny can't leave a marriage: her heart is broken for `disownedSpouseMult` (3) times as long instead.
+  A fight, someone leaving or a load breaks the scene off: both simply catch you.
 - **Her family and friends** (the circle) react: a line the next time you meet (also when you adopt a child,
   married to her), and if you broke her heart they may refuse you their shop or training until you make amends.
   Now and then their everyday hellos and goodbyes are about the two of you (and your children).
@@ -240,6 +249,7 @@ mood lines; the generator does this. A spouse's idle lines also carry `(IRF_Stag
 | `deny.works` / `deny.fails` | 0x83A | IRF_ConfrontFaction 0x820 | 1 / 2 |
 | `admit` | 0x83C | IRF_ConfrontFaction | **GreaterThan** 0 |
 | `idle.ex` (her idle chatter as an ex) | IRF_IdleTopic 0x85C | IRF_StageFaction 0x801 | 6 |
+| the scene when two partners have it out (optional; it plays only when both add-ons have them): `expose.ask`, `expose.claim.<dating\|committed\|engaged\|spouse>`, `expose.counter.<same>` (said in either role, by the speaker's own stage), `expose.question` (her force greet; links to your three answers), `expose.believed`, `expose.disbelieved`, `expose.disowned`, `expose.true` (A's last word; also B's answer in the talk unless `expose.reply.<outcome>` gives another) | IRF_SayTopic 0x829, IRF_ForceGreetTopic 0x848, IRF_ExposeSideA/SideB/TrueTopic 0x878-0x87A | IRF_MomentFaction 27-31, IRF_ExposeFaction 0x877 (1 believed, 2 not, 3 disowned, 4 true) | |
 | mood versions (optional): `hello.<state>.<mood>`, `goodbye.<state>.<mood>` (strained, jealous, wary) and `idle.<stage>.<mood>` (also hurt); one more row, `GetFactionRank IRF_MoodFaction == <mood>`, and listed BEFORE the plain line (the game plays the first that fits) | as the plain line | as the plain line, plus IRF_MoodFaction 0x85B | + mood: strained 2, jealous 3, hurt 4, wary 5 |
 | `plead` (a pleading ex you left asks you back; required for "pleading") | IRF_HelloTopic | IRF_GreetFaction | 30 |
 | `plead.yes` / `plead.no` (her answers to "Alright. Let's try again." / "No. It's over.") | 0x85E / 0x860 | IRF_PleadFaction 0x85D | 1 |

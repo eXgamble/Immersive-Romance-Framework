@@ -1,5 +1,7 @@
 #include "Events.h"
 
+#include "Expose.h"
+
 #include "Children.h"
 #include "Confess.h"
 #include "Crimes.h"
@@ -94,6 +96,12 @@ namespace Events
 			g_afterGoodbye = false;
 			if (!greeter) {
 				return;
+			}
+			if (!overheard.empty()) {
+				const auto other = overheard.front().get();
+				if (other && Romance::IsPartner(greeter.get()) && Romance::IsPartner(other.get()) && Expose::Start(greeter.get(), other.get())) {
+					return;  // they have it out (others who heard it learn of it there)
+				}
 			}
 			float       delay = a_delay;
 			RE::Actor*  first = nullptr;
@@ -327,6 +335,8 @@ namespace Events
 			} else if (a_key.starts_with("breakup.")) {
 				const auto why = s.pendingBreakup != Why::kNone ? s.pendingBreakup : Why::kAbsence;
 				Romance::BreakUp(a_speaker, Who::kThem, why, s.unforgivable);
+			} else if (a_key.starts_with("expose.reply.")) {
+				Expose::OnAnswered(a_speaker, a_key);
 			} else if (a_key.starts_with("absence.")) {
 				a_speaker->AddToFaction(f.absence, 0);
 			}
@@ -347,6 +357,7 @@ namespace Events
 					Queue([handle = actor->GetHandle(), meeting]() {
 						if (const auto a = handle.get()) {
 							Children::Count();
+							Expose::Check();
 							Children::Sync(a.get());
 							Romance::Sync(a.get(), meeting);
 							if (meeting && Romance::IsPartner(a.get())) {
@@ -403,6 +414,7 @@ namespace Events
 								}
 							});
 						}
+						Expose::OnDialogueClosed();
 						Confess::OnDialogueClosed();
 						FirstDate::OnDialogueClosed();
 						Replies::OnDialogueClosed();
@@ -476,6 +488,16 @@ namespace Events
 				}
 				logger::info("Events: line '{}' {} ({:08X})", key, a_event->type == RE::TESTopicInfoEvent::TopicInfoEventType::kTopicEnd ? "ended" : "began",
 					a_event->topicInfoFormID);
+				Queue([handle = a_event->speakerRef ? a_event->speakerRef->GetHandle() : RE::ObjectRefHandle{}, key,
+						  began = a_event->type != RE::TESTopicInfoEvent::TopicInfoEventType::kTopicEnd]() {
+					if (Expose::Running()) {
+						const auto ref = handle.get();
+						if (began && ref && ref->As<RE::Actor>()) {
+							Expose::OnLineBegan(ref->As<RE::Actor>(), key);
+						}
+						Expose::Check();  // the lines around are its clock: a beat that never started is said again
+					}
+				});
 				if (a_event->type != RE::TESTopicInfoEvent::TopicInfoEventType::kTopicEnd) {
 					if (key == "firstdate" && a_event->speakerRef) {
 						Queue([handle = a_event->speakerRef->GetHandle()]() {
@@ -515,6 +537,13 @@ namespace Events
 					return RE::BSEventNotifyControl::kContinue;
 				}
 				const auto speaker = a_event->speakerRef ? a_event->speakerRef->As<RE::Actor>() : nullptr;
+				if (speaker && key.starts_with("expose.")) {
+					Queue([handle = speaker->GetHandle(), key]() {
+						if (const auto a = handle.get()) {
+							Expose::OnLineEnded(a.get(), key);
+						}
+					});
+				}
 				if (speaker && key.starts_with("goodbye.")) {
 					Queue([handle = speaker->GetHandle()]() {
 						if (g_greeter && handle.get() == g_greeter.get()) {
@@ -983,6 +1012,7 @@ namespace Events
 		g_overheard.clear();
 		g_greeterGoodbye = false;
 		g_afterGoodbye = false;
+		Expose::OnGameLoaded();
 		g_refusing = {};
 		g_talkingChild = {};
 		Gifts::OnGameLoaded();

@@ -1,5 +1,7 @@
 #include "Romance.h"
 
+#include "Expose.h"
+
 #include "FirstDate.h"
 #include "Follower.h"
 #include "Forms.h"
@@ -395,7 +397,6 @@ namespace Romance
 		if (!candidate) {
 			return;
 		}
-		auto& s = State::Of(a_partner->GetFormID());
 		logger::info("Romance: {} caught you ({})", a_partner->GetDisplayFullName(), a_cause);
 		if (a_with && Candidates::Find(a_with)) {
 			State::Of(a_with->GetFormID()).knowSeeing.insert(a_partner->GetFormID());  // she knows about her now
@@ -404,16 +405,26 @@ namespace Romance
 		if (!RE::UI::GetSingleton()->IsMenuOpen(RE::DialogueMenu::MENU_NAME)) {
 			World::SayMoment(a_partner, Moment::kCaught, a_delay);
 		}
-		int silent = candidate->attributes.brokenHeartDays;
+		Heartbroken(a_partner, a_cause);
+		SendModEvent("IRF_Strayed"sv, a_partner, a_cause, 1.0f);
+	}
+
+	void Heartbroken(RE::Actor* a_partner, std::string_view a_cause, int a_times)
+	{
+		const auto candidate = Candidates::Find(a_partner);
+		if (!candidate) {
+			return;
+		}
+		auto& s = State::Of(a_partner->GetFormID());
+		int   silent = candidate->attributes.brokenHeartDays;
 		if (candidate->attributes.heartbreak == Candidates::Heartbreak::kBitter) {
 			silent = std::max(silent, candidate->attributes.silentDays);  // a bitter heart stays silent longer
 		}
-		s.silentUntilDay = State::Today() + static_cast<float>(silent);
+		s.silentUntilDay = State::Today() + static_cast<float>(silent * std::max(1, a_times));
 		s.hurt = true;
 		Follower::Dismiss(a_partner);
 		Notify(a_partner, Event::kBrokenHeart);
 		Hurt(a_partner, candidate->attributes.cheat, Why::kCheating, a_cause);
-		SendModEvent("IRF_Strayed"sv, a_partner, a_cause, 1.0f);
 		Sync(a_partner);
 	}
 
@@ -441,6 +452,9 @@ namespace Romance
 		for (const auto partner : Partners()) {
 			if (partner == a_other) {
 				continue;
+			}
+			if (World::Sees(partner, player, r.caughtDistance) && IsPartner(a_other) && !Knows(partner, a_other) && Expose::Start(a_other, partner)) {
+				return;  // your other partner saw it: the two have it out
 			}
 			if (World::Sees(partner, player, r.caughtDistance)) {
 				Caught(partner, a_deed, delay, a_other);

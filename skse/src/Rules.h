@@ -66,6 +66,10 @@ namespace Rules
 		float jealousDistance = 1536.0f;
 		float exposeDistance = 1024.0f;  // ~15 m: a partner this close hears another greet you as hers
 		float caughtLineGap = 4.0f;      // seconds between two partners' caught lines in one scene
+		float exposeLeaveDistance = 4096.0f;  // walk this far from them during the scene and it's broken off
+		int   exposePersuade = 50;            // Speech that carries the lie when the two have it out (fixed)
+		int   exposeDoubtCost = 5;            // approval the one who believed you still loses
+		int   disownedSpouseMult = 3;         // a wife you denied: her broken heart lasts this many times as long
 	};
 
 	void          Load();

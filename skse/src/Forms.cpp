@@ -62,6 +62,10 @@ namespace Forms
 		s.moment = f.Own<RE::TESFaction>(kMomentFaction, "IRF_MomentFaction");
 		s.reply = f.Own<RE::TESFaction>(kReplyFaction, "IRF_ReplyFaction");
 		s.jealousOf = f.Own<RE::TESFaction>(kJealousOfFaction, "IRF_JealousOfFaction");
+		s.expose = f.Own<RE::TESFaction>(kExposeFaction, "IRF_ExposeFaction");
+		s.exposeSideA = f.Own<RE::TESTopic>(kExposeSideATopic, "IRF_ExposeSideATopic");
+		s.exposeSideB = f.Own<RE::TESTopic>(kExposeSideBTopic, "IRF_ExposeSideBTopic");
+		s.exposeTrue = f.Own<RE::TESTopic>(kExposeTrueTopic, "IRF_ExposeTrueTopic");
 		s.refuse = f.Own<RE::TESFaction>(kRefuseFaction, "IRF_RefuseFaction");
 		s.askDate = f.Own<RE::TESFaction>(kAskDateFaction, "IRF_AskDateFaction");
 		s.follow = f.Own<RE::TESFaction>(kFollowFaction, "IRF_FollowAnswerFaction");

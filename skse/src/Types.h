@@ -103,6 +103,12 @@ namespace IRF
 		kTown = 24,
 		kInn = 25,
 		kHomeTown = 26,
+		// two partners have it out (Expose): A walks up to B and asks, B claims you, A answers, B asks you, A's last word
+		kExposeAsk = 27,
+		kExposeClaim = 28,
+		kExposeCounter = 29,
+		kExposeQuestion = 30,  // her force greet "Is this true?" and her answers to yours
+		kExposeOutcome = 31,   // IRF_ExposeFaction: 1 she believes you, 2 she doesn't, 3 you denied her, 4 you told the truth
 	};
 
 	// IRF_MoodFaction: her mood on top of the stage (Dating to Married), for the mood versions of her greetings,
