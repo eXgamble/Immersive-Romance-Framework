@@ -20,6 +20,7 @@ Spec (JSON):
              most specific first and a plain one last
              a text may also carry "alive": "Skyrim.esm|0x013487" or "dead": ... (a placed reference): played only
              while that person lives (or after they died), e.g. lines about her brother; these join the random pick
+             a text's "text" may be a list: one line said as several responses in a row (a longer answer)
   "placeholders": true,                      fill every required key that has no text
   "circle": [ { "name": "Lucan", "npc": "...", "ref": "...",
                 "reactions": { "amends": "Text" },
@@ -229,10 +230,11 @@ def info(editor_id, topic, text, speaker_npc, faction, rank, op, goodbye, random
     extra = (rows or []) + adopted_conditions(text) + life_conditions(text)
     prompt = text.get("prompt") if isinstance(text, dict) else None
     text = text["text"] if isinstance(text, dict) else text
-    ops = [
-        {"field_path": "Topic", "value": fw(topic)},
+    parts = text if isinstance(text, list) else [text]  # several responses: said one after another
+    ops = [{"field_path": "Topic", "value": fw(topic)}] + [
         {"field_path": "Responses", "op": "Add", "compose": {"type": "DialogResponse", "fields": {
-            "Emotion": "Neutral", "EmotionValue": "50", "ResponseNumber": "1", "Text": text}}},
+            "Emotion": "Neutral", "EmotionValue": "50", "ResponseNumber": str(n), "Text": part}}}
+        for n, part in enumerate(parts, start=1)] + [
         {"field_path": "Conditions", "op": "Add", "composes": [
             condition("GetIsIDConditionData", "Object", speaker_npc, 1)] + rank_rows(faction, rank, op) + extra},
     ]
