@@ -107,126 +107,6 @@ namespace Papyrus
 			SKSE::GetTaskInterface()->AddTask([]() { Romance::SyncAll(); });
 		}
 
-		// ---- debug tools (dev and authors: stage, approval, deeds, days, a state dump) ----
-
-		void DebugSetApproval(RE::StaticFunctionTag*, RE::Actor* a_actor, std::int32_t a_value)
-		{
-			Later(a_actor, [a_value](RE::Actor* a) { Romance::ModApproval(a, a_value - Romance::GetApproval(a), "debug"); });
-		}
-
-		// Moves this candidate's clocks back, as if a_days had passed (absence, broken heart, win-back, refusals)
-		void DebugSkipDays(RE::StaticFunctionTag*, RE::Actor* a_actor, std::int32_t a_days)
-		{
-			Later(a_actor, [a_days](RE::Actor* a) {
-				const auto d = static_cast<float>(a_days);
-				if (Children::IsChild(a)) {  // an adopted child: when they last saw you
-					auto& c = State::Children()[a->GetFormID()];
-					c.lastSeenDay = (c.lastSeenDay <= State::kNever ? State::Today() : c.lastSeenDay) - d;
-					c.lastMoodDay -= d;
-					logger::info("Debug: {}'s clocks moved back {} days", a->GetDisplayFullName(), a_days);
-					Children::Sync(a);
-					return;
-				}
-				auto& s = State::Of(a->GetFormID());
-				s.lastContactDay -= d;
-				s.silentUntilDay -= d;
-				s.breakupDay -= d;
-				s.lockUntilDay -= d;
-				s.waryUntilDay -= d;
-				s.jealousUntilDay -= d;
-				s.nextPleadDay -= d;
-				s.committedDay -= d;
-				s.recentDay -= d;
-				s.lastKnowDay -= d;
-				if (s.dateUntilDay > 0.0f) {
-					s.dateUntilDay -= d;  // a date that's now in the past: stood up at the next check
-				}
-				s.lastDateDay -= d;
-				s.lastKissDay -= d;
-				s.lastGiftDay -= d;
-				for (auto& [id, refusal] : State::Refusals()) {
-					if (refusal.untilDay > 0.0f) {
-						refusal.untilDay -= d;
-					}
-				}
-				logger::info("Debug: {}'s clocks moved back {} days", a->GetDisplayFullName(), a_days);
-				Romance::Sync(a);
-			});
-		}
-
-		// "caught", "bleedout", "attack", "absence", "crime", "breakup" (they end it), "amends", "xp", "jealous", "dumped" (you end it)
-		void DebugDeed(RE::StaticFunctionTag*, RE::Actor* a_actor, RE::BSFixedString a_deed)
-		{
-			std::string deed = a_deed.c_str();
-			Later(a_actor, [deed](RE::Actor* a) {
-				const auto candidate = Candidates::Find(a);
-				if (!candidate) {
-					return;
-				}
-				auto& s = State::Of(a->GetFormID());
-				if (deed == "caught") {
-					Romance::Caught(a, "debug");
-				} else if (deed == "bleedout") {
-					Romance::Hurt(a, candidate->attributes.bleedout, Why::kBleedouts, "debug bleedout");
-				} else if (deed == "attack") {
-					Events::Attack(a, "debug attack");  // as a real one: approval, lock, her wary mood
-				} else if (deed == "dumped") {
-					Romance::BreakUp(a, Who::kPlayer, Why::kChoice);  // you end it (her heartbreak style applies)
-				} else if (deed == "jealous") {
-					s.jealousUntilDay = State::Today() + static_cast<float>(Rules::Get().jealousDays);
-				} else if (deed == "absence") {
-					s.lastContactDay = State::Today() - static_cast<float>(candidate->attributes.absenceDays) * 3.0f;
-				} else if (deed == "crime") {
-					Romance::Hurt(a, { std::abs(candidate->attributes.alignment) * 4, false }, Why::kCrime, "debug crime");
-				} else if (deed == "breakup") {
-					s.pendingBreakup = Why::kAbsence;
-				} else if (deed == "amends") {
-					s.hurt = false;
-					s.silentUntilDay = 0.0f;
-					Romance::Notify(a, Event::kAmends);
-				} else if (deed == "xp") {
-					Follower::AddXp(a, 100, "debug");
-				}
-				Romance::Sync(a);
-			});
-		}
-
-		void DebugDump(RE::StaticFunctionTag*, RE::Actor* a_actor)
-		{
-			Later(a_actor, [](RE::Actor* a) {
-				const auto candidate = Candidates::Find(a);
-				if (!candidate) {
-					logger::info("Debug: {} is not a candidate", a->GetDisplayFullName());
-					return;
-				}
-				const auto& s = State::Of(a->GetFormID());
-				const auto  today = State::Today();
-				logger::info("Debug: {} stage {} approval {} | silent {:.1f}d hurt {} | ex who {} why {} unforgivable {} | secret {} | lock {:.1f}d | "
-							 "contact {:.1f}d ago | recent {} {:.1f}d ago | xp {} levels {} | pending breakup {} confront {} | knowSeeing {} sawStraying {}",
-					a->GetDisplayFullName(), Rank(Romance::GetStage(a)), Romance::GetApproval(a), std::max(0.0f, s.silentUntilDay - today), s.hurt,
-					Rank(s.who), Rank(s.why), s.unforgivable, s.secret, std::max(0.0f, s.lockUntilDay - today), today - s.lastContactDay, Rank(s.recent),
-					today - s.recentDay, s.partnerXp, s.appliedLevels, Rank(s.pendingBreakup), s.confrontPending, s.knowSeeing.size(), s.sawStraying.size());
-				RE::SendHUDMessage::ShowHUDMessage(std::format("{}: stage {}, approval {}", a->GetDisplayFullName(), Rank(Romance::GetStage(a)),
-					Romance::GetApproval(a))
-														.c_str());
-			});
-		}
-
-		void DebugReset(RE::StaticFunctionTag*, RE::Actor* a_actor)
-		{
-			Later(a_actor, [](RE::Actor* a) {
-				State::All().erase(a->GetFormID());
-				Romance::SetStage(a, Stage::kNone, "debug reset");
-				a->RemoveFromFaction(Forms::Get().approval);
-				Romance::Sync(a);
-			});
-		}
-	}
-
-	namespace
-	{
-		// A child counts as adopted (Hearthfire's free Child1/Child2 alias and its adoption faction), without
-		// Hearthfire's adoption and move: for testing the children's lines and a spouse staying home
 		std::int32_t GetAdoptedBoys(RE::StaticFunctionTag*)
 		{
 			return Children::Boys();
@@ -235,32 +115,6 @@ namespace Papyrus
 		std::int32_t GetAdoptedGirls(RE::StaticFunctionTag*)
 		{
 			return Children::Girls();
-		}
-
-		void DebugAdopt(RE::StaticFunctionTag*, RE::Actor* a_child)
-		{
-			Later(a_child, [](RE::Actor* a) {
-				const auto& f = Forms::Get();
-				if (!f.adoption || !f.adoptionFaction) {
-					logger::info("Debug: Hearthfire isn't loaded");
-					return;
-				}
-				for (const auto alias : f.adoption->aliases) {
-					if (!alias || alias->GetVMTypeID() != RE::BGSRefAlias::VMTYPEID || (alias->aliasName != "Child1"sv && alias->aliasName != "Child2"sv)) {
-						continue;
-					}
-					const auto ref = static_cast<RE::BGSRefAlias*>(alias);
-					if (!ref->GetReference()) {
-						ref->ForceRefTo(a);
-						a->AddToFaction(f.adoptionFaction, 0);
-						logger::info("Debug: {} counts as adopted ({})", a->GetDisplayFullName(), alias->aliasName.c_str());
-						Children::Count();
-						Children::Sync(a);
-						return;
-					}
-				}
-				logger::info("Debug: no free child alias for {}", a->GetDisplayFullName());
-			});
 		}
 	}
 
@@ -278,12 +132,6 @@ namespace Papyrus
 		a_vm->RegisterFunction("RequestStage"sv, script, RequestStage);
 		a_vm->RegisterFunction("ModApproval"sv, script, ModApproval);
 		a_vm->RegisterFunction("SetPlayerInterest"sv, script, SetPlayerInterest);
-		a_vm->RegisterFunction("DebugSetApproval"sv, script, DebugSetApproval);
-		a_vm->RegisterFunction("DebugSkipDays"sv, script, DebugSkipDays);
-		a_vm->RegisterFunction("DebugDeed"sv, script, DebugDeed);
-		a_vm->RegisterFunction("DebugDump"sv, script, DebugDump);
-		a_vm->RegisterFunction("DebugReset"sv, script, DebugReset);
-		a_vm->RegisterFunction("DebugAdopt"sv, script, DebugAdopt);
 		a_vm->RegisterFunction("GetAdoptedBoys"sv, script, GetAdoptedBoys);
 		a_vm->RegisterFunction("GetAdoptedGirls"sv, script, GetAdoptedGirls);
 		logger::info("Papyrus: IRF natives registered");

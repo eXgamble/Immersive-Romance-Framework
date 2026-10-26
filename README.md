@@ -285,8 +285,9 @@ The generator takes them per text: `{ "text": "...", "girls": 1, "boys": ">=1" }
 
 `Scripts/Source/IRF.psc` (MIT): `IsCandidate`, `GetStage`, `GetApproval`, `GetPartner`, `GetWhy`, `GetWho`,
 `IsBrokenHearted`, `IsIntimacyAllowed` (for mods that start scenes), `RequestStage` (story beats from your own
-quests), `ModApproval`, `SetPlayerInterest`, and debug tools (`DebugSetApproval`, `DebugSkipDays`, `DebugDeed`,
-`GetAdoptedBoys`, `GetAdoptedGirls`, `DebugDump`, `DebugReset`, `DebugAdopt`: a child counts as adopted without Hearthfire's move). Mod events: `IRF_StageChanged` (sender = candidate, numArg = new stage, strArg = cause),
+quests), `ModApproval`, `SetPlayerInterest`, `GetAdoptedBoys`, `GetAdoptedGirls`. Debug tools live in the optional
+**IRF - Debug** mod (its own README; script `IRFDebug`), which talks to the framework through `IRFGetDebugAPI()`
+(`skse/include/IRFDebugAPI.h`, free for other tools too). Mod events: `IRF_StageChanged` (sender = candidate, numArg = new stage, strArg = cause),
 `IRF_Strayed` (sender = the partner strayed from, numArg = 1 if caught, strArg = the deed), `IRF_SpouseBonus` (sender = the
 spouse, strArg = "on" / "off", numArg = 1 / 0).
 

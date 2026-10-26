@@ -52,17 +52,5 @@ Function SetPlayerInterest(string asInterest) global native
 int Function GetAdoptedBoys() global native
 int Function GetAdoptedGirls() global native
 
-; ---- debug tools ----
-; Set approval directly
-Function DebugSetApproval(Actor akActor, int aiValue) global native
-; Move this candidate's clocks back as if aiDays had passed (absence, broken heart, win-back, refusals)
-Function DebugSkipDays(Actor akActor, int aiDays) global native
-; Trigger a deed: "caught", "bleedout", "attack", "absence", "crime", "breakup", "amends", "xp"
-Function DebugDeed(Actor akActor, string asDeed) global native
-; Write everything the framework knows about the candidate to ImmersiveRomanceFramework.log (and a notification)
-Function DebugDump(Actor akActor) global native
-; Forget the candidate's relationship entirely
-Function DebugReset(Actor akActor) global native
-
-; A child counts as adopted (Hearthfire's child alias and adoption faction) without Hearthfire's adoption and move
-Function DebugAdopt(Actor akChild) global native
+; Debug tools (set stage, approval, deeds, days, adopt, reactions, the line inspector): the optional "IRF - Debug"
+; mod (script IRFDebug)

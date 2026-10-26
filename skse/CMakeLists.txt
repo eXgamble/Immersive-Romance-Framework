@@ -21,9 +21,9 @@ find_package(nlohmann_json CONFIG REQUIRED)
 add_commonlibsse_plugin(${PROJECT_NAME}
 	NAME "ImmersiveRomanceFramework"
 	AUTHOR "eXgamble"
-	SOURCES src/plugin.cpp src/Forms.cpp src/Rules.cpp src/Candidates.cpp src/State.cpp src/Romance.cpp src/World.cpp src/Follower.cpp src/Events.cpp src/Crimes.cpp src/Gifts.cpp src/Children.cpp src/Confess.cpp src/FirstDate.cpp src/Replies.cpp src/Papyrus.cpp)
+	SOURCES src/plugin.cpp src/Forms.cpp src/Rules.cpp src/Candidates.cpp src/State.cpp src/Romance.cpp src/World.cpp src/Follower.cpp src/Events.cpp src/Crimes.cpp src/Gifts.cpp src/Children.cpp src/Confess.cpp src/FirstDate.cpp src/Replies.cpp src/DebugAPI.cpp src/Papyrus.cpp)
 
-target_include_directories(${PROJECT_NAME} PRIVATE src)
+target_include_directories(${PROJECT_NAME} PRIVATE src include)
 target_link_libraries(${PROJECT_NAME} PRIVATE nlohmann_json::nlohmann_json)
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_23)
 target_compile_options(${PROJECT_NAME} PRIVATE /Zc:preprocessor /permissive- /EHsc /utf-8 /W4)
@@ -36,4 +36,24 @@ set(DEPLOY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../mod/SKSE/Plugins")
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 	COMMAND ${CMAKE_COMMAND} -E make_directory "${DEPLOY_DIR}"
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:${PROJECT_NAME}>" "${DEPLOY_DIR}"
+	VERBATIM)
+
+# IRF - Debug: test tools for the framework and its add-ons (SKSE Menu Framework pages + Papyrus script IRFDebug). It
+# reads the framework through the exported IRFGetDebugAPI (include/IRFDebugAPI.h), never links to it. Deployed to
+# ../debug-mod, the MO2 mod "IRF - Debug" (junction); an optional download. debug/include/SKSEMenuFramework.h is the
+# framework's GPL-3 header (QTR-Modding/SKSE-Menu-Framework-3 @ f93a729, matching 3.13).
+add_commonlibsse_plugin(IRFDebug
+	NAME "IRFDebug"
+	AUTHOR "eXgamble"
+	SOURCES debug/src/plugin.cpp debug/src/Game.cpp debug/src/UI.cpp debug/src/Papyrus.cpp)
+target_link_libraries(IRFDebug PRIVATE nlohmann_json::nlohmann_json)
+target_compile_features(IRFDebug PRIVATE cxx_std_23)
+target_compile_options(IRFDebug PRIVATE /Zc:preprocessor /permissive- /EHsc /utf-8 /W4)
+target_compile_definitions(IRFDebug PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX UNICODE _UNICODE)
+target_include_directories(IRFDebug PRIVATE debug/src debug/include include)
+target_precompile_headers(IRFDebug PRIVATE debug/src/PCH.h)
+set(DEBUG_DEPLOY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../debug-mod/SKSE/Plugins")
+add_custom_command(TARGET IRFDebug POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E make_directory "${DEBUG_DEPLOY_DIR}"
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:IRFDebug>" "${DEBUG_DEPLOY_DIR}"
 	VERBATIM)
