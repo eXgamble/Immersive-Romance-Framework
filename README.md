@@ -62,8 +62,9 @@ line they say.
 - **Witnesses:** your partner catches you straying if she sees it; if someone else from her town or her family
   sees it, word may get back (as often as that witness is garrulous). Deny it (it works only with a silver
   tongue) or admit it.
-- **Her family and friends** (the circle) react: a line the next time you meet, and if you broke her heart they
-  may refuse you their shop or training until you make amends.
+- **Her family and friends** (the circle) react: a line the next time you meet (also when you adopt a child,
+  married to her), and if you broke her heart they may refuse you their shop or training until you make amends.
+  Now and then their everyday hellos and goodbyes are about the two of you (and your children).
 - **Crimes:** a candidate who sees you steal, pickpocket, assault or murder judges it by her alignment (good ones
   disapprove, evil ones approve), a cheap theft included.
 - **Beside you:** a partner who follows you fights to her own profile (role, nerve, gear) and grows in level up to
@@ -130,6 +131,7 @@ A candidate whose manifest is missing a required line, or whose lines don't carr
   "circle": [
     { "name": "Lucan Valerius", "npc": "Skyrim.esm|0x01347A", "ref": "Skyrim.esm|0x013487",
       "reactions": { "amends": ["IRF - Camilla.esp|0x84D"] },
+      "greetings": { "goodbye.spouse": ["IRF - Camilla.esp|0x84F"] },
       "refuse": { "on": ["brokenHeart"], "until": "amends", "services": ["trade"],
                   "lines": ["IRF - Camilla.esp|0x84E"] } }
   ]
@@ -148,6 +150,14 @@ you." is gone until a day has passed, so nothing is given away for nothing. An i
 town) comes from her editor location. `refuse.on` takes the events below, or `theyEnded.<why>` for only the
 breakups she began for that reason (e.g. `theyEnded.violence`). `refuse.until` is `"amends"` (amends with her, or
 winning her back) or a number of days (no amends follow `killed`: a refusal over it lasts for good).
+
+**A circle member's greetings:** `greetings` keys are `hello.<set>` / `goodbye.<set>`, the sets as hers (dating,
+love, marry, maramal, spouse) plus `ex` and `widowed`. The lines go in IRF_CircleHelloTopic 0x873 /
+IRF_CircleGoodbyeTopic 0x874 (IRF_CircleQuest 0x872, open to any speaker; the candidates' own greeting topics take
+only candidates), each with `GetIsID` of the speaker and `GetFactionRank IRF_StageFaction` run on the candidate's
+reference (an OR group, == each stage of the set); add `GetRandomPercent` so their vanilla greetings still come up
+(the generator: one of theirs `greetShare`, default 25, % of the time). Any line can ask about children with
+`GetGlobalValue IRF_AdoptedBoys / IRF_AdoptedGirls` (the generator: `"kids": ">=1"`).
 
 ### The lines
 
@@ -215,7 +225,8 @@ mood lines; the generator does this. A spouse's idle lines also carry `(IRF_Stag
 - **why:** 1 cheating, 2 violence, 3 absence, 4 bleedouts, 5 crime, 6 choice (you ended it).
 - **events:** 2 dating, 3 committed, 4 engaged, 5 married, 6 amends, 7 playerEnded, 8 theyEnded,
   9 brokenHeart, 10 seeingSomeone (said by other candidates who know), 11 widowed, 12 wonBack, 13 killed (you
-  killed them, seen), 14 stoodUp (you missed the first date). A reaction plays once, at the next meeting, within a week; a recent line plays for a while
+  killed them, seen), 14 stoodUp (you missed the first date), 15 adopted (married to her, you adopted a child; not for children
+  already there when the framework was added). A reaction plays once, at the next meeting, within a week; a recent line plays for a while
   after the event.
 - **moments:** 1 `caught`, 2 `revive`, 3 `attacked`, 8 `stayhome` (in its own topic, above), 4 `crime.approve` (required when alignment < 0),
   5 `crime.disapprove` (when alignment > 0), 6 `jealous`, 10 `road.afterfight`, 11 `road.dragon`,

@@ -117,6 +117,8 @@ namespace Forms
 		s.chat = f.Own<RE::TESFaction>(kChatFaction, "IRF_ChatFaction");
 		s.firstDateQuest = f.Own<RE::TESQuest>(kFirstDateQuest, "IRF_FirstDateQuest");
 		s.firstDateReply = f.Own<RE::TESTopic>(kFirstDateReplyTopic, "IRF_FirstDateReplyTopic");
+		s.circleHello = f.Own<RE::TESTopic>(kCircleHelloTopic, "IRF_CircleHelloTopic");
+		s.circleGoodbye = f.Own<RE::TESTopic>(kCircleGoodbyeTopic, "IRF_CircleGoodbyeTopic");
 		s.pleadYes = f.Own<RE::TESTopic>(kPleadYesTopic, "IRF_PleadYesTopic");
 		s.pleadNo = f.Own<RE::TESTopic>(kPleadNoTopic, "IRF_PleadNoTopic");
 		s.forceGreetTopic = f.Own<RE::TESTopic>(kForceGreetTopic, "IRF_ForceGreetTopic");

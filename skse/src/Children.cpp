@@ -168,9 +168,17 @@ namespace Children
 		const auto  boys = static_cast<float>(Boys());
 		const auto  girls = static_cast<float>(Girls());
 		if (f.adoptedBoys && f.adoptedGirls && (f.adoptedBoys->value != boys || f.adoptedGirls->value != girls)) {
+			// -1: never counted in this game (the plugin's value; added mid-game): the children already there are
+			// no news to anyone
+			const bool counted = f.adoptedBoys->value >= 0.0f && f.adoptedGirls->value >= 0.0f;
+			const bool more = boys + girls > f.adoptedBoys->value + f.adoptedGirls->value;
 			f.adoptedBoys->value = boys;
 			f.adoptedGirls->value = girls;
 			logger::info("Children: {} boys, {} girls", boys, girls);
+			const auto spouse = Romance::Partner();
+			if (counted && more && spouse && Romance::GetStage(spouse) == Stage::kMarried) {
+				Romance::Notify(spouse, Event::kAdopted);  // her family hears of it
+			}
 		}
 	}
 

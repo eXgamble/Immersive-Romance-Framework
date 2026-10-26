@@ -25,6 +25,7 @@ Spec (JSON):
              {"toward": "Skyrim.esm|0x013491", "is": "<0"} (with someone else), and "stageDone": "Skyrim.esm|0x074A83:310"
              (that quest stage is done); give the other texts of that key the opposite, or (circle reactions, which
              play the first that fits) list the plain one last
+             a text may carry "kids": ">=1" (you're raising at least one adopted child) or "kids": 0 (none)
   "placeholders": true,                      fill every required key that has no text
   "records": [ {houseCARL create record}, ... ]  her own other records (a spouse perk, ...), created FIRST so their
                                              FormIDs never move; an attribute value "@EditorID" names one of them
@@ -33,6 +34,10 @@ Spec (JSON):
                                              --relock only while no voice files exist yet
   "circle": [ { "name": "Lucan", "npc": "...", "ref": "...",
                 "reactions": { "amends": "Text" },
+                "greetings": { "goodbye.spouse": ["Text", {"text": "...", "kids": ">=1"}] },   their everyday hellos
+                       and goodbyes while she is at that stage with you (sets as hers: dating, love, marry, maramal,
+                       spouse, and ex, widowed); mixed with their vanilla ones: one of theirs plays "greetShare"
+                       (default 25) % of the time
                 "refuse": { "on": ["brokenHeart"], "until": "amends", "services": ["trade"], "lines": "Text" } } ]
 }
 
@@ -54,6 +59,7 @@ CONFESS_REPLY = 0x862  # IRF_ConfessReplyTopic: "You mean a lot to me too."
 KNOW, KNOW_MAX = 0x864, 10  # IRF_KnowTopic1-10 (0x864-0x86D): the get-to-know questions (at least one)
 CANDIDATE_F = 0x800  # IRF_CandidateFaction: every registered candidate, rank 0
 FIRSTDATE_REPLY = 0x871  # IRF_FirstDateReplyTopic: "Of course I came."
+CIRCLE_HELLO, CIRCLE_GOODBYE = 0x873, 0x874  # a circle member's everyday greetings (IRF_CircleQuest: any speaker)
 LINKS = {"confess": [CONFESS_REPLY], "firstdate": [FIRSTDATE_REPLY]}  # the replies her line offers (LinkTo); "court" links to her questions (main)
 ASKDATE, FOLLOW, KISS, BREAKUP, AMENDS, WINBACK, SECRET, DATE, DENY, ADMIT = (
     0x82A, 0x82C, 0x82E, 0x830, 0x832, 0x834, 0x836, 0x838, 0x83A, 0x83C)
@@ -72,13 +78,15 @@ WEDDING = "07404E:Skyrim.esm"  # RelationshipMarriageWedding: runs once the wedd
 # the stages listed (IRF_GreetFaction / IRF_StageFaction 2 Dating, 3 Committed, 4 Engaged, 5 Married) and every
 # set that fits joins ONE random pick per topic. "maramal" stops once the wedding is booked.
 SETS = {"dating": [2, 3, 4], "love": [3, 4, 5], "marry": [3], "maramal": [4], "spouse": [5]}
+CIRCLE_SETS = {**SETS, "ex": [6], "widowed": [7]}  # a circle member's greetings: hers, and after it ended
+CIRCLE_GREET_SHARE = 25
 MARRIED = 5
 ADOPTED = {"boys": 0x859, "girls": 0x85A}  # IRF_AdoptedBoys / IRF_AdoptedGirls (globals)
 OPS = {"==": "EqualTo", "!=": "NotEqualTo", ">=": "GreaterThanOrEqualTo", "<=": "LessThanOrEqualTo", ">": "GreaterThan", "<": "LessThan"}
 
 EVENTS = {"dating": 2, "committed": 3, "engaged": 4, "married": 5, "amends": 6,
           "playerEnded": 7, "theyEnded": 8, "brokenHeart": 9, "seeingSomeone": 10, "widowed": 11, "wonBack": 12, "killed": 13,
-          "stoodUp": 14}
+          "stoodUp": 14, "adopted": 15}
 WHYS = {"cheating": 1, "violence": 2, "absence": 3, "bleedouts": 4, "crime": 5, "choice": 6}
 REFUSE_MOMENT = 7  # a circle member refusing service
 STAYHOME_MOMENT = 8  # a spouse with children won't leave town
@@ -215,7 +223,9 @@ def share_rows(percent):
 
 
 def rank_rows(faction, rank, op):
-    """one GetFactionRank row, or for a list of ranks an OR group (== each)"""
+    """one GetFactionRank row, or for a list of ranks an OR group (== each); none without a faction"""
+    if faction is None:
+        return []
     if not isinstance(rank, list):
         return [condition("GetFactionRankConditionData", "Faction", fw(faction), rank, op)]
     return [condition("GetFactionRankConditionData", "Faction", fw(faction), r, "EqualTo", or_next=i < len(rank) - 1)
@@ -268,13 +278,33 @@ def feeling_conditions(text):
     return rows
 
 
+def kids_conditions(text):
+    """{"kids": ">=1"} -> IRF_AdoptedBoys >= 1 OR IRF_AdoptedGirls >= 1; {"kids": 0} -> both == 0"""
+    if not isinstance(text, dict) or "kids" not in text:
+        return []
+    some = str(text["kids"]).strip() != "0"
+    return [{"type": "ConditionFloat", "fields": {"CompareOperator": "GreaterThanOrEqualTo" if some else "EqualTo",
+                                                  "ComparisonValue": "1" if some else "0", **({"Flags": "OR"} if some and i == 0 else {})},
+             "sets": [{"path": "Data", "compose": {"type": "GetGlobalValueConditionData",
+                                                   "sets": [{"path": "Global", "value": fw(local)}]}}]}
+            for i, local in enumerate(ADOPTED.values())]
+
+
+def stage_rows_on(ref, ranks):
+    """GetFactionRank IRF_StageFaction == each rank, run on the candidate (an OR group): a circle member's greeting"""
+    return [{"type": "ConditionFloat", "fields": {"CompareOperator": "EqualTo", "ComparisonValue": str(r), **({"Flags": "OR"} if i < len(ranks) - 1 else {})},
+             "sets": [{"path": "Data", "compose": {"type": "GetFactionRankConditionData", "fields": {"RunOnType": "Reference"},
+                                                   "sets": [{"path": "Faction", "value": fw(STAGE_F)}, {"path": "Reference", "value": ref}]}}]}
+            for i, r in enumerate(ranks)]
+
+
 def specific(text):
     """a boys/girls text: first-fit, before the random pick"""
     return isinstance(text, dict) and any(name in text for name in ADOPTED)
 
 
 def info(editor_id, topic, text, speaker_npc, faction, rank, op, goodbye, random=None, rows=None):
-    extra = (rows or []) + adopted_conditions(text) + life_conditions(text) + feeling_conditions(text)
+    extra = (rows or []) + adopted_conditions(text) + life_conditions(text) + feeling_conditions(text) + kids_conditions(text)
     prompt = text.get("prompt") if isinstance(text, dict) else None
     text = text["text"] if isinstance(text, dict) else text
     parts = text if isinstance(text, list) else [text]  # several responses: said one after another
@@ -401,6 +431,29 @@ def main(spec_path, out_dir, relock=False):
                 reactions.setdefault(event, []).append(lines[key][-1])
         if reactions:
             entry["reactions"] = reactions
+        # their everyday hellos and goodbyes while she's at a stage with you: one random run per topic, thinned so
+        # one of them plays greetShare % of the time and their vanilla ones the rest
+        greetings = {}
+        share = member.get("greetShare", CIRCLE_GREET_SHARE)
+        her = form_key(who["ref"])
+        for topic, prefix in ((CIRCLE_HELLO, "hello."), (CIRCLE_GOODBYE, "goodbye.")):
+            run = [(name, text) for name, value in member.get("greetings", {}).items() if name.startswith(prefix) for text in texts(value)]
+            for i, (name, text) in enumerate(run):
+                together = sum(1 for other, _ in run if other == name)  # the lines of one set can fit at once
+                percent = round(100 * (1 - (1 - share / 100) ** (1 / together)))
+                ranks = CIRCLE_SETS[name[len(prefix):]]
+                booked = [condition("GetQuestRunningConditionData", "Quest", WEDDING, 0)] if name.endswith(".maramal") else []
+                key = f"circle.{index}.{name}"
+                eid = f"IRF{short}_{mshort}_{name.replace('.', '_')}_{i + 1}"
+                random = None if len(run) < 2 else ("end" if i == len(run) - 1 else "start")
+                record = info(eid, topic, text, mnpc, None, None, None, False, random,
+                              stage_rows_on(her, ranks) + booked + [random_row(percent)])
+                records.append(record)
+                lines.setdefault(key, []).append(f"{plugin}|0x{next_id:03X}")
+                next_id += 1
+                greetings.setdefault(name, []).append(lines[key][-1])
+        if greetings:
+            entry["greetings"] = greetings
         if "refuse" in member:
             refuse = dict(member["refuse"])
             refuse_lines = []

@@ -71,6 +71,7 @@ namespace IRF
 		kWonBack = 12,          // back together after a breakup
 		kKilled = 13,           // the player killed them, and someone saw it
 		kStoodUp = 14,          // the player didn't come to the first date (her "stoodup" line at the next meeting)
+		kAdopted = 15,          // married to them, the player adopted a child (Hearthfire)
 		kBreakupSpeech = 20,    // + Why: the candidate's own speech as she leaves you (21 cheating .. 25 crime)
 		kConfront = 30,         // word got back: she confronts you
 	};

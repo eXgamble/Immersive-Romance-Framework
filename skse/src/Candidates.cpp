@@ -38,6 +38,7 @@ namespace Candidates
 				{ Event::kWonBack, "wonBack" },
 				{ Event::kKilled, "killed" },
 				{ Event::kStoodUp, "stoodUp" },
+				{ Event::kAdopted, "adopted" },
 			};
 			return names;
 		}
@@ -275,6 +276,19 @@ namespace Candidates
 					continue;
 				}
 				if (d.functionData.params[0] == a_param && d.comparisonValue.f == a_value) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		// A circle member's greeting reads the candidate's stage off her: GetFactionRank IRF_StageFaction on a reference
+		bool HasStageRow(const RE::TESTopicInfo* a_info)
+		{
+			for (auto item = a_info->objConditions.head; item; item = item->next) {
+				const auto& d = item->data;
+				if (d.functionData.function.get() == RE::FUNCTION_DATA::FunctionID::kGetFactionRank &&
+					d.object.get() == RE::CONDITIONITEMOBJECT::kRef && d.functionData.params[0] == Forms::Get().stage) {
 					return true;
 				}
 			}
@@ -529,6 +543,37 @@ namespace Candidates
 					nlohmann::json wrap{ { name, list } };
 					TakeLines(wrap, { name, f.reactionHello, f.reaction, Rank(*event) }, member.npc, std::format("circle.{}.reaction.{}", index, name),
 						candidate.lines, problems);
+				}
+				// their everyday greetings and goodbyes about the two of you: in IRF_CircleHelloTopic / GoodbyeTopic (the
+				// candidates' own greeting topics only take candidates), with the candidate's stage read off the candidate
+				// (GetFactionRank IRF_StageFaction run on her reference)
+				const auto greetings = c.value("greetings", nlohmann::json::object());
+				for (const auto& [name, list] : greetings.items()) {
+					const bool hello = name.starts_with("hello.");
+					if (!hello && !name.starts_with("goodbye.")) {
+						problems.push_back(std::format("circle member {}: greeting '{}' is not hello.<set> or goodbye.<set>", member.name, name));
+						continue;
+					}
+					for (const auto& entry : list) {
+						const auto text = entry.is_string() ? entry.get<std::string>() : ""s;
+						const auto form = ParseForm(text);
+						const auto info = form ? form->As<RE::TESTopicInfo>() : nullptr;
+						std::string why;
+						if (!info) {
+							why = "is not a dialogue line";
+						} else if (info->parentTopic != (hello ? f.circleHello : f.circleGoodbye)) {
+							why = "is not in the framework's topic for it";
+						} else if (!HasRow(info, RE::FUNCTION_DATA::FunctionID::kGetIsID, member.npc, 1.0f)) {
+							why = "has no GetIsID == 1 condition for its speaker";
+						} else if (!HasStageRow(info)) {
+							why = "has no GetFactionRank IRF_StageFaction condition run on the candidate";
+						}
+						if (!why.empty()) {
+							problems.push_back(std::format("circle member {}: '{}' line {} {}", member.name, name, text, why));
+							continue;
+						}
+						candidate.lines[std::format("circle.{}.{}", index, name)].push_back(info);
+					}
 				}
 				if (c.contains("refuse")) {
 					const auto refuse = c["refuse"];
