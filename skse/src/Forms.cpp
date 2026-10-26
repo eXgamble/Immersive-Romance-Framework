@@ -61,6 +61,7 @@ namespace Forms
 		s.recentDays = f.Own<RE::TESFaction>(kRecentDaysFaction, "IRF_RecentDaysFaction");
 		s.moment = f.Own<RE::TESFaction>(kMomentFaction, "IRF_MomentFaction");
 		s.reply = f.Own<RE::TESFaction>(kReplyFaction, "IRF_ReplyFaction");
+		s.jealousOf = f.Own<RE::TESFaction>(kJealousOfFaction, "IRF_JealousOfFaction");
 		s.refuse = f.Own<RE::TESFaction>(kRefuseFaction, "IRF_RefuseFaction");
 		s.askDate = f.Own<RE::TESFaction>(kAskDateFaction, "IRF_AskDateFaction");
 		s.follow = f.Own<RE::TESFaction>(kFollowFaction, "IRF_FollowAnswerFaction");

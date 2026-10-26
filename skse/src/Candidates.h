@@ -93,6 +93,7 @@ namespace Candidates
 		int       alignment{ 0 };   // -5 evil .. 5 good
 		Interest  interestedIn{ Interest::kAny };
 		bool      refusesSecret{ false };
+		bool      fighter{ true };  // what another partner's jealousy takes her for (any non-candidate is a fighter)
 		RE::TESForm* spouseBonus{ nullptr };  // her own spouse perk: an ability (SPEL) or a perk the player has while married
 		RE::TESObjectREFR* dateSpot{ nullptr };  // firstDate.spot: where she waits for your first date (required)
 		RE::BGSLocation*   datePlace{ nullptr }; // firstDate.place: its name in the journal (default: the spot's cell's)

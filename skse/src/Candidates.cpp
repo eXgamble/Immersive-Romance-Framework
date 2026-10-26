@@ -421,6 +421,7 @@ namespace Candidates
 			const auto interest = a.value("interestedIn", "any"s);
 			out.interestedIn = interest == "male" ? Interest::kMale : interest == "female" ? Interest::kFemale : Interest::kAny;
 			out.refusesSecret = a.value("refusesSecret", false);
+			out.fighter = a.value("fighter", true);
 
 			const auto gifts = a.value("gifts", nlohmann::json::object());
 			const std::pair<const char*, std::vector<RE::TESForm*>*> tastes[]{

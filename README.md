@@ -70,7 +70,8 @@ line they say.
 - **Beside you:** a partner who follows you fights to her own profile (role, nerve, gear) and grows in level up to
   her cap. She can die if you don't get her up in time; an essential one is only knocked out.
 - **On the road:** lines in ruins, caves, towns and inns, after a fight, a dragon, a rest; a jealous line when
-  she sees you travelling with another woman (another candidate, or any female follower but the old people).
+  she sees you travelling with another woman (another candidate, or any female follower but the old people). Her jealous lines can differ for a fighter at your side and for a woman who isn't one
+  (`IRF_JealousOfFaction` 0x876: 1 fighter, 2 not; the generator's `"jealousOf"`).
 
 ## For add-on authors
 
@@ -120,6 +121,8 @@ A candidate whose manifest is missing a required line, or whose lines don't carr
     "alignment": 2,                                // -5 evil .. 0 gray .. 5 good: how she judges your crimes
     "interestedIn": "any",                         // "any", "male", "female"
     "refusesSecret": false,                        // won't keep the relationship secret
+    "fighter": false,                              // what another partner's jealousy takes her for when she
+                                                   // follows you (default true; any non-candidate is a fighter)
     "gifts": {                                     // an item, a keyword it carries, or a form list holding it
       "insulted": [], "disliked": ["Skyrim.esm|0x03AD6F"],
       "liked": ["Skyrim.esm|0x08F95A"], "loved": ["Skyrim.esm|0x064B3D"]

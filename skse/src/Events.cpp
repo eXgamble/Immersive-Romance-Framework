@@ -81,8 +81,16 @@ namespace Events
 			return id != 0x00067CD8 && id != 0x000A82BA;
 		}
 
+		// What kind of woman she's jealous of: 1 a fighter, 2 not. Only a candidate's add-on says she isn't one
+		// ("fighter": false); everyone else is, as a vanilla follower is.
+		int RivalKind(RE::Actor* a_actor)
+		{
+			const auto candidate = Candidates::Find(a_actor);
+			return candidate && !candidate->attributes.fighter ? 2 : 1;
+		}
+
 		// Returns what happened, for the debug tools: "" when she got jealous
-		std::string CheckJealousImpl(RE::Actor* a_partner, bool a_test)
+		std::string CheckJealousImpl(RE::Actor* a_partner, bool a_test, std::string* a_kind = nullptr)
 		{
 			const auto player = RE::PlayerCharacter::GetSingleton();
 			if (!a_partner || a_partner->IsDead()) {
@@ -121,7 +129,14 @@ namespace Events
 				return "no woman following you nearby";
 			}
 			g_jealousDay[a_partner->GetFormID()] = today;
-			logger::info("Events: {} saw you travelling with {}", a_partner->GetDisplayFullName(), other->GetDisplayFullName());
+			const auto kind = RivalKind(other);
+			logger::info("Events: {} saw you travelling with {} ({})", a_partner->GetDisplayFullName(), other->GetDisplayFullName(),
+				kind == 1 ? "a fighter" : "not a fighter");
+			if (a_kind) {
+				*a_kind = std::format("{}, {}", other->GetDisplayFullName(), kind == 1 ? "a fighter" : "not a fighter");
+			}
+			// before her line: its version can depend on it (and her mood lines that day)
+			a_partner->AddToFaction(Forms::Get().jealousOf, static_cast<std::int8_t>(kind));
 			World::SayMoment(a_partner, Moment::kJealous);
 			// jealous for the rest of that day (jealousDays 1), or longer
 			State::Of(a_partner->GetFormID()).jealousUntilDay = today + static_cast<float>(Rules::Get().jealousDays);
@@ -820,9 +835,12 @@ namespace Events
 		logger::info("Events: sinks registered");
 	}
 
-	std::string TestJealous(RE::Actor* a_partner)
+	bool TestJealous(RE::Actor* a_partner, std::string& a_what)
 	{
-		return CheckJealousImpl(a_partner, true);
+		std::string kind;
+		const auto  why = CheckJealousImpl(a_partner, true, &kind);
+		a_what = why.empty() ? kind : why;
+		return why.empty();
 	}
 
 	void OnGameLoaded()

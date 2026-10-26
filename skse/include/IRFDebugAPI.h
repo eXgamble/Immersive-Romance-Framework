@@ -97,8 +97,8 @@ namespace IRFDebug
 		// An event's name ("dating", "theyEnded", ...) and back
 		bool (*eventName)(std::int32_t a_event, char* a_out, std::uint32_t a_size) = nullptr;
 		std::int32_t (*eventByName)(const char* a_name) = nullptr;
-		// version 2: runs the jealousy check for her now (past its once-a-day limit), as when you meet her; false
-		// with why not in a_why when she didn't get jealous
+		// version 2: runs the jealousy check for her now (past its once-a-day limit), as when you meet her: true with
+		// whom and whether a fighter in a_why, or false with why not
 		bool (*checkJealous)(std::uint32_t a_ref, char* a_why, std::uint32_t a_size) = nullptr;
 	};
 }

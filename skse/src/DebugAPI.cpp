@@ -321,9 +321,10 @@ namespace
 
 	bool CheckJealous(std::uint32_t a_ref, char* a_why, std::uint32_t a_size)
 	{
-		const auto why = Events::TestJealous(RE::TESForm::LookupByID<RE::Actor>(a_ref));
-		Copy(a_why, a_size, why);
-		return why.empty();
+		std::string what;
+		const bool  jealous = Events::TestJealous(RE::TESForm::LookupByID<RE::Actor>(a_ref), what);
+		Copy(a_why, a_size, what);
+		return jealous;
 	}
 
 	const IRFDebug::API g_api{
