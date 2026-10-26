@@ -42,6 +42,10 @@ Spec (JSON):
              committed|engaged|spouse>", "expose.counter.<same>", "expose.question", "expose.believed",
              "expose.disbelieved", "expose.disowned", "expose.true" (and "expose.reply.<outcome>" when her answer in the
              talk should differ from her line after it)
+  "family": [ {"when": {"home": "happy|fine|strained|bad|heartbroken", "mood": "jealous|wary|..."}, "child": "boy|girl",
+              "lines": [{"child": "Text"}, {"her": "Text"}, ...]} ]   her conversations with the adopted children, when
+             home is that way (her heart and approval) and, given, she's in that mood; either may start, any number of
+             turns; the framework picks one a day (the least recent that fits) and stages it
   "placeholders": true,                      fill every required key that has no text
   "records": [ {houseCARL create record}, ... ]  her own other records (a spouse perk, ...), created FIRST so their
                                              FormIDs never move; an attribute value "@EditorID" names one of them
@@ -93,6 +97,9 @@ EXPOSE_ASK, EXPOSE_CLAIM, EXPOSE_COUNTER, EXPOSE_QUESTION, EXPOSE_OUTCOME = 27, 
 EXPOSE_F = 0x877  # IRF_ExposeFaction: 1 she believes you, 2 she doesn't, 3 you denied her, 4 you told the truth
 EXPOSE_SIDE_A, EXPOSE_SIDE_B, EXPOSE_TRUE = 0x878, 0x879, 0x87A
 EXPOSE_OUTCOMES = ["believed", "disbelieved", "disowned", "true"]
+# her family conversations with the adopted children (the framework's Family): moment, which one (on her), which line
+FAMILY_MOMENT, FAMILY_F, FAMILY_STEP_F = 32, 0x87B, 0x87C
+FAMILY_HOMES = ["happy", "fine", "strained", "bad", "heartbroken"]
 LINKS = {"confess": [CONFESS_REPLY], "firstdate": [FIRSTDATE_REPLY], "expose.question": [EXPOSE_SIDE_A, EXPOSE_SIDE_B, EXPOSE_TRUE]}  # the replies her line offers (LinkTo); "court" links to her questions (main)
 ASKDATE, FOLLOW, KISS, BREAKUP, AMENDS, WINBACK, SECRET, DATE, DENY, ADMIT = (
     0x82A, 0x82C, 0x82E, 0x830, 0x832, 0x834, 0x836, 0x838, 0x83A, 0x83C)
@@ -603,6 +610,40 @@ def main(spec_path, out_dir, relock=False, into=None):
             if key.startswith("circle.") and key not in before:
                 del lines[key]  # circle lines live under the circle entry, not in "lines"
 
+    # her family conversations: both halves are hers to write; the child's lines are said by whichever child it is
+    # (no speaker check; the conversation's number is read off her), voiced in both child voices
+    family = []
+    for n, talk in enumerate(spec.get("family", []), start=1):
+        when = talk.get("when", {})
+        if when.get("home", "fine") not in FAMILY_HOMES:
+            sys.exit(f'family {n}: "home" is one of {FAMILY_HOMES}')
+        entry = {"home": when.get("home", "fine"), "lines": []}
+        if when.get("mood"):
+            entry["mood"] = when["mood"]
+        if talk.get("child") in ("boy", "girl"):
+            entry["child"] = talk["child"]
+        for k, line in enumerate(talk["lines"], start=1):
+            by_child = "child" in line
+            text = line["child"] if by_child else line["her"]
+            step = condition("GetFactionRankConditionData", "Faction", fw(FAMILY_STEP_F), k, "EqualTo")
+            if by_child:
+                which = {"type": "ConditionFloat", "fields": {"CompareOperator": "EqualTo", "ComparisonValue": str(n)},
+                         "sets": [{"path": "Data", "compose": {"type": "GetFactionRankConditionData", "fields": {"RunOnType": "Reference"},
+                                                               "sets": [{"path": "Faction", "value": fw(FAMILY_F)}, {"path": "Reference", "value": HER[0]}]}}]}
+            else:
+                which = condition("GetFactionRankConditionData", "Faction", fw(FAMILY_F), n, "EqualTo")
+            record = info(word_id(f"IRF{short}_family_{n}_{k}{'_child' if by_child else ''}", text), SAY, text, npc,
+                          MOMENT_F, FAMILY_MOMENT, "EqualTo", False, None, [step, which])
+            if by_child:  # whichever child it is: no GetIsID
+                for op in record["ops"]:
+                    if op.get("field_path") == "Conditions":
+                        op["composes"] = op["composes"][1:]
+            records.append(record)
+            entry["lines"].append({"who": "child" if by_child else "her", "line": record["editorid"]})
+        if len(entry["lines"]) < 2:
+            sys.exit(f"family {n}: a conversation needs two lines at least")
+        family.append(entry)
+
     # FormIDs: the lock's for every record it knows (voice files are named by them), the next free ones for the rest
     lock_path = Path(spec_path).parent / spec["lock"] if spec.get("lock") else None
     lock = {} if relock or not lock_path or not lock_path.exists() else \
@@ -675,6 +716,8 @@ def main(spec_path, out_dir, relock=False, into=None):
             manifest["circle"].append(m)
     if replies:
         manifest["replies"] = refs(replies)
+    if family:
+        manifest["family"] = refs(family)
     if lock_path:
         new_lock = {**lock, **ids}
         lock_path.write_text(json.dumps({e: f"0x{i:03X}" for e, i in sorted(new_lock.items(), key=lambda x: x[1])}, indent=1) + "\n",

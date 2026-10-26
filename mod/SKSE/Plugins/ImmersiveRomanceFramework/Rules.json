@@ -83,5 +83,6 @@
   "exposeLeaveDistance": 4096.0,  // when two partners have it out: walk this far off and it's broken off
   "exposePersuade": 50,           // ... the Speech that carries your lie (fixed)
   "exposeDoubtCost": 5,           // ... approval the one who believed you still loses
-  "disownedSpouseMult": 3         // ... a wife you denied: her broken heart lasts this many times as long
+  "disownedSpouseMult": 3,        // ... a wife you denied: her broken heart lasts this many times as long
+  "familyHearDistance": 1500.0    // a family conversation: she and a child this close to each other and to you
 }

@@ -1,6 +1,7 @@
 #include "Events.h"
 
 #include "Expose.h"
+#include "Family.h"
 
 #include "Children.h"
 #include "Confess.h"
@@ -358,6 +359,7 @@ namespace Events
 						if (const auto a = handle.get()) {
 							Children::Count();
 							Expose::Check();
+							Family::Check();  // at home: she and a child may talk
 							Children::Sync(a.get());
 							Romance::Sync(a.get(), meeting);
 							if (meeting && Romance::IsPartner(a.get())) {
@@ -415,6 +417,7 @@ namespace Events
 							});
 						}
 						Expose::OnDialogueClosed();
+						Family::OnDialogueClosed();
 						Confess::OnDialogueClosed();
 						FirstDate::OnDialogueClosed();
 						Replies::OnDialogueClosed();
@@ -422,12 +425,14 @@ namespace Events
 						if (const auto a = handle.get()) {
 							Romance::Sync(a.get());  // she may have started or stopped following you
 						}
+						Family::Check();  // at home: she and a child may talk now
 					});
 					g_talking = {};
 				}
 				if (a_event && !a_event->opening && a_event->menuName == RE::LoadingMenu::MENU_NAME) {
 					Queue([]() {
 						Children::OnLoadingDone();
+						Family::Check();
 						Confess::Check();
 						FirstDate::Check();
 					});
@@ -497,6 +502,13 @@ namespace Events
 						}
 						Expose::Check();  // the lines around are its clock: a beat that never started is said again
 					}
+					if (Family::Running()) {
+						const auto ref = handle.get();
+						if (began && ref && ref->As<RE::Actor>()) {
+							Family::OnLineBegan(ref->As<RE::Actor>(), key);
+						}
+						Family::Tick();
+					}
 				});
 				if (a_event->type != RE::TESTopicInfoEvent::TopicInfoEventType::kTopicEnd) {
 					if (key == "firstdate" && a_event->speakerRef) {
@@ -537,6 +549,13 @@ namespace Events
 					return RE::BSEventNotifyControl::kContinue;
 				}
 				const auto speaker = a_event->speakerRef ? a_event->speakerRef->As<RE::Actor>() : nullptr;
+				if (speaker && key.starts_with("family.")) {
+					Queue([handle = speaker->GetHandle(), key]() {
+						if (const auto a = handle.get()) {
+							Family::OnLineEnded(a.get(), key);
+						}
+					});
+				}
 				if (speaker && key.starts_with("expose.")) {
 					Queue([handle = speaker->GetHandle(), key]() {
 						if (const auto a = handle.get()) {
@@ -842,6 +861,7 @@ namespace Events
 				}
 				Queue([loc = a_event->newLoc]() {
 					Children::OnPlayerLocation(loc);  // the wilds have no location at all
+					Family::Check();
 					Confess::Check();
 					FirstDate::Check();
 				});
@@ -1013,6 +1033,7 @@ namespace Events
 		g_greeterGoodbye = false;
 		g_afterGoodbye = false;
 		Expose::OnGameLoaded();
+		Family::OnGameLoaded();
 		g_refusing = {};
 		g_talkingChild = {};
 		Gifts::OnGameLoaded();

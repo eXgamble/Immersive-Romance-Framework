@@ -70,6 +70,7 @@ namespace Rules
 		int   exposePersuade = 50;            // Speech that carries the lie when the two have it out (fixed)
 		int   exposeDoubtCost = 5;            // approval the one who believed you still loses
 		int   disownedSpouseMult = 3;         // a wife you denied: her broken heart lasts this many times as long
+		float familyHearDistance = 1500.0f;   // a family conversation: she and a child this close to each other and to you
 	};
 
 	void          Load();

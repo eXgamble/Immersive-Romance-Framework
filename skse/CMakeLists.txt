@@ -21,7 +21,7 @@ find_package(nlohmann_json CONFIG REQUIRED)
 add_commonlibsse_plugin(${PROJECT_NAME}
 	NAME "ImmersiveRomanceFramework"
 	AUTHOR "eXgamble"
-	SOURCES src/plugin.cpp src/Forms.cpp src/Rules.cpp src/Candidates.cpp src/State.cpp src/Romance.cpp src/World.cpp src/Follower.cpp src/Events.cpp src/Expose.cpp src/Crimes.cpp src/Gifts.cpp src/Children.cpp src/Confess.cpp src/FirstDate.cpp src/Replies.cpp src/DebugAPI.cpp src/Papyrus.cpp)
+	SOURCES src/plugin.cpp src/Forms.cpp src/Rules.cpp src/Candidates.cpp src/State.cpp src/Romance.cpp src/World.cpp src/Follower.cpp src/Events.cpp src/Expose.cpp src/Family.cpp src/Crimes.cpp src/Gifts.cpp src/Children.cpp src/Confess.cpp src/FirstDate.cpp src/Replies.cpp src/DebugAPI.cpp src/Papyrus.cpp)
 
 target_include_directories(${PROJECT_NAME} PRIVATE src include)
 target_link_libraries(${PROJECT_NAME} PRIVATE nlohmann_json::nlohmann_json)

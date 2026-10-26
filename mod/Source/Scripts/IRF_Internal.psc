@@ -21,33 +21,33 @@ Function ForceGreet(Quest akQuest, Actor akSpouse, bool abOn) global
 	akSpouse.EvaluatePackage()
 EndFunction
 
-; Two partners have it out (the framework's Expose). IRF_SayQuest's aliases 1 (ExposeHoldA) and 2 (ExposeHoldB) hold
-; them with vanilla's DoNothing package, so their day doesn't take them off mid-scene. A walks over to B; the framework
-; hears when she's there
-Function ExposeApproach(Quest akQuest, Actor akA, Actor akB) global
-	ExposeHold(akQuest, 2, akB)
-	ExposeHold(akQuest, 1, akA)
-	akA.SetLookAt(akB)
-	akB.SetLookAt(akA)
-	If akA.GetDistance(akB) > 170.0
-		akA.PathToReference(akB, 0.5)  ; a scripted walk: it overrides the hold while it lasts
+; A scene between two of them (the framework's: two partners having it out, a family conversation). IRF_SayQuest's
+; aliases 1 and 2 hold them with vanilla's DoNothing package, so their day doesn't take them off mid-scene. The walker
+; walks over to the other; the framework hears when she's there (aiScene: 1 Expose, 2 Family)
+Function Approach(Quest akQuest, Actor akWalker, Actor akTarget, int aiScene) global
+	Hold(akQuest, 2, akTarget)
+	Hold(akQuest, 1, akWalker)
+	akWalker.SetLookAt(akTarget)
+	akTarget.SetLookAt(akWalker)
+	If akWalker.GetDistance(akTarget) > 170.0
+		akWalker.PathToReference(akTarget, 0.5)  ; a scripted walk: it overrides the hold while it lasts
 	EndIf
-	ExposeArrived()
+	Arrived(aiScene)
 EndFunction
 
-; Holds an actor in hold alias aiAlias (1 A, 2 B), or lets it go (akActor None)
-Function ExposeHold(Quest akQuest, int aiAlias, Actor akActor) global
-	ReferenceAlias hold = akQuest.GetAlias(aiAlias) as ReferenceAlias
-	If !hold
+; Holds an actor in hold alias aiAlias (1 or 2), or lets it go (akActor None)
+Function Hold(Quest akQuest, int aiAlias, Actor akActor) global
+	ReferenceAlias slot = akQuest.GetAlias(aiAlias) as ReferenceAlias
+	If !slot
 		Debug.Trace("IRF: IRF_SayQuest has no hold alias " + aiAlias + " (a save from before it)")
 		Return
 	EndIf
-	Actor was = hold.GetActorReference()
+	Actor was = slot.GetActorReference()
 	If akActor
-		hold.ForceRefTo(akActor)
+		slot.ForceRefTo(akActor)
 		akActor.EvaluatePackage()
 	Else
-		hold.Clear()
+		slot.Clear()
 		If was
 			was.EvaluatePackage()
 		EndIf
@@ -55,14 +55,14 @@ Function ExposeHold(Quest akQuest, int aiAlias, Actor akActor) global
 EndFunction
 
 ; The scene is over: both go back to their day
-Function ExposeEnd(Quest akQuest, Actor akA, Actor akB) global
+Function Release(Quest akQuest, Actor akA, Actor akB) global
 	akA.ClearLookAt()
 	akB.ClearLookAt()
-	ExposeHold(akQuest, 1, None)
-	ExposeHold(akQuest, 2, None)
+	Hold(akQuest, 1, None)
+	Hold(akQuest, 2, None)
 EndFunction
 
-Function ExposeArrived() global native
+Function Arrived(int aiScene) global native
 
 ; She didn't come along on a fast travel: back where her day has her
 Function SendHome(Actor akSpouse) global

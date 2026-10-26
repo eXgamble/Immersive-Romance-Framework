@@ -116,6 +116,15 @@ namespace Candidates
 		bool                                                   refuseTraining{ true };
 	};
 
+	// A family conversation (her add-on's own): her and an adopted child, lines in turn, when home is in this state
+	struct FamilyTalk
+	{
+		IRF::Home                                       home{ IRF::Home::kFine };
+		int                                             mood{ -1 };   // her mood (IRF::Mood), -1 any
+		int                                             child{ 0 };   // 0 any child, 1 a boy, 2 a girl
+		std::vector<std::pair<bool, RE::TESTopicInfo*>> steps;        // (said by the child, the line), in order
+	};
+
 	struct Candidate
 	{
 		std::string                name;
@@ -129,6 +138,7 @@ namespace Candidates
 		// line key ("court", "hello.dating", ...) -> the add-on's lines for it
 		std::map<std::string, std::vector<RE::TESTopicInfo*>> lines;
 		std::map<RE::FormID, int>  replyAfter;  // a line (anyone's) -> the number of her reply to it
+		std::vector<FamilyTalk>    family;      // her conversations with the children (number = index + 1)
 	};
 
 	void Load();

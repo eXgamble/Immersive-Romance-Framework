@@ -101,6 +101,7 @@ namespace Rules
 		IRF_RULE(exposePersuade);
 		IRF_RULE(exposeDoubtCost);
 		IRF_RULE(disownedSpouseMult);
+		IRF_RULE(familyHearDistance);
 #undef IRF_RULE
 		g_known.insert("playerInterestedIn");
 		if (j.contains("playerInterestedIn") && j["playerInterestedIn"].is_string()) {

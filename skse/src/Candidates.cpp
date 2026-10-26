@@ -642,6 +642,46 @@ namespace Candidates
 				TakeLines(r, req, candidate.npc, std::format("reply.{}", reply), candidate.lines, problems);
 			}
 
+			// her conversations with the children: "family": [{"home", "mood"?, "child"?, "lines": [{"who", "line"}]}]
+			// (the child's lines are said by whichever child it is: no speaker check, only that they're IRF_SayTopic lines)
+			const std::map<std::string, Home> homes{ { "happy", Home::kHappy }, { "fine", Home::kFine }, { "strained", Home::kStrained },
+				{ "bad", Home::kBad }, { "heartbroken", Home::kHeartbroken } };
+			const std::map<std::string, int> moods{ { "jealous", Rank(Mood::kJealous) }, { "wary", Rank(Mood::kWary) },
+				{ "strained", Rank(Mood::kStrained) }, { "hurt", Rank(Mood::kHurt) } };
+			int talk = 0;
+			for (const auto& t : j.value("family", nlohmann::json::array())) {
+				++talk;
+				FamilyTalk ft;
+				const auto home = homes.find(t.value("home", "fine"s));
+				const auto mood = t.value("mood", ""s);
+				if (home == homes.end() || (!mood.empty() && !moods.contains(mood))) {
+					problems.push_back(std::format("family {}: unknown home or mood", talk));
+					continue;
+				}
+				ft.home = home->second;
+				ft.mood = mood.empty() ? -1 : moods.at(mood);
+				const auto child = t.value("child", "any"s);
+				ft.child = child == "boy" ? 1 : child == "girl" ? 2 : 0;
+				int step = 0;
+				for (const auto& l : t.value("lines", nlohmann::json::array())) {
+					++step;
+					const auto text = l.value("line", ""s);
+					const auto info = ParseForm(text);
+					if (!info || !info->As<RE::TESTopicInfo>() || info->As<RE::TESTopicInfo>()->parentTopic != f.say) {
+						problems.push_back(std::format("family {} line {}: '{}' is not an IRF_SayTopic line", talk, step, text));
+						continue;
+					}
+					const bool byChild = l.value("who", "her"s) == "child";
+					ft.steps.emplace_back(byChild, info->As<RE::TESTopicInfo>());
+					candidate.lines[std::format("family.{}.{}", talk, step)].push_back(info->As<RE::TESTopicInfo>());
+				}
+				if (ft.steps.size() < 2) {
+					problems.push_back(std::format("family {}: a conversation needs two lines at least", talk));
+					continue;
+				}
+				candidate.family.push_back(std::move(ft));
+			}
+
 			if (!problems.empty()) {
 				std::string all;
 				for (const auto& p : problems) {

@@ -109,6 +109,17 @@ namespace IRF
 		kExposeCounter = 29,
 		kExposeQuestion = 30,  // her force greet "Is this true?" and her answers to yours
 		kExposeOutcome = 31,   // IRF_ExposeFaction: 1 she believes you, 2 she doesn't, 3 you denied her, 4 you told the truth
+		kFamily = 32,          // a family conversation (Family): IRF_FamilyFaction on her (which), IRF_FamilyStepFaction on the speaker
+	};
+
+	// How things are at home, for a family conversation: her heart, then her approval band (as "How are we?")
+	enum class Home : std::int8_t
+	{
+		kHappy = 1,        // band 4-5
+		kFine = 2,         // band 3
+		kStrained = 3,     // band 2
+		kBad = 4,          // band 1
+		kHeartbroken = 5,  // she caught you, or is still hurt
 	};
 
 	// IRF_MoodFaction: her mood on top of the stage (Dating to Married), for the mood versions of her greetings,

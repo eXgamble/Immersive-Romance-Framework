@@ -1,5 +1,7 @@
 #include "Expose.h"
 
+#include "Family.h"
+
 #include "Candidates.h"
 #include "Follower.h"
 #include "Forms.h"
@@ -143,7 +145,7 @@ namespace Expose
 				}
 			}
 			if (a && b) {
-				Script::CallStatic("IRF_Internal"sv, "ExposeEnd"sv, f.sayQuest, a.get(), b.get());
+				Script::CallStatic("IRF_Internal"sv, "Release"sv, f.sayQuest, a.get(), b.get());
 			}
 			if (b) {
 				Script::CallStatic("IRF_Internal"sv, "ForceGreet"sv, f.sayQuest, b.get(), false);
@@ -241,7 +243,7 @@ namespace Expose
 
 	bool Start(RE::Actor* a_b, RE::Actor* a_a)
 	{
-		if (Running()) {
+		if (Running() || Family::Running()) {
 			logger::info("Expose: a scene is already on");
 			return false;
 		}
@@ -282,7 +284,7 @@ namespace Expose
 		logger::info("Expose: {} and {} have it out (a lie would {})", a_a->GetDisplayFullName(), a_b->GetDisplayFullName(),
 			g_persuaded ? "work" : "fail");
 		Go(Step::kWalk);
-		Script::CallStatic("IRF_Internal"sv, "ExposeApproach"sv, f.sayQuest, a_a, a_b);  // A walks over; OnArrived goes on from there
+		Script::CallStatic("IRF_Internal"sv, "Approach"sv, f.sayQuest, a_a, a_b, 1);  // A walks over; OnArrived goes on from there
 		return true;
 	}
 
@@ -324,7 +326,7 @@ namespace Expose
 			const auto& f = Forms::Get();
 			a->AddToFaction(f.moment, 0);
 			b->AddToFaction(f.moment, static_cast<std::int8_t>(Rank(Moment::kExposeQuestion)));
-			Script::CallStatic("IRF_Internal"sv, "ExposeHold"sv, f.sayQuest, 2, static_cast<RE::Actor*>(nullptr));  // she may move
+			Script::CallStatic("IRF_Internal"sv, "Hold"sv, f.sayQuest, 2, static_cast<RE::Actor*>(nullptr));  // she may move
 			Script::CallStatic("IRF_Internal"sv, "ForceGreet"sv, f.sayQuest, b.get(), true);  // she comes up to you and asks
 		} else if (g_step == Step::kOutcome && a_speaker == a.get() &&
 				   (a_key == "expose.believed" || a_key == "expose.disbelieved" || a_key == "expose.disowned" || a_key == "expose.true")) {
@@ -344,7 +346,7 @@ namespace Expose
 		// greet finds nothing to say), and she stays where she is for A's last word
 		a_speaker->AddToFaction(Forms::Get().moment, 0);
 		Script::CallStatic("IRF_Internal"sv, "ForceGreet"sv, Forms::Get().sayQuest, a_speaker, false);
-		Script::CallStatic("IRF_Internal"sv, "ExposeHold"sv, Forms::Get().sayQuest, 2, a_speaker);
+		Script::CallStatic("IRF_Internal"sv, "Hold"sv, Forms::Get().sayQuest, 2, a_speaker);
 	}
 
 	void OnDialogueClosed()
@@ -364,7 +366,7 @@ namespace Expose
 		const auto& f = Forms::Get();
 		b->AddToFaction(f.moment, 0);
 		Script::CallStatic("IRF_Internal"sv, "ForceGreet"sv, f.sayQuest, b.get(), false);  // walked away: no second asking
-		Script::CallStatic("IRF_Internal"sv, "ExposeHold"sv, f.sayQuest, 2, b.get());
+		Script::CallStatic("IRF_Internal"sv, "Hold"sv, f.sayQuest, 2, b.get());
 		const int rank = g_answer == Answer::kSideA ? (g_persuaded ? kBelieved : kDisbelieved) :
 		                 g_answer == Answer::kSideB ? kDisowned :
 		                                              kTrueRank;

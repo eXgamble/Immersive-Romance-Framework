@@ -63,6 +63,8 @@ namespace Forms
 		s.reply = f.Own<RE::TESFaction>(kReplyFaction, "IRF_ReplyFaction");
 		s.jealousOf = f.Own<RE::TESFaction>(kJealousOfFaction, "IRF_JealousOfFaction");
 		s.expose = f.Own<RE::TESFaction>(kExposeFaction, "IRF_ExposeFaction");
+		s.family = f.Own<RE::TESFaction>(kFamilyFaction, "IRF_FamilyFaction");
+		s.familyStep = f.Own<RE::TESFaction>(kFamilyStepFaction, "IRF_FamilyStepFaction");
 		s.exposeSideA = f.Own<RE::TESTopic>(kExposeSideATopic, "IRF_ExposeSideATopic");
 		s.exposeSideB = f.Own<RE::TESTopic>(kExposeSideBTopic, "IRF_ExposeSideBTopic");
 		s.exposeTrue = f.Own<RE::TESTopic>(kExposeTrueTopic, "IRF_ExposeTrueTopic");

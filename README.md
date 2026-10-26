@@ -80,6 +80,12 @@ line they say.
   - "It's true." Both leave you; both can be won back. Walking away from the question counts as this.
   A wife you deny can't leave a marriage: her heart is broken for `disownedSpouseMult` (3) times as long instead.
   A fight, someone leaving or a load breaks the scene off: both simply catch you.
+- **Family conversations:** married, with adopted children, at home she and a child talk where you can hear it, once
+  a game day. The conversations are her add-on's own (`"family"` in the spec: both halves, any number of turns,
+  either may start), picked by how things are at home (happy, fine, strained, bad, heartbroken: her heart and
+  approval) and, when given, her mood, the least recent first. The one who speaks first walks over; both are held for
+  it. The child's lines are said by whichever child it is (a boy or a girl when a conversation asks), so they're
+  voiced in both child voices. A fight or someone leaving ends it quietly; a talk with you pauses it.
 - **Her family and friends** (the circle) react: a line the next time you meet (also when you adopt a child,
   married to her), and if you broke her heart they may refuse you their shop or training until you make amends.
   Now and then their everyday hellos and goodbyes are about the two of you (and your children).

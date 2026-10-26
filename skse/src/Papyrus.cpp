@@ -1,6 +1,7 @@
 #include "Papyrus.h"
 
 #include "Expose.h"
+#include "Family.h"
 
 #include "Candidates.h"
 #include "Children.h"
@@ -33,10 +34,17 @@ namespace Papyrus
 			});
 		}
 
-		// IRF_Internal.ExposeApproach: A has walked up to B (the scene goes on, on the game's safe point)
-		void ExposeArrived(RE::StaticFunctionTag*)
+		// IRF_Internal.Approach: the walker has reached the other (1 two partners having it out, 2 a family
+		// conversation); the scene goes on, on the game's safe point
+		void Arrived(RE::StaticFunctionTag*, std::int32_t a_scene)
 		{
-			SKSE::GetTaskInterface()->AddTask([]() { Expose::OnArrived(); });
+			SKSE::GetTaskInterface()->AddTask([a_scene]() {
+				if (a_scene == 1) {
+					Expose::OnArrived();
+				} else if (a_scene == 2) {
+					Family::OnArrived();
+				}
+			});
 		}
 
 		bool IsCandidate(RE::StaticFunctionTag*, RE::Actor* a_actor)
@@ -129,7 +137,7 @@ namespace Papyrus
 	bool Register(VM* a_vm)
 	{
 		constexpr auto script = "IRF"sv;
-		a_vm->RegisterFunction("ExposeArrived"sv, "IRF_Internal"sv, ExposeArrived);
+		a_vm->RegisterFunction("Arrived"sv, "IRF_Internal"sv, Arrived);
 		a_vm->RegisterFunction("IsCandidate"sv, script, IsCandidate);
 		a_vm->RegisterFunction("GetStage"sv, script, GetStage);
 		a_vm->RegisterFunction("GetApproval"sv, script, GetApproval);
