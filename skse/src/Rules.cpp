@@ -59,8 +59,6 @@ namespace Rules
 		IRF_RULE(killCapPerDay);
 		IRF_RULE(clearGain);
 		IRF_RULE(bleedoutCost);
-		IRF_RULE(reviveBack);
-		IRF_RULE(reviveSeconds);
 		IRF_RULE(cheatCost);
 		IRF_RULE(brokenHeartDays);
 		IRF_RULE(hitCost);

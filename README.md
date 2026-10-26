@@ -92,7 +92,9 @@ A candidate whose manifest is missing a required line, or whose lines don't carr
                                                    // catches you; the win-back wait starts after), "pleading" (asks
                                                    // you to take her back when you talk to her, "pleads" times,
                                                    // "every" days apart; "No. It's over." counts one)
-    "bleedoutTolerance": 6,                        // per bleedout
+    "bleedoutTolerance": 6,                        // approval lost each time she goes down while following
+                                                   // you (vanilla's follower slot is Protected, so she goes down
+                                                   // rather than dying); nothing after the wedding
     "absenceTolerance": { "days": 5, "cost": 4 },  // apart longer than days costs cost per band (1-3)
     "brokenHeartDays": 2,                          // silent this long after catching you, then hurt until amends
     "modesty": 1,                                  // 0 kisses anywhere .. 3 only at home, alone

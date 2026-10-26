@@ -382,21 +382,21 @@ namespace Events
 			}
 		};
 
-		// bleedouts: when a following partner went down, and whether you got them up quickly
-		std::unordered_map<RE::FormID, Clock::time_point> g_down;
+		// bleedouts: a following partner who went down this fight (each one costs her bleedout tolerance, nothing
+		// comes back for a rescue: user, 2026-10-25)
+		std::set<RE::FormID> g_down;
 
-		void CheckRevive(RE::Actor* a_actor)
+		// The fight is over: back on her feet, she says so (instead of the after-fight line). True if she was down
+		bool CheckRevive(RE::Actor* a_actor)
 		{
-			const auto it = g_down.find(a_actor->GetFormID());
-			if (it == g_down.end() || a_actor->AsActorState()->IsBleedingOut()) {
-				return;
+			if (!g_down.contains(a_actor->GetFormID()) || a_actor->AsActorState()->IsBleedingOut()) {
+				return false;
 			}
-			const auto seconds = std::chrono::duration<float>(Clock::now() - it->second).count();
-			g_down.erase(it);
-			if (!a_actor->IsDead() && seconds <= Rules::Get().reviveSeconds) {
-				Romance::ModApproval(a_actor, Rules::Get().reviveBack, "you got them back up quickly");
+			g_down.erase(a_actor->GetFormID());
+			if (!a_actor->IsDead()) {
 				World::SayMoment(a_actor, Moment::kRevive);
 			}
+			return true;
 		}
 
 		class Bleedout : public RE::BSTEventSink<RE::TESEnterBleedoutEvent>
@@ -414,7 +414,7 @@ namespace Events
 					if (!candidate || Romance::GetStage(a.get()) == Stage::kMarried) {
 						return;  // after the wedding, bleedouts no longer cost approval
 					}
-					g_down[a->GetFormID()] = Clock::now();
+					g_down.insert(a->GetFormID());
 					Romance::Hurt(a.get(), candidate->attributes.bleedout, Why::kBleedouts, "went down beside you");
 				});
 				return RE::BSEventNotifyControl::kContinue;
@@ -512,8 +512,8 @@ namespace Events
 						Attack(a.get(), "turned on you");
 					} else if (state == RE::ACTOR_COMBAT_STATE::kNone) {
 						State::Of(a->GetFormID()).strayHits = 0;
-						CheckRevive(a.get());
-						if (a->IsPlayerTeammate() && !RE::PlayerCharacter::GetSingleton()->IsInCombat()) {
+						const bool wasDown = CheckRevive(a.get());
+						if (!wasDown && a->IsPlayerTeammate() && !RE::PlayerCharacter::GetSingleton()->IsInCombat()) {
 							Moment_(a.get(), Moment::kAfterFight);
 						}
 						Confess::Check();

@@ -79,7 +79,7 @@ namespace IRF
 	{
 		kNone = 0,
 		kCaught = 1,           // she caught you with someone else
-		kRevive = 2,           // you got her back up quickly
+		kRevive = 2,           // back on her feet after going down (said when the fight ends)
 		kAttacked = 3,         // you attacked her
 		kCrimeApprove = 4,     // she saw a crime and liked it (alignment below 0)
 		kCrimeDisapprove = 5,  // she saw a crime and didn't (alignment above 0)

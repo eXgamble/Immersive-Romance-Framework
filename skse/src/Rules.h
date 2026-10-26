@@ -26,8 +26,6 @@ namespace Rules
 		int clearGain = 5;      // a location cleared together
 
 		int bleedoutCost = 8;       // default bleedout-tolerance (what one bleedout costs)
-		int reviveBack = 4;         // won back for a quick revive
-		float reviveSeconds = 30.0f;// "quick"
 		int cheatCost = 30;         // default cheat-tolerance
 		int brokenHeartDays = 3;    // default
 		int hitCost = 2;            // default hit-tolerance: a stray hit

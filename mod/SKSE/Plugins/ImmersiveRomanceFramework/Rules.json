@@ -25,11 +25,9 @@
   "killGain": 1,            // an enemy killed while they follow ...
   "killCapPerDay": 5,       // ... up to this many a day
   "clearGain": 5,           // a location cleared together
-  "reviveBack": 4,          // won back for getting them up quickly ...
-  "reviveSeconds": 30.0,    // ... within this many seconds
 
   // what lowers it (defaults; each candidate's own tolerances override these)
-  "bleedoutCost": 8,        // one bleedout
+  "bleedoutCost": 8,        // one bleedout while following you (until the wedding); a rescue gives nothing back
   "cheatCost": 30,          // being caught straying
   "brokenHeartDays": 3,     // silent this long after being caught, then hurt until amends
   "hitCost": 2,             // a stray hit in a fight
