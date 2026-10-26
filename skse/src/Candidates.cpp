@@ -600,6 +600,28 @@ namespace Candidates
 				++index;
 			}
 
+			// her replies: after any of these lines (hers or her circle's), she answers with one of these
+			int reply = 0;
+			for (const auto& r : j.value("replies", nlohmann::json::array())) {
+				if (++reply > 127) {
+					problems.push_back("more than 127 replies");
+					break;
+				}
+				for (const auto& after : r.value("after", nlohmann::json::array())) {
+					const auto text = after.is_string() ? after.get<std::string>() : ""s;
+					const auto form = ParseForm(text);
+					if (!form || !form->As<RE::TESTopicInfo>()) {
+						problems.push_back(std::format("reply {}: '{}' is not a dialogue line", reply, text));
+						continue;
+					}
+					candidate.replyAfter[form->GetFormID()] = reply;
+				}
+				Requirement req{ "lines", f.say, f.moment, Rank(Moment::kReply) };
+				req.faction2 = f.reply;
+				req.rank2 = reply;
+				TakeLines(r, req, candidate.npc, std::format("reply.{}", reply), candidate.lines, problems);
+			}
+
 			if (!problems.empty()) {
 				std::string all;
 				for (const auto& p : problems) {
@@ -718,6 +740,20 @@ namespace Candidates
 			*a_key = it->second.second;
 		}
 		return &g_all[it->second.first];
+	}
+
+	int ReplyTo(RE::FormID a_info, RE::FormID* a_candidate)
+	{
+		const auto candidate = FindLine(a_info, nullptr);
+		if (!candidate) {
+			return 0;
+		}
+		const auto it = candidate->replyAfter.find(a_info);
+		if (it == candidate->replyAfter.end()) {
+			return 0;
+		}
+		*a_candidate = candidate->ref;
+		return it->second;
 	}
 
 	const std::vector<std::pair<const Candidate*, const CircleMember*>>& CircleOf(RE::FormID a_ref)

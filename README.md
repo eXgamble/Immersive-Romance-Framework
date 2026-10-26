@@ -159,6 +159,16 @@ reference (an OR group, == each stage of the set); add `GetRandomPercent` so the
 (the generator: one of theirs `greetShare`, default 25, % of the time). Any line can ask about children with
 `GetGlobalValue IRF_AdoptedBoys / IRF_AdoptedGirls` (the generator: `"kids": ">=1"`).
 
+**Replies:** a line (anyone's: hers, her circle's) can get a short answer from her, said aloud right after it
+(Sven: "You should have chosen me, Camilla." Camilla: "Keep dreaming, Sven."). The manifest's top-level
+`"replies": [{"after": [lines], "lines": [her answers]}]`; reply n's answers go in IRF_SayTopic 0x829 with
+`GetFactionRank IRF_MomentFaction == 16` and `GetFactionRank IRF_ReplyFaction (0x875) == n` (several versions:
+the first that fits, e.g. by her stage). She answers only if she's within about 21 m of the speaker, alive and not
+fighting; a line ended while the talk is still open gets its answer as the talk closes. Give the line a distance
+condition to her (`GetDistance` < 700; the generator: `"near": {"within": 700}`) so it's only said when she can
+hear it, and Say Once with 24 reset hours (the generator: `"once": "day"`) so the exchange isn't repeated.
+`GetLineOfSight` between two NPCs is always false (the game only works it out when one of them is the player).
+
 ### The lines
 
 Every line is an INFO in one of the framework's topics with these conditions, **ANDed**, run on the subject

@@ -68,6 +68,7 @@ namespace Forms
 		kFirstDateReplyTopic = 0x871, // IRF_FirstDateReplyTopic: "Of course I came." (linked from her first-date greeting)
 		kCircleHelloTopic = 0x873,    // IRF_CircleHelloTopic / GoodbyeTopic (IRF_CircleQuest 0x872, open to any speaker):
 		kCircleGoodbyeTopic = 0x874,  // a circle member's everyday greetings about the two of you
+		kReplyFaction = 0x875,        // IRF_ReplyFaction: which reply she's saying (moment kReply)
 		kPleadYesTopic = 0x85E,
 		kPleadNoTopic = 0x860,
 
@@ -115,6 +116,7 @@ namespace Forms
 		RE::TESFaction* recent{ nullptr };
 		RE::TESFaction* recentDays{ nullptr };
 		RE::TESFaction* moment{ nullptr };
+		RE::TESFaction* reply{ nullptr };
 		RE::TESFaction* refuse{ nullptr };
 		RE::TESFaction* askDate{ nullptr };
 		RE::TESFaction* follow{ nullptr };

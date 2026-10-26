@@ -26,6 +26,12 @@ Spec (JSON):
              (that quest stage is done); give the other texts of that key the opposite, or (circle reactions, which
              play the first that fits) list the plain one last
              a text may carry "kids": ">=1" (you're raising at least one adopted child) or "kids": 0 (none)
+             "following": true / false (she's following you or not), "near": {"who": ref (default: her),
+             "within": 700, "sees": true} (the speaker is that close to them; "sees": in their line of sight, which
+             the game only works out when one of the two is the player: never between two NPCs), "once": "day" (Say
+             Once, again after 24 hours), "set": "dating" (the speaker's own stage set: for her replies)
+             a text may carry "reply": "Text" | [{"text": ..., "set": "spouse"}, ...]: she answers it aloud right after
+             (the first version that fits); give the line "near" her so she's there to hear it
   "placeholders": true,                      fill every required key that has no text
   "records": [ {houseCARL create record}, ... ]  her own other records (a spouse perk, ...), created FIRST so their
                                              FormIDs never move; an attribute value "@EditorID" names one of them
@@ -58,6 +64,8 @@ FORCEGREET = 0x848  # IRF_ForceGreetTopic: what she comes up to tell you (stay h
 CONFESS_REPLY = 0x862  # IRF_ConfessReplyTopic: "You mean a lot to me too."
 KNOW, KNOW_MAX = 0x864, 10  # IRF_KnowTopic1-10 (0x864-0x86D): the get-to-know questions (at least one)
 CANDIDATE_F = 0x800  # IRF_CandidateFaction: every registered candidate, rank 0
+REPLY_F, REPLY_MOMENT = 0x875, 16  # her answer to someone's line: IRF_ReplyFaction == its number, in IRF_SayTopic
+HER = [None]  # her reference (houseCARL form), for conditions about her
 FIRSTDATE_REPLY = 0x871  # IRF_FirstDateReplyTopic: "Of course I came."
 CIRCLE_HELLO, CIRCLE_GOODBYE = 0x873, 0x874  # a circle member's everyday greetings (IRF_CircleQuest: any speaker)
 LINKS = {"confess": [CONFESS_REPLY], "firstdate": [FIRSTDATE_REPLY]}  # the replies her line offers (LinkTo); "court" links to her questions (main)
@@ -80,6 +88,7 @@ WEDDING = "07404E:Skyrim.esm"  # RelationshipMarriageWedding: runs once the wedd
 SETS = {"dating": [2, 3, 4], "love": [3, 4, 5], "marry": [3], "maramal": [4], "spouse": [5]}
 CIRCLE_SETS = {**SETS, "ex": [6], "widowed": [7]}  # a circle member's greetings: hers, and after it ended
 CIRCLE_GREET_SHARE = 25
+EXCHANGE_SHARE = 50  # a line she answers (with "reply"): this % of the time when it fits
 MARRIED = 5
 ADOPTED = {"boys": 0x859, "girls": 0x85A}  # IRF_AdoptedBoys / IRF_AdoptedGirls (globals)
 OPS = {"==": "EqualTo", "!=": "NotEqualTo", ">=": "GreaterThanOrEqualTo", "<=": "LessThanOrEqualTo", ">": "GreaterThan", "<": "LessThan"}
@@ -298,13 +307,39 @@ def stage_rows_on(ref, ranks):
             for i, r in enumerate(ranks)]
 
 
+def place_conditions(text):
+    """{"following": bool} -> GetPlayerTeammate on her; {"near": {...}} -> GetDistance (+ GetLineOfSight) to them;
+    {"set": name} -> the speaker's own IRF_StageFaction rank (an OR group)"""
+    rows = []
+    if not isinstance(text, dict):
+        return rows
+    if "following" in text:
+        rows.append({"type": "ConditionFloat", "fields": {"CompareOperator": "EqualTo", "ComparisonValue": "1" if text["following"] else "0"},
+                     "sets": [{"path": "Data", "compose": {"type": "GetPlayerTeammateConditionData", "fields": {"RunOnType": "Reference"},
+                                                           "sets": [{"path": "Reference", "value": HER[0]}]}}]})
+    if "near" in text:
+        near = text["near"]
+        who = form_key(near["who"]) if near.get("who") else HER[0]
+        rows.append({"type": "ConditionFloat", "fields": {"CompareOperator": "LessThan", "ComparisonValue": str(near.get("within", 700))},
+                     "sets": [{"path": "Data", "compose": {"type": "GetDistanceConditionData", "fields": {"RunOnType": "Subject"},
+                                                           "sets": [{"path": "Target", "value": who}]}}]})
+        if near.get("sees", False):
+            rows.append({"type": "ConditionFloat", "fields": {"CompareOperator": "EqualTo", "ComparisonValue": "1"},
+                         "sets": [{"path": "Data", "compose": {"type": "GetLineOfSightConditionData", "fields": {"RunOnType": "Subject"},
+                                                               "sets": [{"path": "Target", "value": who}]}}]})
+    if "set" in text:
+        rows += rank_rows(STAGE_F, SETS[text["set"]], "EqualTo")
+    return rows
+
+
 def specific(text):
     """a boys/girls text: first-fit, before the random pick"""
     return isinstance(text, dict) and any(name in text for name in ADOPTED)
 
 
 def info(editor_id, topic, text, speaker_npc, faction, rank, op, goodbye, random=None, rows=None):
-    extra = (rows or []) + adopted_conditions(text) + life_conditions(text) + feeling_conditions(text) + kids_conditions(text)
+    extra = (rows or []) + adopted_conditions(text) + life_conditions(text) + feeling_conditions(text) + kids_conditions(text) + place_conditions(text)
+    raw = text
     prompt = text.get("prompt") if isinstance(text, dict) else None
     text = text["text"] if isinstance(text, dict) else text
     parts = text if isinstance(text, list) else [text]  # several responses: said one after another
@@ -317,9 +352,12 @@ def info(editor_id, topic, text, speaker_npc, faction, rank, op, goodbye, random
     ]
     if prompt:
         ops.append({"field_path": "Prompt", "value": prompt})  # the player's words for this line
-    flags = (["Goodbye"] if goodbye else []) + (["Random"] if random else []) + (["RandomEnd"] if random == "end" else [])
+    once = isinstance(raw, dict) and raw.get("once") == "day"
+    flags = (["Goodbye"] if goodbye else []) + (["Random"] if random else []) + (["RandomEnd"] if random == "end" else []) + (["SayOnce"] if once else [])
     if flags:
         ops.append({"field_path": "Flags.Flags", "value": ", ".join(flags)})
+    if once:
+        ops.append({"field_path": "Flags.ResetHours", "value": "24"})  # once a day
     return {"record_type": "DialogResponses", "editorid": editor_id, "parent": fw(topic), "ops": ops}
 
 
@@ -339,6 +377,7 @@ def main(spec_path, out_dir, relock=False):
     who = spec["candidate"]
     short = "".join(ch for ch in who["name"].split()[0] if ch.isalnum())
     npc = form_key(who["npc"])
+    HER[0] = form_key(who["ref"])
     reqs = requirements(spec.get("attributes", {}))
     records, lines = [], {}
     next_id = 0x800
@@ -362,6 +401,24 @@ def main(spec_path, out_dir, relock=False):
         records.append(record)
         lines.setdefault(key, []).append(f"{plugin}|0x{next_id:03X}")
         next_id += 1
+        add_reply(lines[key][-1], text)
+
+    replies = []  # [{"after": [line], "lines": [her answers]}]: the manifest's
+
+    def add_reply(after, text):
+        """her answer to the line just made (a "reply" on its text): IRF_SayTopic, moment kReply, IRF_ReplyFaction == n"""
+        nonlocal next_id
+        if not isinstance(text, dict) or "reply" not in text:
+            return
+        n = len(replies) + 1
+        answers = []
+        for i, answer in enumerate(texts(text["reply"])):
+            records.append(info(f"IRF{short}_reply_{n}" + (f"_{i + 1}" if len(texts(text["reply"])) > 1 else ""), SAY, answer, npc,
+                                MOMENT_F, REPLY_MOMENT, "EqualTo", False, None,
+                                [condition("GetFactionRankConditionData", "Faction", fw(REPLY_F), n, "EqualTo")]))
+            answers.append(f"{plugin}|0x{next_id:03X}")
+            next_id += 1
+        replies.append({"after": [after], "lines": answers})
 
     given = spec.get("lines", {})
     LINKS["court"] = [KNOW + i - 1 for i in range(1, KNOW_MAX + 1) if f"know.{i}" in given or i == 1]
@@ -443,6 +500,8 @@ def main(spec_path, out_dir, relock=False):
                 mood = lambda t: json.dumps([t.get(k) for k in ("rank", "stageDone")] if isinstance(t, dict) else None)
                 together = sum(1 for other, t in run if other == name and mood(t) == mood(text))
                 percent = round(100 * (1 - (1 - share / 100) ** (1 / together)))
+                if isinstance(text, dict) and "reply" in text:
+                    percent = EXCHANGE_SHARE  # she has to be there and it's once a day: don't make it rarer still
                 ranks = CIRCLE_SETS[name[len(prefix):]]
                 booked = [condition("GetQuestRunningConditionData", "Quest", WEDDING, 0)] if name.endswith(".maramal") else []
                 key = f"circle.{index}.{name}"
@@ -454,6 +513,7 @@ def main(spec_path, out_dir, relock=False):
                 lines.setdefault(key, []).append(f"{plugin}|0x{next_id:03X}")
                 next_id += 1
                 greetings.setdefault(name, []).append(lines[key][-1])
+                add_reply(lines[key][-1], text)
         if greetings:
             entry["greetings"] = greetings
         if "refuse" in member:
@@ -473,6 +533,8 @@ def main(spec_path, out_dir, relock=False):
     manifest = {"format": 1, "candidate": who, "attributes": attributes, "lines": lines}
     if manifest_circle:
         manifest["circle"] = manifest_circle
+    if replies:
+        manifest["replies"] = replies
     # voice files are named by FormID: a rebuild must not move a record that already has one
     ids = {r["editorid"]: f"0x{0x800 + i:03X}" for i, r in enumerate(records)}
     if spec.get("lock"):

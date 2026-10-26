@@ -9,6 +9,7 @@
 #include "Follower.h"
 #include "Forms.h"
 #include "Gifts.h"
+#include "Replies.h"
 #include "Romance.h"
 #include "Rules.h"
 #include "State.h"
@@ -263,6 +264,7 @@ namespace Events
 					Queue([handle = g_talking]() {
 						Confess::OnDialogueClosed();
 						FirstDate::OnDialogueClosed();
+						Replies::OnDialogueClosed();
 						FirstDate::Check();
 						if (const auto a = handle.get()) {
 							Romance::Sync(a.get());  // she may have started or stopped following you
@@ -359,9 +361,14 @@ namespace Events
 				}
 				const auto speaker = a_event->speakerRef ? a_event->speakerRef->As<RE::Actor>() : nullptr;
 				if (speaker) {
-					Queue([handle = speaker->GetHandle(), key]() {
+					RE::FormID candidate = 0;
+					const int  reply = Candidates::ReplyTo(a_event->topicInfoFormID, &candidate);
+					Queue([handle = speaker->GetHandle(), key, candidate, reply]() {
 						if (const auto a = handle.get()) {
 							OnLineSaid(a.get(), key);
+							if (reply > 0) {
+								Replies::OnLineEnded(a.get(), candidate, reply);  // she answers
+							}
 						}
 					});
 				}
@@ -783,5 +790,6 @@ namespace Events
 		Children::OnGameLoaded();
 		Confess::OnGameLoaded();
 		FirstDate::OnGameLoaded();
+		Replies::OnGameLoaded();
 	}
 }

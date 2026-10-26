@@ -127,6 +127,7 @@ namespace Candidates
 		std::set<IRF::Event>       reactsTo;  // events their own optional reaction lines cover
 		// line key ("court", "hello.dating", ...) -> the add-on's lines for it
 		std::map<std::string, std::vector<RE::TESTopicInfo*>> lines;
+		std::map<RE::FormID, int>  replyAfter;  // a line (anyone's) -> the number of her reply to it
 	};
 
 	void Load();
@@ -141,6 +142,9 @@ namespace Candidates
 
 	// The candidate and line key an add-on line belongs to (circle members' lines too); nullptr when it's no listed line
 	const Candidate* FindLine(RE::FormID a_info, std::string* a_key);
+
+	// The number of a candidate's reply to this line (0: none), and whose (her reference)
+	int ReplyTo(RE::FormID a_info, RE::FormID* a_candidate);
 
 	// Circle members of every candidate, by their reference
 	const std::vector<std::pair<const Candidate*, const CircleMember*>>& CircleOf(RE::FormID a_ref);

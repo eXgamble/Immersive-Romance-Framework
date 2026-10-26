@@ -95,6 +95,7 @@ namespace IRF
 		kRest = 13,
 		kFirstDate = 14,       // the first date: she comes up to you at her spot (and her answer to your reply)
 		kFirstDateAfter = 15,  // ... and her line after the kiss
+		kReply = 16,           // her answer to someone's line (IRF_ReplyFaction: which one)
 		kNordicRuin = 20,
 		kDwarvenRuin = 21,
 		kCave = 22,
