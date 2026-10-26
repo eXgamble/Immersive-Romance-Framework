@@ -29,7 +29,8 @@ Spec (JSON):
              "following": true / false (she's following you or not), "near": {"who": ref (default: her),
              "within": 700, "sees": true} (the speaker is that close to them; "sees": in their line of sight, which
              the game only works out when one of the two is the player: never between two NPCs), "once": "day" (Say
-             Once, again after 24 hours), "set": "dating" (the speaker's own stage set: for her replies)
+             Once, again after 24 hours), "set": "dating" (the speaker's own stage set: for her replies),
+             "happy": true / false (she's happy with you: her IRF_BandFaction 4 or 5, as her "I'm happy", and no mood)
              a text may carry "reply": "Text" | [{"text": ..., "set": "spouse"}, ...]: she answers it aloud right after
              (the first version that fits); give the line "near" her so she's there to hear it
   "placeholders": true,                      fill every required key that has no text
@@ -88,6 +89,7 @@ WEDDING = "07404E:Skyrim.esm"  # RelationshipMarriageWedding: runs once the wedd
 SETS = {"dating": [2, 3, 4], "love": [3, 4, 5], "marry": [3], "maramal": [4], "spouse": [5]}
 CIRCLE_SETS = {**SETS, "ex": [6], "widowed": [7]}  # a circle member's greetings: hers, and after it ended
 CIRCLE_GREET_SHARE = 25
+HAPPY_BAND = 4  # IRF_BandFaction from here up: she's happy with you (her "howarewe.4": "I'm happy.")
 EXCHANGE_SHARE = 50  # a line she answers (with "reply"): this % of the time when it fits
 MARRIED = 5
 ADOPTED = {"boys": 0x859, "girls": 0x85A}  # IRF_AdoptedBoys / IRF_AdoptedGirls (globals)
@@ -329,6 +331,15 @@ def place_conditions(text):
                                                                "sets": [{"path": "Target", "value": who}]}}]})
     if "set" in text:
         rows += rank_rows(STAGE_F, SETS[text["set"]], "EqualTo")
+    if "happy" in text:
+        def her_rank(faction, value, op, or_next=False):
+            return {"type": "ConditionFloat", "fields": {"CompareOperator": op, "ComparisonValue": str(value), **({"Flags": "OR"} if or_next else {})},
+                    "sets": [{"path": "Data", "compose": {"type": "GetFactionRankConditionData", "fields": {"RunOnType": "Reference"},
+                                                          "sets": [{"path": "Faction", "value": fw(faction)}, {"path": "Reference", "value": HER[0]}]}}]}
+        if text["happy"]:
+            rows += [her_rank(BAND_F, HAPPY_BAND, "GreaterThanOrEqualTo"), her_rank(MOOD_F, 0, "EqualTo")]
+        else:
+            rows += [her_rank(BAND_F, HAPPY_BAND, "LessThan", or_next=True), her_rank(MOOD_F, 0, "GreaterThan")]
     return rows
 
 

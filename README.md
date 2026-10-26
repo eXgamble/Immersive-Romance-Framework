@@ -168,6 +168,9 @@ fighting; a line ended while the talk is still open gets its answer as the talk 
 condition to her (`GetDistance` < 700; the generator: `"near": {"within": 700}`) so it's only said when she can
 hear it, and Say Once with 24 reset hours (the generator: `"once": "day"`) so the exchange isn't repeated.
 `GetLineOfSight` between two NPCs is always false (the game only works it out when one of them is the player).
+Whether she's happy with you, for anyone's line: `GetFactionRank IRF_BandFaction` (0x80F, her approval band 1-5, the
+same as her "How are we?" answer) >= 4 and `GetFactionRank IRF_MoodFaction` (0x85B) == 0, run on her reference (the
+generator: `"happy": true`, or `false` for the opposite).
 
 ### The lines
 
