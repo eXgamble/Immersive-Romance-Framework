@@ -32,9 +32,10 @@ Spec (JSON):
              Once, again after 24 hours), "set": "dating" (the speaker's own stage set: for her replies),
              "happy": true / false (she's happy with you: her IRF_BandFaction 4 or 5, as her "I'm happy", and no mood)
              "player": "male" / "female" (the player's sex: for the few lines that name it; give the other sex its own text)
-             "jealousOf": "fighter" / "other" (the woman she got jealous of today: a fighter at your side, or not; for her
-             "jealous" line and her jealous-mood lines; once voiced, give the existing lines "fighter" (their words, so
-             their FormIDs, stay) and add the "other" ones, so no new line has to come first)
+             "jealousOf": "fighter" / "nonfighter" / "both" (the woman she got jealous of today: a fighter at your side,
+             or not; for her "jealous" line and her jealous-mood lines; "both", the default, plays for either). The
+             condition doesn't change a line's words, so marking voiced lines keeps their FormIDs: no new line has to
+             come first
              a text may carry "reply": "Text" | [{"text": ..., "set": "spouse"}, ...]: she answers it aloud right after
              (the first version that fits); give the line "near" her so she's there to hear it
   "placeholders": true,                      fill every required key that has no text
@@ -345,8 +346,11 @@ def place_conditions(text):
                                                                "sets": [{"path": "Target", "value": who}]}}]})
     if "set" in text:
         rows += rank_rows(STAGE_F, SETS[text["set"]], "EqualTo")
-    if "jealousOf" in text:
-        rows.append(condition("GetFactionRankConditionData", "Faction", fw(JEALOUS_OF_F), 1 if text["jealousOf"] == "fighter" else 2, "EqualTo"))
+    if text.get("jealousOf", "both") != "both":
+        kinds = {"fighter": 1, "nonfighter": 2}
+        if text["jealousOf"] not in kinds:
+            sys.exit(f'"jealousOf" is "fighter", "nonfighter" or "both", not {text["jealousOf"]!r}')
+        rows.append(condition("GetFactionRankConditionData", "Faction", fw(JEALOUS_OF_F), kinds[text["jealousOf"]], "EqualTo"))
     if "player" in text:
         rows.append({"type": "ConditionFloat", "fields": {"CompareOperator": "EqualTo", "ComparisonValue": "1"},
                      "sets": [{"path": "Data", "compose": {"type": "GetPCIsSexConditionData",

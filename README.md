@@ -71,7 +71,7 @@ line they say.
   her cap. She can die if you don't get her up in time; an essential one is only knocked out.
 - **On the road:** lines in ruins, caves, towns and inns, after a fight, a dragon, a rest; a jealous line when
   she sees you travelling with another woman (another candidate, or any female follower but the old people). Her jealous lines can differ for a fighter at your side and for a woman who isn't one
-  (`IRF_JealousOfFaction` 0x876: 1 fighter, 2 not; the generator's `"jealousOf"`).
+  (`IRF_JealousOfFaction` 0x876: 1 fighter, 2 not; the generator's `"jealousOf"`: fighter, nonfighter or both).
 
 ## For add-on authors
 
