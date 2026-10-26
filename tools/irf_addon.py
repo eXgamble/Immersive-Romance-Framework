@@ -44,7 +44,8 @@ FORCEGREET = 0x848  # IRF_ForceGreetTopic: what she comes up to tell you (stay h
 CONFESS_REPLY = 0x862  # IRF_ConfessReplyTopic: "You mean a lot to me too."
 KNOW, KNOW_MAX = 0x864, 10  # IRF_KnowTopic1-10 (0x864-0x86D): the get-to-know questions (at least one)
 CANDIDATE_F = 0x800  # IRF_CandidateFaction: every registered candidate, rank 0
-LINKS = {"confess": [CONFESS_REPLY]}  # the replies her line offers (LinkTo); "court" links to her questions (main)
+FIRSTDATE_REPLY = 0x871  # IRF_FirstDateReplyTopic: "Of course I came."
+LINKS = {"confess": [CONFESS_REPLY], "firstdate": [FIRSTDATE_REPLY]}  # the replies her line offers (LinkTo); "court" links to her questions (main)
 ASKDATE, FOLLOW, KISS, BREAKUP, AMENDS, WINBACK, SECRET, DATE, DENY, ADMIT = (
     0x82A, 0x82C, 0x82E, 0x830, 0x832, 0x834, 0x836, 0x838, 0x83A, 0x83C)
 # factions
@@ -66,12 +67,15 @@ MARRIED = 5
 ADOPTED = {"boys": 0x859, "girls": 0x85A}  # IRF_AdoptedBoys / IRF_AdoptedGirls (globals)
 OPS = {"==": "EqualTo", "!=": "NotEqualTo", ">=": "GreaterThanOrEqualTo", "<=": "LessThanOrEqualTo", ">": "GreaterThan", "<": "LessThan"}
 
-EVENTS = {"courting": 1, "dating": 2, "committed": 3, "engaged": 4, "married": 5, "amends": 6,
-          "playerEnded": 7, "theyEnded": 8, "brokenHeart": 9, "seeingSomeone": 10, "widowed": 11, "wonBack": 12, "killed": 13}
+EVENTS = {"dating": 2, "committed": 3, "engaged": 4, "married": 5, "amends": 6,
+          "playerEnded": 7, "theyEnded": 8, "brokenHeart": 9, "seeingSomeone": 10, "widowed": 11, "wonBack": 12, "killed": 13,
+          "stoodUp": 14}
 WHYS = {"cheating": 1, "violence": 2, "absence": 3, "bleedouts": 4, "crime": 5, "choice": 6}
 REFUSE_MOMENT = 7  # a circle member refusing service
 STAYHOME_MOMENT = 8  # a spouse with children won't leave town
 CONFESS_MOMENT = 9  # newly Committed: she tells you how much you mean to her
+FIRSTDATE_MOMENT, FIRSTDATE_AFTER = 14, 15  # the first date at her spot, and her line after the kiss
+HINT_GREET, HINT_SHARE = 1, 50  # she'd say yes to a date: her hint hello/goodbye, this % of the time (else vanilla's)
 MOMENTS = {"caught": 1, "revive": 2, "attacked": 3, "crime.approve": 4, "crime.disapprove": 5, "jealous": 6,
            "road.afterfight": 10, "road.dragon": 11, "road.nearlydead": 12, "road.rest": 13,
            "road.nordicruin": 20, "road.dwarvenruin": 21, "road.cave": 22, "road.dungeon": 23,
@@ -92,9 +96,8 @@ def requirements(attributes):
     def mood_row(mood):
         return condition("GetFactionRankConditionData", "Faction", fw(MOOD_F), MOODS[mood], "EqualTo")
 
-    # "I'd like to get to know you better.": her opener links to her five questions; she declines if you're taken
+    # "I'd like to get to know you better.": her opener links to her questions (only talk, never courting)
     add("court", COURT, COURT_F, 1)
-    add("court.taken", COURT, COURT_F, 2)
     for i in range(1, KNOW_MAX + 1):  # her answers, at least one: {"prompt": "<your question>", "text": "<her answer>"}
         add(f"know.{i}", KNOW + i - 1, CANDIDATE_F, 0, required=i == 1)
     # Courting greets, says goodbye and idles as vanilla's Friend: her own everyday lines start at Dating.
@@ -125,12 +128,15 @@ def requirements(attributes):
         if name != "choice":
             add(f"breakup.{name}", REACTION_HELLO, REACTION_F, 20 + why)
     add("amulet.friend", AMULET, AMULET_F, 1)
-    add("amulet.courting", AMULET, AMULET_F, 2)
     add("amulet.dating", AMULET, AMULET_F, 3)
     for band in range(1, 6):
         add(f"howarewe.{band}", HOWAREWE, BAND_F, band)
     add("askdate.yes", ASKDATE, ASKDATE_F, 1)
     add("askdate.notyet", ASKDATE, ASKDATE_F, 2)
+    add("askdate.taken", ASKDATE, ASKDATE_F, 3)  # a Friend who knows you're taken (and won't compete)
+    # once she'd say yes: a hello and a goodbye that hint at it, mixed with her vanilla ones
+    add("hello.hint", HELLO, GREET_F, HINT_GREET, extra=[random_row(HINT_SHARE)])
+    add("goodbye.hint", GOODBYE, GREET_F, HINT_GREET, extra=[random_row(HINT_SHARE)])
     add("follow.yes", FOLLOW, FOLLOW_F, 1)
     add("follow.no", FOLLOW, FOLLOW_F, 2)
     add("kiss.yes", KISS, KISS_F, 1)
@@ -152,6 +158,12 @@ def requirements(attributes):
     add("stayhome", FORCEGREET, MOMENT_F, STAYHOME_MOMENT, goodbye=True)
     add("confess", FORCEGREET, MOMENT_F, CONFESS_MOMENT)
     add("confess.reply", CONFESS_REPLY, MOMENT_F, CONFESS_MOMENT, goodbye=True)
+    # the first date: she comes up to you at her spot, answers "Of course I came.", her line after the kiss; and
+    # if you never came, her line at your next meeting
+    add("firstdate", FORCEGREET, MOMENT_F, FIRSTDATE_MOMENT)
+    add("firstdate.reply", FIRSTDATE_REPLY, MOMENT_F, FIRSTDATE_MOMENT, goodbye=True)
+    add("firstdate.after", SAY, MOMENT_F, FIRSTDATE_AFTER)
+    add("stoodup", REACTION_HELLO, REACTION_F, EVENTS["stoodUp"])
     for rank, name in enumerate(["gift.insulted", "gift.disliked", "gift", "gift.liked", "gift.loved"], start=1):
         add(name, GIFT_ANSWER, GIFT_F, rank)
     for name, code in MOMENTS.items():
@@ -178,6 +190,12 @@ def condition(function, field, value, compare, op="EqualTo", or_next=False):
     return {"type": "ConditionFloat", "fields": fields,
             "sets": [{"path": "Data", "compose": {"type": function, "fields": {"RunOnType": "Subject"},
                                                   "sets": [{"path": field, "value": value}]}}]}
+
+
+def random_row(percent):
+    """GetRandomPercent < percent: the line plays only part of the time"""
+    return {"type": "ConditionFloat", "fields": {"CompareOperator": "LessThan", "ComparisonValue": str(percent)},
+            "sets": [{"path": "Data", "compose": {"type": "GetRandomPercentConditionData"}}]}
 
 
 def share_rows(percent):

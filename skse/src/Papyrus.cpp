@@ -79,7 +79,7 @@ namespace Papyrus
 			}
 			const auto stage = Romance::GetStage(a_actor);
 			const auto& s = State::Of(a_actor->GetFormID());
-			if (stage < Stage::kCourting || stage > Stage::kMarried || s.hurt || s.silentUntilDay > State::Today()) {
+			if (stage < Stage::kDating || stage > Stage::kMarried || s.hurt || s.silentUntilDay > State::Today()) {
 				return false;
 			}
 			const int modesty = std::min(3, candidate->attributes.modesty + (a_level > 0 ? 1 : 0));
@@ -138,6 +138,9 @@ namespace Papyrus
 				s.committedDay -= d;
 				s.recentDay -= d;
 				s.lastKnowDay -= d;
+				if (s.dateUntilDay > 0.0f) {
+					s.dateUntilDay -= d;  // a date that's now in the past: stood up at the next check
+				}
 				s.lastDateDay -= d;
 				s.lastKissDay -= d;
 				s.lastGiftDay -= d;

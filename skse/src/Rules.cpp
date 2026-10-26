@@ -88,6 +88,8 @@ namespace Rules
 		IRF_RULE(partnerSkillPerLevel);
 		IRF_RULE(confessDelayDays);
 		IRF_RULE(confessDistance);
+		IRF_RULE(standUpCost);
+		IRF_RULE(firstDateDistance);
 		IRF_RULE(childAwayDays);
 		IRF_RULE(momentCooldownSeconds);
 		IRF_RULE(witnessDistance);

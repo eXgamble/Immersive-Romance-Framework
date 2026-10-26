@@ -6,6 +6,7 @@
 #include "Rules.h"
 #include "Script.h"
 #include "State.h"
+#include "World.h"
 
 namespace Confess
 {
@@ -25,20 +26,6 @@ namespace Confess
 				a_partner->AddToFaction(Forms::Get().moment, 0);
 			}
 			Romance::SyncChat(a_partner);
-		}
-
-		// Both in the same interior, or both outside in the same worldspace
-		bool SamePlace(RE::Actor* a_a, RE::Actor* a_b)
-		{
-			const auto ca = a_a->GetParentCell();
-			const auto cb = a_b->GetParentCell();
-			if (!ca || !cb) {
-				return false;
-			}
-			if (ca->IsInteriorCell() || cb->IsInteriorCell()) {
-				return ca == cb;
-			}
-			return a_a->GetWorldspace() == a_b->GetWorldspace();
 		}
 
 		// Following you she says it anywhere but a dungeon (a camp on the road, an inn); otherwise somewhere people live
@@ -97,7 +84,7 @@ namespace Confess
 			return;
 		}
 		const auto player = RE::PlayerCharacter::GetSingleton();
-		if (!partner->Is3DLoaded() || !SamePlace(player, partner) || player->GetPosition().GetDistance(partner->GetPosition()) > r.confessDistance) {
+		if (!partner->Is3DLoaded() || !World::SamePlace(player, partner) || player->GetPosition().GetDistance(partner->GetPosition()) > r.confessDistance) {
 			return;
 		}
 		if (player->IsInCombat() || Busy(partner) || RE::UI::GetSingleton()->IsMenuOpen(RE::DialogueMenu::MENU_NAME) || !SafePlace(partner, *candidate)) {

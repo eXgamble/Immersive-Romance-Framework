@@ -35,6 +35,9 @@ namespace Romance
 	// The player strayed from their partner with a_other (kiss, courting talk, gift); checks who saw it
 	void Strayed(RE::Actor* a_other, std::string_view a_deed);
 
+	// A Friend who knows you're taken and won't compete for you: she turns down a date ("askdate.taken")
+	bool WontBeCourted(RE::Actor* a_actor);
+
 	// Something happened with a candidate: pending reactions for everyone who reacts, the recent event, refusals
 	void Notify(RE::Actor* a_candidate, Event a_event);
 

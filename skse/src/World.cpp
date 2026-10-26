@@ -123,6 +123,19 @@ namespace World
 		return hour >= 18.0f && hour <= 23.5f;
 	}
 
+	bool SamePlace(RE::Actor* a_a, RE::Actor* a_b)
+	{
+		const auto ca = a_a->GetParentCell();
+		const auto cb = a_b->GetParentCell();
+		if (!ca || !cb) {
+			return false;
+		}
+		if (ca->IsInteriorCell() || cb->IsInteriorCell()) {
+			return ca == cb;
+		}
+		return a_a->GetWorldspace() == a_b->GetWorldspace();
+	}
+
 	void Kiss(RE::Actor* a_partner)
 	{
 		// Game.FadeOutGame(abFadingOut, abBlackFade, afSecsBeforeFade, afFadeDuration): a short fade in

@@ -8,7 +8,7 @@ namespace IRF
 	{
 		kNone = -1,  // not a Friend yet (vanilla relationship rank below 1, or not someone they'd court)
 		kFriend = 0,
-		kCourting = 1,
+		kCourting = 1,  // retired 2026-10-25: a Friend is the courting phase; the first date makes her Dating. Never set
 		kDating = 2,
 		kCommitted = 3,
 		kEngaged = 4,
@@ -22,7 +22,7 @@ namespace IRF
 	enum class GreetState : std::int8_t
 	{
 		kNone = 0,
-		kCourting = 1,  // retired: Courting greets as vanilla's Friend (kNone)
+		kHint = 1,      // a Friend who'd say yes to a date: one extra hello and goodbye that hint at it (else vanilla's)
 		kDating = 2,
 		kCommitted = 3,
 		kEngaged = 4,
@@ -57,7 +57,7 @@ namespace IRF
 	enum class Event : std::int8_t
 	{
 		kNone = 0,
-		kCourting = 1,
+		kCourting = 1,  // retired with the Courting stage: never raised
 		kDating = 2,
 		kCommitted = 3,
 		kEngaged = 4,
@@ -70,6 +70,7 @@ namespace IRF
 		kWidowed = 11,          // the candidate died
 		kWonBack = 12,          // back together after a breakup
 		kKilled = 13,           // the player killed them, and someone saw it
+		kStoodUp = 14,          // the player didn't come to the first date (her "stoodup" line at the next meeting)
 		kBreakupSpeech = 20,    // + Why: the candidate's own speech as she leaves you (21 cheating .. 25 crime)
 		kConfront = 30,         // word got back: she confronts you
 	};
@@ -91,6 +92,8 @@ namespace IRF
 		kDragon = 11,
 		kNearlyDead = 12,
 		kRest = 13,
+		kFirstDate = 14,       // the first date: she comes up to you at her spot (and her answer to your reply)
+		kFirstDateAfter = 15,  // ... and her line after the kiss
 		kNordicRuin = 20,
 		kDwarvenRuin = 21,
 		kCave = 22,
@@ -100,7 +103,7 @@ namespace IRF
 		kHomeTown = 26,
 	};
 
-	// IRF_MoodFaction: her mood on top of the stage (Courting to Married), for the mood versions of her greetings,
+	// IRF_MoodFaction: her mood on top of the stage (Dating to Married), for the mood versions of her greetings,
 	// goodbyes and idles; the strongest wins. No mood is the happy default: her plain stage lines (a spouse's idles
 	// mix with vanilla's). 1 was warm, removed (user, 2026-10-25): not reused
 	enum class Mood : std::int8_t

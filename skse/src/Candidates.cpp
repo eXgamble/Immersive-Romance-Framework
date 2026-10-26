@@ -25,7 +25,6 @@ namespace Candidates
 		const std::vector<std::pair<Event, const char*>>& EventNames()
 		{
 			static const std::vector<std::pair<Event, const char*>> names{
-				{ Event::kCourting, "courting" },
 				{ Event::kDating, "dating" },
 				{ Event::kCommitted, "committed" },
 				{ Event::kEngaged, "engaged" },
@@ -38,6 +37,7 @@ namespace Candidates
 				{ Event::kWidowed, "widowed" },
 				{ Event::kWonBack, "wonBack" },
 				{ Event::kKilled, "killed" },
+				{ Event::kStoodUp, "stoodUp" },
 			};
 			return names;
 		}
@@ -92,7 +92,6 @@ namespace Candidates
 
 			// "I'd like to get to know you better.": her opener (it links to her questions), or she declines: taken
 			add("court", f.court, f.courtFaction, 1);
-			add("court.taken", f.court, f.courtFaction, 2);
 			// her answers to her questions (at least one, up to ten); each carries its question as its prompt (the
 			// player's words)
 			for (std::uint32_t i = 0; i < f.know.size(); ++i) {
@@ -183,13 +182,23 @@ namespace Candidates
 			}
 
 			add("amulet.friend", f.amuletTopic, f.amulet, Rank(Stage::kFriend) + 1);
-			add("amulet.courting", f.amuletTopic, f.amulet, Rank(Stage::kCourting) + 1);
 			add("amulet.dating", f.amuletTopic, f.amulet, Rank(Stage::kDating) + 1);
 			for (int band = 1; band <= 5; ++band) {
 				add(std::format("howarewe.{}", band), f.howAreWe, f.band, band);
 			}
 			add("askdate.yes", f.askDateTopic, f.askDate, 1);
 			add("askdate.notyet", f.askDateTopic, f.askDate, 2);
+			add("askdate.taken", f.askDateTopic, f.askDate, 3);  // a Friend who knows you're taken (and won't compete)
+			// once she'd say yes: one extra hello and goodbye that hint at it (the add-on mixes them with vanilla's)
+			add("hello.hint", f.hello, f.greet, Rank(GreetState::kHint));
+			add("goodbye.hint", f.goodbye, f.greet, Rank(GreetState::kHint));
+			// the first date: she comes up to you at her spot, answers your reply, and her line after the kiss;
+			// if you never came, her line at your next meeting
+			add("firstdate", f.forceGreetTopic, f.moment, Rank(Moment::kFirstDate));
+			add("firstdate.reply", f.firstDateReply, f.moment, Rank(Moment::kFirstDate));
+			list.back().goodbye = true;
+			add("firstdate.after", f.say, f.moment, Rank(Moment::kFirstDateAfter));
+			add("stoodup", f.reactionHello, f.reaction, Rank(Event::kStoodUp));
 			add("follow.yes", f.followTopic, f.follow, 1);
 			add("follow.no", f.followTopic, f.follow, 2);
 			add("kiss.yes", f.kissTopic, f.kiss, 1);
@@ -368,6 +377,15 @@ namespace Candidates
 			out.silentDays = heartbreak.value("silentDays", r.heartbreakSilentDays);
 			out.pleads = heartbreak.value("pleads", r.pleads);
 			out.pleadEvery = heartbreak.value("every", r.pleadEvery);
+			if (const auto date = a.value("firstDate", nlohmann::json::object()); date.contains("spot")) {
+				const auto spot = FormAt(date, "spot");
+				const auto place = date.contains("place") ? FormAt(date, "place") : nullptr;
+				out.dateSpot = spot ? spot->As<RE::TESObjectREFR>() : nullptr;
+				out.datePlace = place ? place->As<RE::BGSLocation>() : nullptr;
+			}
+			if (!out.dateSpot) {
+				a_problems.push_back("firstDate.spot is not a loaded reference (where she waits for your first date)");
+			}
 			if (a.contains("spouseBonus")) {
 				const auto bonus = FormAt(a, "spouseBonus");
 				if (bonus && (bonus->Is(RE::FormType::Spell) || bonus->Is(RE::FormType::Perk))) {

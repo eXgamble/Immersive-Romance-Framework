@@ -25,8 +25,8 @@ line they say.
   Approval (0..100, never shown) moves you between them: getting to know her, evening dates, kisses, gifts (one a day),
   fighting and clearing places together raise it. A gift can also be disliked, or an insult (a human heart).
 - **Getting to know her:** "I'd like to get to know you better." (once a day, Friend to Married) opens her own
-  questions (1 to 10, her add-on writes them). A question you hadn't asked gives approval; the first one starts
-  Courting; asking again does nothing. From Dating up, "Spend the evening with me." in the evening is a date.
+  questions (1 to 10, her add-on writes them). A question you hadn't asked gives approval; asking again does nothing.
+  It's only talk: it never starts courting and never counts as straying. From Dating up, "Spend the evening with me." in the evening is a date.
 - **Committed has its moment:** a day after she becomes Committed she comes up to you, somewhere safe (a town, an
   inn, a home; anywhere but a dungeon while she follows you) and out of combat, and tells you how much you mean to
   her. You answer "You mean a lot to me too." and she replies. Once per relationship (again after a win-back).
@@ -40,7 +40,9 @@ line they say.
   keep vanilla's. Your spouse stays home with them: she follows you inside the family's town, but at its edge she
   comes up to you, says why she can't come and goes home; after a fast travel a message says it.
 - **Gifts:** "I have something for you." opens the gift menu (gold included) for a candidate from Friend up; she
-  answers as she says goodbye. Stolen and quest items can't be given, and an insult isn't taken.
+  answers as she says goodbye. Stolen and quest items can't be given, and an insult isn't taken. A gift is courting:
+  the first one a Friend likes starts Courting, and with a partner a gift to someone else is straying (a Friend who
+  knows you're taken and won't compete for you takes it as a friend's gift).
 - **Moods** on top of the stage: wary (you attacked her lately), hurt (broken heart), jealous (seen you with
   another candidate), strained (low approval). No mood is the happy default: her plain lines. Her
   greetings, goodbyes and idle chatter can follow them; her idles follow every stage, so a partner never falls
@@ -163,8 +165,8 @@ mood lines; the generator does this. A spouse's idle lines also carry `(IRF_Stag
 
 | Key | Topic (Immersive Romance Framework.esp) | Faction | Rank |
 |---|---|---|---|
-| `court` (her opener to "I'd like to get to know you better.", once a day from Friend to Married; LinkTo her questions) / `court.taken` (a Friend declines: you're taken) | IRF_CourtTopic 0x808 | IRF_CourtFaction 0x821 | 1 / 2 |
-| `know.1` .. `know.10` (her answers to her own questions, at least one; each INFO's Prompt is the player's question. A question you hadn't asked gives approval, one a day, and the first makes a Friend Courting; asking again does nothing) | IRF_KnowTopic1-10 0x864-0x86D | IRF_CandidateFaction 0x800 | 0 |
+| `court` (her opener to "I'd like to get to know you better.", once a day from Friend to Married; LinkTo her questions) (only talk: never courting, never straying) | IRF_CourtTopic 0x808 | IRF_CourtFaction 0x821 | 1 |
+| `know.1` .. `know.10` (her answers to her own questions, at least one; each INFO's Prompt is the player's question. A question you hadn't asked gives approval, one a day; asking again does nothing) | IRF_KnowTopic1-10 0x864-0x86D | IRF_CandidateFaction 0x800 | 0 |
 | `hello.<set>`, `goodbye.<set>`, `idle.<set>`: her everyday lines, in sets that build on each other (below). Courting is vanilla's Friend: her greetings, goodbyes and idles there stay vanilla's | IRF_HelloTopic 0x806 / IRF_GoodbyeTopic 0x807 / IRF_IdleTopic 0x85C | IRF_GreetFaction 0x803 (hello, goodbye) / IRF_StageFaction 0x801 (idle) | an OR group, one row `== <rank>` per stage the set plays at (2 Dating, 3 Committed, 4 Engaged, 5 Married); `maramal` also `GetQuestRunning RelationshipMarriageWedding == 0` |
 | `hello.brokenheart.silent` (Goodbye flag) | IRF_HelloTopic | IRF_GreetFaction | 10 |
 | `hello.brokenheart.hurt`, `goodbye.brokenheart` | Hello / Goodbye | IRF_GreetFaction | 11 |

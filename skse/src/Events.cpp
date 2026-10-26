@@ -3,6 +3,7 @@
 #include "Children.h"
 #include "Confess.h"
 #include "Crimes.h"
+#include "FirstDate.h"
 
 #include "Candidates.h"
 #include "Follower.h"
@@ -139,14 +140,10 @@ namespace Events
 				if (!(s.knowAsked & bit) && today - s.lastKnowDay >= 1.0f) {
 					s.knowAsked |= bit;
 					s.lastKnowDay = today;
-					if (stage == Stage::kFriend) {
-						Romance::SetStage(a_speaker, Stage::kCourting, "getting to know them");
-						Romance::Strayed(a_speaker, "courting someone else");
-					}
-					Romance::ModApproval(a_speaker, r.knowGain, "getting to know them");
+					Romance::ModApproval(a_speaker, r.knowGain, "getting to know them");  // only talk: never courting or straying
 				}
-			} else if (a_key == "askdate.yes" && stage == Stage::kCourting) {
-				Romance::SetStage(a_speaker, Stage::kDating, "asked to be together");
+			} else if (a_key == "askdate.yes" && stage == Stage::kFriend) {
+				FirstDate::Start(a_speaker);  // tonight at her spot; the date makes her Dating
 			} else if (a_key == "follow.yes") {
 				Follower::Recruit(a_speaker);
 			} else if (a_key == "kiss.yes") {
@@ -185,6 +182,7 @@ namespace Events
 				s.secret = true;
 			} else if (a_key == "date" && today - s.lastDateDay >= 1.0f) {
 				s.lastDateDay = today;
+				Romance::Strayed(a_speaker, "a date with someone else");  // nothing if she's your partner
 				Romance::ModApproval(a_speaker, r.dateGain, "an evening together");
 				if (Romance::Partner() == a_speaker) {
 					Spread(a_speaker, false);
@@ -226,6 +224,7 @@ namespace Events
 							if (a.get() == Romance::Partner()) {
 								Confess::Check();
 							}
+							FirstDate::Check();
 						}
 					});
 				}
@@ -263,6 +262,8 @@ namespace Events
 				if (a_event && !a_event->opening && a_event->menuName == RE::DialogueMenu::MENU_NAME) {
 					Queue([handle = g_talking]() {
 						Confess::OnDialogueClosed();
+						FirstDate::OnDialogueClosed();
+						FirstDate::Check();
 						if (const auto a = handle.get()) {
 							Romance::Sync(a.get());  // she may have started or stopped following you
 						}
@@ -273,6 +274,7 @@ namespace Events
 					Queue([]() {
 						Children::OnLoadingDone();
 						Confess::Check();
+						FirstDate::Check();
 					});
 				}
 				if (!a_event || !a_event->opening) {
@@ -332,6 +334,13 @@ namespace Events
 				logger::info("Events: line '{}' {} ({:08X})", key, a_event->type == RE::TESTopicInfoEvent::TopicInfoEventType::kTopicEnd ? "ended" : "began",
 					a_event->topicInfoFormID);
 				if (a_event->type != RE::TESTopicInfoEvent::TopicInfoEventType::kTopicEnd) {
+					if (key == "firstdate" && a_event->speakerRef) {
+						Queue([handle = a_event->speakerRef->GetHandle()]() {
+							if (const auto ref = handle.get(); ref && ref->As<RE::Actor>()) {
+								FirstDate::OnSaid(ref->As<RE::Actor>());
+							}
+						});
+					}
 					if (key == "confess" && a_event->speakerRef) {
 						Queue([handle = a_event->speakerRef->GetHandle()]() {
 							if (const auto ref = handle.get(); ref && ref->As<RE::Actor>()) {
@@ -451,7 +460,7 @@ namespace Events
 					});
 					return RE::BSEventNotifyControl::kContinue;
 				}
-				if (!a_event->cause->IsPlayerRef() || !IsCandidateAt(target, Stage::kCourting, Stage::kMarried)) {
+				if (!a_event->cause->IsPlayerRef() || !IsCandidateAt(target, Stage::kFriend, Stage::kMarried)) {
 					return RE::BSEventNotifyControl::kContinue;
 				}
 				// one swing or a concentration spell raises many events: one per second
@@ -508,7 +517,7 @@ namespace Events
 					if (!a) {
 						return;
 					}
-					if (state == RE::ACTOR_COMBAT_STATE::kCombat && atPlayer && IsCandidateAt(a.get(), Stage::kCourting, Stage::kMarried)) {
+					if (state == RE::ACTOR_COMBAT_STATE::kCombat && atPlayer && IsCandidateAt(a.get(), Stage::kFriend, Stage::kMarried)) {
 						Attack(a.get(), "turned on you");
 					} else if (state == RE::ACTOR_COMBAT_STATE::kNone) {
 						State::Of(a->GetFormID()).strayHits = 0;
@@ -517,6 +526,7 @@ namespace Events
 							Moment_(a.get(), Moment::kAfterFight);
 						}
 						Confess::Check();
+						FirstDate::Check();
 					}
 				});
 				return RE::BSEventNotifyControl::kContinue;
@@ -556,7 +566,7 @@ namespace Events
 					}
 					if (Candidates::Find(d.get())) {
 						const auto stage = Romance::GetStage(d.get());
-						if (stage >= Stage::kCourting && stage <= Stage::kMarried) {
+						if (stage >= Stage::kDating && stage <= Stage::kMarried) {
 							const bool seen = k && k->IsPlayerRef() && SomeoneSawKill(d.get());  // unseen, it's a death like any other
 							auto&      s = State::Of(d->GetFormID());
 							s.who = seen ? Who::kPlayer : Who::kNone;  // also clears an old breakup's after a win-back
@@ -619,6 +629,7 @@ namespace Events
 				Queue([loc = a_event->newLoc]() {
 					Children::OnPlayerLocation(loc);  // the wilds have no location at all
 					Confess::Check();
+					FirstDate::Check();
 				});
 				if (!a_event->newLoc) {
 					return RE::BSEventNotifyControl::kContinue;
@@ -664,6 +675,7 @@ namespace Events
 						Moment_(partner, Moment::kRest);
 					}
 					Confess::Check();
+					FirstDate::Check();
 				});
 				return RE::BSEventNotifyControl::kContinue;
 			}
@@ -770,5 +782,6 @@ namespace Events
 		Gifts::OnGameLoaded();
 		Children::OnGameLoaded();
 		Confess::OnGameLoaded();
+		FirstDate::OnGameLoaded();
 	}
 }

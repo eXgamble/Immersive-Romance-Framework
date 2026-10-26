@@ -125,9 +125,7 @@ namespace Gifts
 			} else {
 				const int gain = taste == Taste::kLoved ? r.giftLovedGain : taste == Taste::kLiked ? r.giftLikedGain : r.giftGain;
 				Romance::ModApproval(a_actor, gain, taste == Taste::kLoved ? "a gift they love" : taste == Taste::kLiked ? "a gift they like" : "a gift");
-				if (Romance::GetStage(a_actor) >= Stage::kCourting) {
-					Romance::Strayed(a_actor, "a gift for someone else");  // a gift to a friend is just a gift
-				}
+				// only approval: a gift is never straying (user, 2026-10-25: dates, kisses and intimacy are)
 			}
 			Romance::Contact(a_actor);
 			a_actor->AddToFaction(Forms::Get().gift, static_cast<std::int8_t>(Rank(taste) + 1));

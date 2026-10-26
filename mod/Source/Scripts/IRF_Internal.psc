@@ -26,3 +26,29 @@ Function SendHome(Actor akSpouse) global
 	akSpouse.EvaluatePackage()
 	akSpouse.MoveToPackageLocation()
 EndFunction
+
+; The first date is set: IRF_FirstDateQuest holds her (alias 0, her wait package takes her to her spot), her spot
+; (alias 1) and its place for the journal (alias 2), and shows "Meet her at the place after sunset"
+Function StartDate(Quest akQuest, Actor akDate, ObjectReference akSpot, Location akPlace) global
+	If !akQuest.IsRunning()
+		akQuest.Start()
+	EndIf
+	(akQuest.GetAlias(0) as ReferenceAlias).ForceRefTo(akDate)
+	(akQuest.GetAlias(1) as ReferenceAlias).ForceRefTo(akSpot)
+	If akPlace
+		(akQuest.GetAlias(2) as LocationAlias).ForceLocationTo(akPlace)
+	EndIf
+	akQuest.SetObjectiveDisplayed(10)
+	akDate.EvaluatePackage()
+EndFunction
+
+; The date is over: kept (the objective is done) or missed (failed); she goes back to her day
+Function EndDate(Quest akQuest, Actor akDate, bool abKept) global
+	If abKept
+		akQuest.SetObjectiveCompleted(10)
+	Else
+		akQuest.SetObjectiveFailed(10)
+	EndIf
+	akQuest.Stop()
+	akDate.EvaluatePackage()
+EndFunction

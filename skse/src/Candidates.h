@@ -94,6 +94,8 @@ namespace Candidates
 		Interest  interestedIn{ Interest::kAny };
 		bool      refusesSecret{ false };
 		RE::TESForm* spouseBonus{ nullptr };  // her own spouse perk: an ability (SPEL) or a perk the player has while married
+		RE::TESObjectREFR* dateSpot{ nullptr };  // firstDate.spot: where she waits for your first date (required)
+		RE::BGSLocation*   datePlace{ nullptr }; // firstDate.place: its name in the journal (default: the spot's cell's)
 
 		GiftTaste                                gifts;
 		Combat                                   combat;

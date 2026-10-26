@@ -1,5 +1,6 @@
 #include "Romance.h"
 
+#include "FirstDate.h"
 #include "Follower.h"
 #include "Forms.h"
 #include "Rules.h"
@@ -120,8 +121,6 @@ namespace Romance
 		Event EventFor(Stage a_stage)
 		{
 			switch (a_stage) {
-			case Stage::kCourting:
-				return Event::kCourting;
 			case Stage::kDating:
 				return Event::kDating;
 			case Stage::kCommitted:
@@ -135,7 +134,7 @@ namespace Romance
 			}
 		}
 
-		GreetState GreetFor(Stage a_stage, const State::Candidate& a_state)
+		GreetState GreetFor(Stage a_stage, const State::Candidate& a_state, bool a_hint)
 		{
 			if (a_state.silentUntilDay > State::Today()) {
 				return GreetState::kBrokenSilent;
@@ -144,8 +143,8 @@ namespace Romance
 				return GreetState::kBrokenHurt;
 			}
 			switch (a_stage) {
-			case Stage::kCourting:
-				return GreetState::kNone;  // vanilla's Friend greetings
+			case Stage::kFriend:
+				return a_hint ? GreetState::kHint : GreetState::kNone;  // else vanilla's Friend greetings
 			case Stage::kDating:
 				return GreetState::kDating;
 			case Stage::kCommitted:
@@ -243,6 +242,9 @@ namespace Romance
 
 	void SetStage(RE::Actor* a_actor, Stage a_stage, std::string_view a_cause)
 	{
+		if (a_stage == Stage::kCourting) {
+			a_stage = Stage::kFriend;  // retired: a Friend is the courting phase
+		}
 		const auto candidate = Candidates::Find(a_actor);
 		if (!candidate) {
 			return;
@@ -301,7 +303,7 @@ namespace Romance
 	void Hurt(RE::Actor* a_actor, const Candidates::Tolerance& a_tolerance, Why a_why, std::string_view a_cause, int a_times)
 	{
 		const auto stage = GetStage(a_actor);
-		if (a_tolerance.never && stage >= Stage::kCourting && stage <= Stage::kEngaged) {
+		if (a_tolerance.never && stage >= Stage::kDating && stage <= Stage::kEngaged) {
 			auto& s = State::Of(a_actor->GetFormID());
 			s.unforgivable = true;
 			s.pendingBreakup = a_why;
@@ -319,7 +321,7 @@ namespace Romance
 	void BreakUp(RE::Actor* a_actor, Who a_who, Why a_why, bool a_unforgivable)
 	{
 		const auto stage = GetStage(a_actor);
-		if (stage < Stage::kCourting || stage > Stage::kEngaged) {
+		if (stage < Stage::kDating || stage > Stage::kEngaged) {
 			return;
 		}
 		auto& s = State::Of(a_actor->GetFormID());
@@ -377,6 +379,17 @@ namespace Romance
 		Sync(a_partner);
 	}
 
+	bool WontBeCourted(RE::Actor* a_actor)
+	{
+		const auto candidate = Candidates::Find(a_actor);
+		const auto partner = Partner();
+		if (!candidate || !partner || partner == a_actor || candidate->attributes.scruples == Candidates::Scruples::kCompete) {
+			return false;
+		}
+		const auto& ps = State::Of(partner->GetFormID());
+		return ps.knowSeeing.contains(candidate->ref) || GetStage(partner) >= Stage::kEngaged;  // she knows you're taken
+	}
+
 	void Strayed(RE::Actor* a_other, std::string_view a_deed)
 	{
 		const auto partner = Partner();
@@ -427,7 +440,7 @@ namespace Romance
 				Sync(actor);
 			}
 		};
-		if (candidate->reactsTo.contains(a_event)) {
+		if (candidate->reactsTo.contains(a_event) || a_event == Event::kStoodUp) {  // her stood-up line is required
 			pend(candidate->ref, a_event);
 		}
 		const auto eventName = Candidates::EventName(a_event);
@@ -587,7 +600,7 @@ namespace Romance
 			SetStage(a_actor, Stage::kCommitted, "the engagement ended");
 			return;
 		}
-		if (a_actor->IsDead() && stage >= Stage::kCourting && stage <= Stage::kMarried) {
+		if (a_actor->IsDead() && stage >= Stage::kDating && stage <= Stage::kMarried) {
 			if (s.who == Who::kPlayer && s.why == Why::kViolence) {
 				SetStage(a_actor, Stage::kKilled, "you killed them");  // seen: no condolences for your own victim
 				Notify(a_actor, Event::kKilled);
@@ -600,7 +613,6 @@ namespace Romance
 
 		const bool silent = s.silentUntilDay > today;
 		const auto approval = GetApproval(a_actor);
-		const auto partner = Partner();
 		const bool following = a_actor->IsPlayerTeammate();
 		if (following) {
 			s.lastContactDay = today;
@@ -637,9 +649,8 @@ namespace Romance
 			stage = GetStage(a_actor);
 		}
 
-		SetRank(a_actor, f.greet, IRF::Rank(GreetFor(stage, s)));
 		SetRank(a_actor, f.questBusy, QuestBusy(a_actor) ? 1 : 0);
-		SetRank(a_actor, f.band, stage >= Stage::kCourting && stage <= Stage::kMarried ? 1 + std::min(4, approval / 20) : 0);
+		SetRank(a_actor, f.band, stage >= Stage::kDating && stage <= Stage::kMarried ? 1 + std::min(4, approval / 20) : 0);
 		if (stage == Stage::kEx) {
 			SetRank(a_actor, f.why, IRF::Rank(s.why));
 			SetRank(a_actor, f.who, IRF::Rank(s.who));
@@ -665,22 +676,20 @@ namespace Romance
 
 		// the answers to the player's romance lines (0 hides the line)
 		const bool hurt = s.hurt && !silent;
-		const bool otherPartner = partner && partner != a_actor;
-		bool       knowsTaken = false;
-		if (otherPartner) {
-			const auto& ps = State::Of(partner->GetFormID());
-			knowsTaken = ps.knowSeeing.contains(candidate->ref) || GetStage(partner) >= Stage::kEngaged;
-		}
-		const bool declines = otherPartner && knowsTaken && candidate->attributes.scruples != Candidates::Scruples::kCompete;
-		// get to know her: one question a day, Friend to Married (a Friend who knows you're taken declines)
+		// get to know her: one question a day, Friend to Married. Only talk, never courting (user, 2026-10-25)
 		const bool cold = candidate->attributes.waryStyle == Candidates::WaryStyle::kCold && s.waryUntilDay > today;
 		const bool askedToday = today - s.lastKnowDay < 1.0f;
 		const bool knowable = stage >= Stage::kFriend && stage <= Stage::kMarried && !silent && !hurt && !cold && !askedToday;
-		SetRank(a_actor, f.courtFaction, stage == Stage::kFriend && declines && !silent ? 2 : knowable ? 1 : 0);
+		SetRank(a_actor, f.courtFaction, knowable ? 1 : 0);
 
+		// "Will you go on a date with me?": always there for a Friend (one date at a time); yes from askDateApproval,
+		// not yet below it, no if she knows you're taken and won't compete. Once she'd say yes, she hints at it
 		const bool locked = s.lockUntilDay > today;
-		const bool askable = approval >= r.askDateApproval && GateOpen(*candidate, Stage::kDating) && !otherPartner && !locked;
-		SetRank(a_actor, f.askDate, stage == Stage::kCourting && !hurt ? (askable ? 1 : 2) : 0);
+		const bool taken = WontBeCourted(a_actor);
+		const bool askable = approval >= r.askDateApproval && GateOpen(*candidate, Stage::kDating) && !locked;
+		const bool asking = stage == Stage::kFriend && !silent && !FirstDate::Pending();
+		SetRank(a_actor, f.askDate, asking ? (taken ? 3 : askable ? 1 : 2) : 0);
+		SetRank(a_actor, f.greet, IRF::Rank(GreetFor(stage, s, asking && askable && !taken)));
 
 		const bool booked = Running(f.wedding) && InAliasOf(a_actor, f.wedding);
 		const bool partnerStage = stage >= Stage::kDating && stage <= Stage::kMarried;
@@ -690,7 +699,7 @@ namespace Romance
 		// her mood on top of the stage: the strongest wins
 		const bool wary = s.waryUntilDay > today;
 		auto       mood = Mood::kNone;
-		if (stage >= Stage::kCourting && stage <= Stage::kMarried) {
+		if (stage >= Stage::kDating && stage <= Stage::kMarried) {
 			mood = wary                                              ? Mood::kWary :
 			       s.hurt || silent                                  ? Mood::kHurt :
 			       s.jealousUntilDay > today                         ? Mood::kJealous :
@@ -700,7 +709,7 @@ namespace Romance
 		SetRank(a_actor, f.moodFaction, Rank(mood));
 
 		int kiss = 0;
-		if (stage >= Stage::kCourting && stage <= Stage::kMarried && !silent) {
+		if (stage >= Stage::kDating && stage <= Stage::kMarried && !silent) {
 			kiss = hurt || wary ? 3 : World::PrivateEnough(a_actor, candidate->attributes.modesty) ? 1 : 2;
 		}
 		SetRank(a_actor, f.kiss, kiss);
@@ -711,7 +720,7 @@ namespace Romance
 		const bool winBackable = !s.unforgivable && today - std::max(s.breakupDay, s.silentUntilDay) >= static_cast<float>(r.winBackDays);
 		SetRank(a_actor, f.winBack, stage == Stage::kEx && !silent && !pleading ? (winBackable ? 1 : 2) : 0);
 		SetRank(a_actor, f.plead, pleading ? 1 : 0);
-		const bool secretable = stage >= Stage::kCourting && stage <= Stage::kCommitted && !s.secret && !silent && !hurt && !s.confrontPending;
+		const bool secretable = stage >= Stage::kDating && stage <= Stage::kCommitted && !s.secret && !silent && !hurt && !s.confrontPending;
 		SetRank(a_actor, f.secret, secretable ? (candidate->attributes.refusesSecret ? 2 : 1) : 0);
 		// an evening together: from Dating up, evenings, once a day
 		const bool datable = stage >= Stage::kDating && stage <= Stage::kMarried && !silent && !hurt && !cold && today - s.lastDateDay >= 1.0f;

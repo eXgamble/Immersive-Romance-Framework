@@ -34,7 +34,7 @@ namespace Forms
 		kSecretFaction = 0x81E,     // answer to "Let's keep this between us": 1 yes, 2 no
 		kDateFaction = 0x81F,       // 1 while "Spend the evening with me." applies (evening, Dating up, once a day)
 		kConfrontFaction = 0x820,   // word got back: 1 your denial will work, 2 it won't
-		kCourtFaction = 0x821,      // "I'd like to get to know you better.": 1 she answers (once a day), 2 she declines: you're taken
+		kCourtFaction = 0x821,      // "I'd like to get to know you better.": 1 she answers (once a day)
 
 		// items
 		kGiftInsultingKeyword = 0x83F,  // IRF_GiftInsulting: an item the average person takes as an insult
@@ -64,6 +64,8 @@ namespace Forms
 		kPleadFaction = 0x85D,       // 1 while she's asking you to take her back
 		kSpouseBonusFaction = 0x863, // 1 while her spouse perk is on (married, in good standing)
 		kChatFaction = 0x86E,        // 1 while she may chat on the road: an add-on's own follower comments read it
+		kFirstDateQuest = 0x86F,     // IRF_FirstDateQuest: her (alias 0, IRF_FirstDateWait 0x870), her spot (1), its place (2)
+		kFirstDateReplyTopic = 0x871, // IRF_FirstDateReplyTopic: "Of course I came." (linked from her first-date greeting)
 		kPleadYesTopic = 0x85E,
 		kPleadNoTopic = 0x860,
 
@@ -159,6 +161,8 @@ namespace Forms
 		RE::TESFaction* plead{ nullptr };
 		RE::TESFaction* spouseBonus{ nullptr };
 		RE::TESFaction* chat{ nullptr };
+		RE::TESQuest*   firstDateQuest{ nullptr };
+		RE::TESTopic*   firstDateReply{ nullptr };
 		RE::TESTopic*   pleadYes{ nullptr };
 		RE::TESTopic*   pleadNo{ nullptr };
 		RE::TESTopic*   forceGreetTopic{ nullptr };
