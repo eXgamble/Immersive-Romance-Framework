@@ -439,7 +439,9 @@ def main(spec_path, out_dir, relock=False):
         for topic, prefix in ((CIRCLE_HELLO, "hello."), (CIRCLE_GOODBYE, "goodbye.")):
             run = [(name, text) for name, value in member.get("greetings", {}).items() if name.startswith(prefix) for text in texts(value)]
             for i, (name, text) in enumerate(run):
-                together = sum(1 for other, _ in run if other == name)  # the lines of one set can fit at once
+                # the lines of one set that can fit at once (a rival's and a friend's line never do)
+                mood = lambda t: json.dumps([t.get(k) for k in ("rank", "stageDone")] if isinstance(t, dict) else None)
+                together = sum(1 for other, t in run if other == name and mood(t) == mood(text))
                 percent = round(100 * (1 - (1 - share / 100) ** (1 / together)))
                 ranks = CIRCLE_SETS[name[len(prefix):]]
                 booked = [condition("GetQuestRunningConditionData", "Quest", WEDDING, 0)] if name.endswith(".maramal") else []
