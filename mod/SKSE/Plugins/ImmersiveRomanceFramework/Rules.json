@@ -77,5 +77,7 @@
   "momentCooldownSeconds": 90.0,  // between two road lines
   "witnessDistance": 2048.0,      // farther than this, nobody saw it
   "caughtDistance": 2048.0,       // your partner sees you stray within this
-  "jealousDistance": 1536.0       // your partner sees you and her within this
+  "jealousDistance": 1536.0,      // your partner sees you and her within this
+  "exposeDistance": 1024.0,       // another partner this close hears one greet you as hers: both catch you
+  "caughtLineGap": 4.0            // seconds between two partners' caught lines in one scene
 }

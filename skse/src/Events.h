@@ -13,6 +13,9 @@ namespace Events
 	void Attack(RE::Actor* a_actor, std::string_view a_how);
 	void OnGameLoaded();
 
+	// Debug: does what a line does when said (a_key: "kiss.yes", "date", "breakup", ...), as if a_actor had said it
+	void TestLine(RE::Actor* a_actor, const std::string& a_key);
+
 	// Debug: runs the jealousy check now, past the once-a-day limit: true when she got jealous (a_what: of whom, a
 	// fighter or not), else false and why not
 	bool TestJealous(RE::Actor* a_partner, std::string& a_what);

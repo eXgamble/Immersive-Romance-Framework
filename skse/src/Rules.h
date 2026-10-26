@@ -64,6 +64,8 @@ namespace Rules
 		float witnessDistance = 2048.0f;      // ~30 m: farther than this, nobody "saw" it
 		float caughtDistance = 2048.0f;
 		float jealousDistance = 1536.0f;
+		float exposeDistance = 1024.0f;  // ~15 m: a partner this close hears another greet you as hers
+		float caughtLineGap = 4.0f;      // seconds between two partners' caught lines in one scene
 	};
 
 	void          Load();

@@ -225,6 +225,32 @@ namespace Romance
 		return std::max(0, Rank(a_actor, Forms::Get().approval));
 	}
 
+	std::vector<RE::Actor*> Partners()
+	{
+		std::vector<RE::Actor*> out;
+		for (const auto& candidate : Candidates::All()) {
+			const auto actor = Candidates::ActorOf(candidate);
+			if (IsPartner(actor)) {
+				out.push_back(actor);
+			}
+		}
+		return out;
+	}
+
+	bool IsPartner(RE::Actor* a_actor)
+	{
+		if (!a_actor || a_actor->IsDead() || !Candidates::Find(a_actor)) {
+			return false;
+		}
+		const auto stage = GetStage(a_actor);
+		return stage >= Stage::kDating && stage <= Stage::kMarried;
+	}
+
+	bool Knows(RE::Actor* a_who, RE::Actor* a_partner)
+	{
+		return a_who && a_partner && State::Of(a_partner->GetFormID()).knowSeeing.contains(a_who->GetFormID());
+	}
+
 	RE::Actor* Partner()
 	{
 		RE::Actor* best = nullptr;
@@ -272,8 +298,17 @@ namespace Romance
 		if (a_stage == Stage::kEngaged || a_stage == Stage::kMarried) {
 			s.secret = false;  // an engagement or a wedding ends a secret: everyone knows
 			for (const auto& other : Candidates::All()) {
-				if (other.ref != candidate->ref) {
-					s.knowSeeing.insert(other.ref);
+				if (other.ref == candidate->ref || !s.knowSeeing.insert(other.ref).second) {
+					continue;
+				}
+				// another partner hears of it: word got back, and there's no denying an engagement
+				const auto actor = RE::TESForm::LookupByID<RE::Actor>(other.ref);
+				if (IsPartner(actor)) {
+					auto& os = State::Of(other.ref);
+					os.confrontPending = true;
+					os.confrontWorks = false;
+					logger::info("Romance: {} will hear you're {} to {}", actor->GetDisplayFullName(),
+						a_stage == Stage::kEngaged ? "engaged" : "married", a_actor->GetDisplayFullName());
 				}
 			}
 		}
@@ -354,7 +389,7 @@ namespace Romance
 		Notify(a_actor, a_who == Who::kPlayer ? Event::kPlayerEnded : Event::kTheyEnded);
 	}
 
-	void Caught(RE::Actor* a_partner, std::string_view a_cause)
+	void Caught(RE::Actor* a_partner, std::string_view a_cause, float a_delay, RE::Actor* a_with)
 	{
 		const auto candidate = Candidates::Find(a_partner);
 		if (!candidate) {
@@ -362,9 +397,12 @@ namespace Romance
 		}
 		auto& s = State::Of(a_partner->GetFormID());
 		logger::info("Romance: {} caught you ({})", a_partner->GetDisplayFullName(), a_cause);
+		if (a_with && Candidates::Find(a_with)) {
+			State::Of(a_with->GetFormID()).knowSeeing.insert(a_partner->GetFormID());  // she knows about her now
+		}
 		// in a talk her answer is the line (deny.fails, admit); a moment line said then would never play
 		if (!RE::UI::GetSingleton()->IsMenuOpen(RE::DialogueMenu::MENU_NAME)) {
-			World::SayMoment(a_partner, Moment::kCaught);
+			World::SayMoment(a_partner, Moment::kCaught, a_delay);
 		}
 		int silent = candidate->attributes.brokenHeartDays;
 		if (candidate->attributes.heartbreak == Candidates::Heartbreak::kBitter) {
@@ -382,44 +420,62 @@ namespace Romance
 	bool WontBeCourted(RE::Actor* a_actor)
 	{
 		const auto candidate = Candidates::Find(a_actor);
-		const auto partner = Partner();
-		if (!candidate || !partner || partner == a_actor || candidate->attributes.scruples == Candidates::Scruples::kCompete) {
+		if (!candidate || IsPartner(a_actor) || candidate->attributes.scruples == Candidates::Scruples::kCompete) {
 			return false;
 		}
-		const auto& ps = State::Of(partner->GetFormID());
-		return ps.knowSeeing.contains(candidate->ref) || GetStage(partner) >= Stage::kEngaged;  // she knows you're taken
+		for (const auto partner : Partners()) {
+			const auto& ps = State::Of(partner->GetFormID());
+			if (ps.knowSeeing.contains(candidate->ref) || GetStage(partner) >= Stage::kEngaged) {
+				return true;  // she knows you're taken
+			}
+		}
+		return false;
 	}
 
 	void Strayed(RE::Actor* a_other, std::string_view a_deed)
 	{
-		const auto partner = Partner();
-		if (!partner || partner == a_other) {
-			return;
-		}
 		const auto& r = Rules::Get();
 		const auto  player = RE::PlayerCharacter::GetSingleton();
-		if (World::Sees(partner, player, r.caughtDistance)) {
-			Caught(partner, a_deed);
-			return;
-		}
-		// not caught: who saw it may tell her later (people of her community: candidates and her circle)
-		const auto pc = Candidates::Find(partner);
-		auto&      s = State::Of(partner->GetFormID());
-		for (const auto witness : World::Witnesses(player, r.witnessDistance)) {
-			if (witness == partner || witness == a_other) {
+		float       delay = 0.0f;
+		bool        seen = false;
+		for (const auto partner : Partners()) {
+			if (partner == a_other) {
 				continue;
 			}
-			const auto wc = Candidates::Find(witness);
-			bool       ofHerCircle = false;
-			for (const auto& [c, member] : Candidates::CircleOf(witness->GetFormID())) {
-				ofHerCircle = ofHerCircle || c == pc;
+			if (World::Sees(partner, player, r.caughtDistance)) {
+				Caught(partner, a_deed, delay, a_other);
+				delay += r.caughtLineGap;
+				seen = true;
+				continue;
 			}
-			if ((wc && wc->community == pc->community) || ofHerCircle) {
-				s.sawStraying.insert(witness->GetFormID());
-				logger::info("Romance: {} saw you stray from {}", witness->GetDisplayFullName(), partner->GetDisplayFullName());
+			// not caught: who saw it may tell her later (people of her community: candidates and her circle)
+			const auto pc = Candidates::Find(partner);
+			auto&      s = State::Of(partner->GetFormID());
+			for (const auto witness : World::Witnesses(player, r.witnessDistance)) {
+				if (witness == partner || witness == a_other) {
+					continue;
+				}
+				const auto wc = Candidates::Find(witness);
+				bool       ofHerCircle = false;
+				for (const auto& [c, member] : Candidates::CircleOf(witness->GetFormID())) {
+					ofHerCircle = ofHerCircle || c == pc;
+				}
+				if ((wc && wc->community == pc->community) || ofHerCircle) {
+					s.sawStraying.insert(witness->GetFormID());
+					logger::info("Romance: {} saw you stray from {}", witness->GetDisplayFullName(), partner->GetDisplayFullName());
+				}
+			}
+			SendModEvent("IRF_Strayed"sv, partner, a_deed, 0.0f);
+		}
+		// your other partner was right there, so it comes out for her too: both catch you on the spot (user, 2026-10-26)
+		if (seen && IsPartner(a_other)) {
+			for (const auto partner : Partners()) {
+				if (partner != a_other && Knows(partner, a_other)) {
+					Caught(a_other, "caught by your other partner", delay, partner);
+					break;
+				}
 			}
 		}
-		SendModEvent("IRF_Strayed"sv, partner, a_deed, 0.0f);
 	}
 
 	void Notify(RE::Actor* a_candidate, Event a_event)

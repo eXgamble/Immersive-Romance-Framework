@@ -164,6 +164,8 @@ namespace
 			Events::Attack(actor, "debug attack");  // as a real one: approval, lock, her wary mood
 		} else if (deed == "dumped") {
 			Romance::BreakUp(actor, Who::kPlayer, Why::kChoice);  // you end it (her heartbreak style applies)
+		} else if (deed.starts_with("line:")) {
+			Events::TestLine(actor, deed.substr(5));  // as if she had said that line ("line:kiss.yes", "line:date")
 		} else if (deed == "jealous") {
 			s.jealousUntilDay = std::floor(State::Today()) + static_cast<float>(Rules::Get().jealousDays);
 		} else if (deed == "absence") {

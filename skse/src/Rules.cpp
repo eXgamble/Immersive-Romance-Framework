@@ -95,6 +95,8 @@ namespace Rules
 		IRF_RULE(witnessDistance);
 		IRF_RULE(caughtDistance);
 		IRF_RULE(jealousDistance);
+		IRF_RULE(exposeDistance);
+		IRF_RULE(caughtLineGap);
 #undef IRF_RULE
 		g_known.insert("playerInterestedIn");
 		if (j.contains("playerInterestedIn") && j["playerInterestedIn"].is_string()) {

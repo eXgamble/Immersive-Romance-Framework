@@ -105,8 +105,10 @@ namespace Crimes
 						}
 					}
 					crime->lock.UnlockForRead();
-					if (const auto partner = Romance::Partner(); partner && partner->IsPlayerTeammate()) {
-						witnesses.insert(partner);  // followers are never on the game's list
+					for (const auto partner : Romance::Partners()) {
+						if (partner->IsPlayerTeammate()) {
+							witnesses.insert(partner);  // followers are never on the game's list
+						}
 					}
 					// the victim of an attack judges it as an attack on them (Events), not as a crime they saw
 					RE::NiPointer<RE::TESObjectREFR> victim;

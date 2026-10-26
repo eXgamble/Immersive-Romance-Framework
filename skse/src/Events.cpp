@@ -31,8 +31,82 @@ namespace Events
 
 		RE::Actor* FollowingPartner()
 		{
-			const auto partner = Romance::Partner();
-			return partner && partner->IsPlayerTeammate() ? partner : nullptr;
+			for (const auto partner : Romance::Partners()) {
+				if (partner->IsPlayerTeammate()) {
+					return partner;  // with two following, the first speaks for the road
+				}
+			}
+			return nullptr;
+		}
+
+		// A partner's hello in her lovers' sets (not a hurt, ex or friend one)
+		bool IsLoversGreeting(const std::string& a_key)
+		{
+			for (const auto set : { "dating"sv, "committed"sv, "engaged"sv, "spouse"sv, "love"sv, "marry"sv, "maramal"sv }) {
+				const auto prefix = std::format("hello.{}", set);
+				if (a_key == prefix || a_key.starts_with(prefix + ".")) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		// A partner greets you as hers ("hello.dating", "hello.spouse", ...) where another partner who doesn't know
+		// about her hears it (same place, within exposeDistance, awake): it comes out, and both catch you on the spot, once the greeting is over (user,
+		// 2026-10-26). In a talk the talk closes first: a line said while the dialogue menu is open never plays.
+		RE::ActorHandle              g_greeter{};
+		std::vector<RE::ActorHandle> g_overheard{};
+		bool                         g_greeterGoodbye{ false };  // her goodbye is playing (closing the talk starts it)
+		bool                         g_afterGoodbye{ false };    // the scene waits for that goodbye to end
+
+		void OnGreeting(RE::Actor* a_greeter)
+		{
+			g_greeter = {};
+			g_overheard.clear();
+			if (!Romance::IsPartner(a_greeter)) {
+				return;
+			}
+			// she hears it: in the same place, close by, awake (detection isn't needed to hear a greeting)
+			const auto player = RE::PlayerCharacter::GetSingleton();
+			for (const auto other : Romance::Partners()) {
+				if (other == a_greeter || Romance::Knows(other, a_greeter) || !other->Is3DLoaded() || !World::SamePlace(other, player)) {
+					continue;
+				}
+				const bool asleep = other->AsActorState()->GetSitSleepState() == RE::SIT_SLEEP_STATE::kIsSleeping;
+				if (!asleep && other->GetPosition().GetDistance(player->GetPosition()) < Rules::Get().exposeDistance) {
+					g_overheard.push_back(other->GetHandle());
+				}
+			}
+			if (!g_overheard.empty()) {
+				g_greeter = a_greeter->GetHandle();
+				logger::info("Events: {} greets you as hers in front of another partner", a_greeter->GetDisplayFullName());
+			}
+		}
+
+		// the greeting is over: both catch you (the one who overheard first)
+		void Exposed(float a_delay)
+		{
+			const auto greeter = g_greeter.get();
+			const auto overheard = std::move(g_overheard);
+			g_greeter = {};
+			g_overheard.clear();
+			g_greeterGoodbye = false;
+			g_afterGoodbye = false;
+			if (!greeter) {
+				return;
+			}
+			float       delay = a_delay;
+			RE::Actor*  first = nullptr;
+			for (const auto& handle : overheard) {
+				if (const auto other = handle.get(); other && Romance::IsPartner(other.get())) {
+					Romance::Caught(other.get(), "heard another partner greet you", delay, greeter.get());
+					delay += Rules::Get().caughtLineGap;
+					first = first ? first : other.get();
+				}
+			}
+			if (first && Romance::IsPartner(greeter.get())) {
+				Romance::Caught(greeter.get(), "your other partner was there", delay, first);
+			}
 		}
 
 		bool IsCandidateAt(RE::Actor* a_actor, Stage a_from, Stage a_to)
@@ -211,11 +285,10 @@ namespace Events
 					Romance::ModApproval(a_speaker, r.kissGain, "a kiss");
 				}
 				Romance::Contact(a_speaker);
-				if (Romance::Partner() == a_speaker) {
+				if (Romance::IsPartner(a_speaker)) {
 					Spread(a_speaker, true);  // a kiss in public spreads even a secret
-				} else {
-					Romance::Strayed(a_speaker, "a kiss with someone else");
 				}
+				Romance::Strayed(a_speaker, "a kiss with someone else");  // from every other partner
 			} else if (a_key == "breakup") {
 				Romance::BreakUp(a_speaker, Who::kPlayer, Why::kChoice);
 			} else if (a_key == "amends") {
@@ -240,9 +313,9 @@ namespace Events
 				s.secret = true;
 			} else if (a_key == "date" && today - s.lastDateDay >= 1.0f) {
 				s.lastDateDay = today;
-				Romance::Strayed(a_speaker, "a date with someone else");  // nothing if she's your partner
+				Romance::Strayed(a_speaker, "a date with someone else");  // from every other partner
 				Romance::ModApproval(a_speaker, r.dateGain, "an evening together");
-				if (Romance::Partner() == a_speaker) {
+				if (Romance::IsPartner(a_speaker)) {
 					Spread(a_speaker, false);
 				}
 				Romance::Contact(a_speaker);
@@ -276,10 +349,10 @@ namespace Events
 							Children::Count();
 							Children::Sync(a.get());
 							Romance::Sync(a.get(), meeting);
-							if (meeting && a.get() == Romance::Partner()) {
+							if (meeting && Romance::IsPartner(a.get())) {
 								CheckJealous(a.get());
 							}
-							if (a.get() == Romance::Partner()) {
+							if (Romance::IsPartner(a.get())) {
 								Confess::Check();
 							}
 							FirstDate::Check();
@@ -319,6 +392,17 @@ namespace Events
 				}
 				if (a_event && !a_event->opening && a_event->menuName == RE::DialogueMenu::MENU_NAME) {
 					Queue([handle = g_talking]() {
+						if (g_greeter) {
+							// closing the talk makes her say goodbye, and that line's start is queued just after this
+							// task: decide once it has run (a single follow-up task, not a loop)
+							Queue([]() {
+								if (g_greeterGoodbye) {
+									g_afterGoodbye = true;  // the scene comes after her goodbye
+								} else {
+									Exposed(1.5f);  // a line within ~1 s of the close never plays
+								}
+							});
+						}
 						Confess::OnDialogueClosed();
 						FirstDate::OnDialogueClosed();
 						Replies::OnDialogueClosed();
@@ -407,6 +491,20 @@ namespace Events
 							}
 						});
 					}
+					if (key.starts_with("goodbye.") && a_event->speakerRef) {
+						Queue([handle = a_event->speakerRef->GetHandle()]() {
+							if (g_greeter && handle.get() == g_greeter.get()) {
+								g_greeterGoodbye = true;
+							}
+						});
+					}
+					if (IsLoversGreeting(key) && a_event->speakerRef) {
+						Queue([handle = a_event->speakerRef->GetHandle()]() {
+							if (const auto ref = handle.get(); ref && ref->As<RE::Actor>()) {
+								OnGreeting(ref->As<RE::Actor>());
+							}
+						});
+					}
 					if (key == "stayhome" && a_event->speakerRef) {  // said once: a second force greet finds nothing to say
 						Queue([handle = a_event->speakerRef->GetHandle()]() {
 							if (const auto ref = handle.get(); ref && ref->As<RE::Actor>()) {
@@ -417,6 +515,29 @@ namespace Events
 					return RE::BSEventNotifyControl::kContinue;
 				}
 				const auto speaker = a_event->speakerRef ? a_event->speakerRef->As<RE::Actor>() : nullptr;
+				if (speaker && key.starts_with("goodbye.")) {
+					Queue([handle = speaker->GetHandle()]() {
+						if (g_greeter && handle.get() == g_greeter.get()) {
+							g_greeterGoodbye = false;
+							if (g_afterGoodbye) {
+								Exposed(0.5f);
+							}
+						}
+					});
+				}
+				if (speaker && IsLoversGreeting(key)) {
+					Queue([handle = speaker->GetHandle()]() {
+						if (handle.get() != g_greeter.get() || !g_greeter) {
+							return;
+						}
+						if (RE::UI::GetSingleton()->IsMenuOpen(RE::DialogueMenu::MENU_NAME)) {
+							// the talk closes, and the scene plays then (the menu's close runs Exposed)
+							RE::UIMessageQueue::GetSingleton()->AddMessage(RE::DialogueMenu::MENU_NAME, RE::UI_MESSAGE_TYPE::kHide, nullptr);
+						} else {
+							Exposed(0.5f);  // a greeting in passing
+						}
+					});
+				}
 				if (speaker) {
 					RE::FormID candidate = 0;
 					const int  reply = Candidates::ReplyTo(a_event->topicInfoFormID, &candidate);
@@ -699,7 +820,9 @@ namespace Events
 					return RE::BSEventNotifyControl::kContinue;
 				}
 				Queue([loc = a_event->newLoc]() {
-					CheckJealous(Romance::Partner());
+					for (const auto other : Romance::Partners()) {
+						CheckJealous(other);
+					}
 					const auto partner = FollowingPartner();
 					if (!partner) {
 						return;
@@ -835,6 +958,13 @@ namespace Events
 		logger::info("Events: sinks registered");
 	}
 
+	void TestLine(RE::Actor* a_actor, const std::string& a_key)
+	{
+		if (a_actor) {
+			OnLineSaid(a_actor, a_key);
+		}
+	}
+
 	bool TestJealous(RE::Actor* a_partner, std::string& a_what)
 	{
 		std::string kind;
@@ -849,6 +979,10 @@ namespace Events
 		g_lastHit.clear();
 		g_lastPlace = Moment::kNone;
 		g_jealousDay.clear();
+		g_greeter = {};
+		g_overheard.clear();
+		g_greeterGoodbye = false;
+		g_afterGoodbye = false;
 		g_refusing = {};
 		g_talkingChild = {};
 		Gifts::OnGameLoaded();

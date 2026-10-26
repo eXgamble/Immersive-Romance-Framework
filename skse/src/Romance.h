@@ -15,8 +15,17 @@ namespace Romance
 	Stage GetStage(RE::Actor* a_actor);
 	int   GetApproval(RE::Actor* a_actor);
 
-	// The player's partner: the candidate at Dating or later (married included), not an ex; nullptr when none
+	// The player's main partner (home, children, the spouse): the one at the highest stage (married included), not an
+	// ex; nullptr when none
 	RE::Actor* Partner();
+
+	// Every partner: each candidate from Dating to Married. Two-timing is possible (a candidate who doesn't know, or
+	// competes), so straying, jealousy and getting caught look at each of them
+	std::vector<RE::Actor*> Partners();
+	bool                    IsPartner(RE::Actor* a_actor);
+
+	// a_who knows you're seeing a_partner (she has learned it, or was there when it came out)
+	bool Knows(RE::Actor* a_who, RE::Actor* a_partner);
 
 	void SetStage(RE::Actor* a_actor, Stage a_stage, std::string_view a_cause);
 
@@ -29,10 +38,12 @@ namespace Romance
 	// Ends the relationship: who and why are recorded for the ex lines and win-back
 	void BreakUp(RE::Actor* a_actor, Who a_who, Why a_why, bool a_unforgivable = false);
 
-	// She caught you with someone else (or word got back and your denial failed)
-	void Caught(RE::Actor* a_partner, std::string_view a_cause);
+	// She caught you with someone else (or word got back and your denial failed); her line after a_delay seconds.
+	// a_with: the one she caught you with, when known: from now on she knows about her
+	void Caught(RE::Actor* a_partner, std::string_view a_cause, float a_delay = 0.0f, RE::Actor* a_with = nullptr);
 
-	// The player strayed from their partner with a_other (kiss, courting talk, gift); checks who saw it
+	// The player strayed with a_other (a kiss, a date): every other partner who sees it catches you, and if a_other is
+	// a partner too and one of them was there, a_other catches you as well; who else saw it may tell them later
 	void Strayed(RE::Actor* a_other, std::string_view a_deed);
 
 	// A Friend who knows you're taken and won't compete for you: she turns down a date ("askdate.taken")

@@ -61,7 +61,13 @@ namespace Confess
 
 	void Check()
 	{
-		const auto partner = Romance::Partner();
+		RE::Actor* partner = nullptr;
+		for (const auto p : Romance::Partners()) {
+			if (Romance::GetStage(p) == Stage::kCommitted && !State::Of(p->GetFormID()).confessed) {
+				partner = p;  // with two partners, the first who hasn't told you yet
+				break;
+			}
+		}
 		const auto today = State::Today();
 		if (const auto coming = g_coming.get()) {
 			if (today - g_comingDay > 0.05f || Romance::GetStage(coming.get()) != Stage::kCommitted) {
