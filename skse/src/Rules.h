@@ -36,9 +36,9 @@ namespace Rules
 		int attackLockDays = 3;     // won't follow or date after an attack
 		int absenceDays = 7;        // default absence-tolerance
 		int absenceCost = 5;        // per band, once when you come back
-		int jealousCost = 3;        // travelling with another candidate
+		int jealousCost = 2;        // seen travelling with another woman, once a day
 		int waryDays = 5;           // default wary-tolerance: days she's wary of you after an attack
-		int jealousDays = 3;        // her jealous mood after seeing you with another candidate
+		int jealousDays = 1;        // her jealous mood after seeing you with another woman: the rest of that day (1) or more
 		int strainedBelow = 15;     // approval under this: strained mood
 		int heartbreakSilentDays = 5;  // a bitter candidate you left (or who caught you) won't talk this long
 		int pleads = 3;             // a pleading candidate you left asks you back this many times ...

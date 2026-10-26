@@ -12,4 +12,7 @@ namespace Events
 	// An attack on a candidate (a hit outside a fight, too many stray hits; debug): approval, lock, wary mood
 	void Attack(RE::Actor* a_actor, std::string_view a_how);
 	void OnGameLoaded();
+
+	// Debug: runs the jealousy check now, past the once-a-day limit; "" when she got jealous, else why not
+	std::string TestJealous(RE::Actor* a_partner);
 }

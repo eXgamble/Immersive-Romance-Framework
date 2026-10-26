@@ -9,7 +9,7 @@
 // framework of version N or later.
 namespace IRFDebug
 {
-	constexpr std::uint32_t kVersion = 1;
+	constexpr std::uint32_t kVersion = 2;
 	constexpr std::uint32_t kMaxCircle = 8;
 
 	struct Candidate
@@ -97,6 +97,9 @@ namespace IRFDebug
 		// An event's name ("dating", "theyEnded", ...) and back
 		bool (*eventName)(std::int32_t a_event, char* a_out, std::uint32_t a_size) = nullptr;
 		std::int32_t (*eventByName)(const char* a_name) = nullptr;
+		// version 2: runs the jealousy check for her now (past its once-a-day limit), as when you meet her; false
+		// with why not in a_why when she didn't get jealous
+		bool (*checkJealous)(std::uint32_t a_ref, char* a_why, std::uint32_t a_size) = nullptr;
 	};
 }
 

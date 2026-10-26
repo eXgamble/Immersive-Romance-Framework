@@ -165,7 +165,7 @@ namespace
 		} else if (deed == "dumped") {
 			Romance::BreakUp(actor, Who::kPlayer, Why::kChoice);  // you end it (her heartbreak style applies)
 		} else if (deed == "jealous") {
-			s.jealousUntilDay = State::Today() + static_cast<float>(Rules::Get().jealousDays);
+			s.jealousUntilDay = std::floor(State::Today()) + static_cast<float>(Rules::Get().jealousDays);
 		} else if (deed == "absence") {
 			s.lastContactDay = State::Today() - static_cast<float>(candidate->attributes.absenceDays) * 3.0f;
 		} else if (deed == "crime") {
@@ -319,6 +319,13 @@ namespace
 		return 0;
 	}
 
+	bool CheckJealous(std::uint32_t a_ref, char* a_why, std::uint32_t a_size)
+	{
+		const auto why = Events::TestJealous(RE::TESForm::LookupByID<RE::Actor>(a_ref));
+		Copy(a_why, a_size, why);
+		return why.empty();
+	}
+
 	const IRFDebug::API g_api{
 		IRFDebug::kVersion,
 		ListCandidates,
@@ -334,6 +341,7 @@ namespace
 		LineKey,
 		EventNameOf,
 		EventByName,
+		CheckJealous,
 	};
 }
 

@@ -58,38 +58,80 @@ namespace Events
 			World::SayMoment(a_speaker, a_moment, a_delay);
 		}
 
-		// Travelling with another candidate where your partner sees you together: a jealous line and a small cost, once
-		// a game day (not straying; the session forgets the day on load, so a reload can bring it once more)
+		// Travelling with another woman where your partner notices you and sees her with her own eyes: a jealous line and a small cost, once a game
+		// day (not straying; the session forgets the day on load, so a reload can bring it once more)
 		std::unordered_map<RE::FormID, float> g_jealousDay;
 
-		void CheckJealous(RE::Actor* a_partner)
+		// Someone following you that she'd be jealous of: another candidate, or any woman who isn't one of the old
+		// people (ElderRace, ElderRaceVampire)
+		bool Rival(RE::Actor* a_actor, RE::Actor* a_partner)
+		{
+			if (!a_actor || a_actor == a_partner || a_actor->IsPlayerRef() || a_actor->IsDead() || !a_actor->IsPlayerTeammate()) {
+				return false;
+			}
+			if (Candidates::Find(a_actor)) {
+				return true;
+			}
+			const auto base = a_actor->GetActorBase();
+			const auto race = a_actor->GetRace();
+			if (!base || !race || !base->IsFemale() || !race->HasKeywordString("ActorTypeNPC")) {
+				return false;
+			}
+			const auto id = race->GetFormID();
+			return id != 0x00067CD8 && id != 0x000A82BA;
+		}
+
+		// Returns what happened, for the debug tools: "" when she got jealous
+		std::string CheckJealousImpl(RE::Actor* a_partner, bool a_test)
 		{
 			const auto player = RE::PlayerCharacter::GetSingleton();
 			if (!a_partner || a_partner->IsDead()) {
-				return;
+				return "no partner";
 			}
 			const auto today = std::floor(State::Today());
-			if (const auto it = g_jealousDay.find(a_partner->GetFormID()); it != g_jealousDay.end() && it->second == today) {
-				return;
+			if (const auto it = g_jealousDay.find(a_partner->GetFormID()); !a_test && it != g_jealousDay.end() && it->second == today) {
+				return "already jealous today";
 			}
 			const auto distance = Rules::Get().jealousDistance;
+			if (!World::Sees(a_partner, player, distance)) {
+				return "she hasn't noticed you";
+			}
+			const auto lists = RE::ProcessLists::GetSingleton();
+			if (!lists) {
+				return "no actors";
+			}
 			RE::Actor* other = nullptr;
-			for (const auto& candidate : Candidates::All()) {
-				const auto a = Candidates::ActorOf(candidate);
-				if (a && a != a_partner && a->IsPlayerTeammate() && !a->IsDead() &&
-					a->GetPosition().GetDistance(player->GetPosition()) < distance) {
-					other = a;
+			RE::Actor* unseen = nullptr;
+			for (const auto& handle : lists->highActorHandles) {  // skse-lint: ok only when you meet her or change location
+				const auto a = handle.get();
+				if (!a || !Rival(a.get(), a_partner) || a->GetPosition().GetDistance(player->GetPosition()) >= distance) {
+					continue;
+				}
+				if (World::InSight(a_partner, a.get(), distance)) {
+					other = a.get();
 					break;
 				}
+				unseen = a.get();
 			}
-			if (!other || !World::Sees(a_partner, player, distance)) {
-				return;
+			if (!other) {
+				if (unseen) {
+					logger::info("Events: {} is with you, out of {}'s sight", unseen->GetDisplayFullName(), a_partner->GetDisplayFullName());
+					return std::format("{} is with you, out of her sight", unseen->GetDisplayFullName());
+				}
+				return "no woman following you nearby";
 			}
 			g_jealousDay[a_partner->GetFormID()] = today;
 			logger::info("Events: {} saw you travelling with {}", a_partner->GetDisplayFullName(), other->GetDisplayFullName());
 			World::SayMoment(a_partner, Moment::kJealous);
-			State::Of(a_partner->GetFormID()).jealousUntilDay = State::Today() + static_cast<float>(Rules::Get().jealousDays);
+			// jealous for the rest of that day (jealousDays 1), or longer
+			State::Of(a_partner->GetFormID()).jealousUntilDay = today + static_cast<float>(Rules::Get().jealousDays);
 			Romance::ModApproval(a_partner, -Rules::Get().jealousCost, "you travel with someone else");  // syncs her mood too
+			return "";
+		}
+
+		void CheckJealous(RE::Actor* a_partner)
+		{
+			CheckJealousImpl(a_partner, false);
 		}
 
 		// The people around who are candidates learn you're seeing a_partner (a date, a kiss in public, a walk
@@ -776,6 +818,11 @@ namespace Events
 			source->AddEventSink(&cleared);
 		}
 		logger::info("Events: sinks registered");
+	}
+
+	std::string TestJealous(RE::Actor* a_partner)
+	{
+		return CheckJealousImpl(a_partner, true);
 	}
 
 	void OnGameLoaded()

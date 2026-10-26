@@ -19,6 +19,40 @@ namespace World
 		return a_watcher->RequestDetectionLevel(a_target) > 0;
 	}
 
+	bool InSight(RE::Actor* a_watcher, RE::Actor* a_target, float a_distance)
+	{
+		if (!a_watcher || !a_target || a_watcher == a_target || a_watcher->IsDead() || !a_watcher->Is3DLoaded() || !a_target->Is3DLoaded()) {
+			return false;
+		}
+		const auto eye = a_watcher->GetLookingAtLocation();
+		const auto head = a_target->GetLookingAtLocation();
+		auto       to = head - eye;
+		const float distance = to.Length();
+		if (distance > a_distance || distance < 1.0f) {
+			return false;
+		}
+		const float heading = a_watcher->GetAngleZ();
+		to /= distance;
+		if (to.x * std::sin(heading) + to.y * std::cos(heading) <= 0.0f) {
+			return false;  // behind her
+		}
+		const auto cell = a_watcher->GetParentCell();
+		const auto world = cell ? cell->GetbhkWorld() : nullptr;
+		if (!world) {
+			return false;
+		}
+		const float     scale = RE::bhkWorld::GetWorldScale();
+		RE::bhkPickData pick;
+		pick.rayInput.from = RE::hkVector4(eye.x * scale, eye.y * scale, eye.z * scale, 0.0f);
+		pick.rayInput.to = RE::hkVector4(head.x * scale, head.y * scale, head.z * scale, 0.0f);
+		RE::CFilter filter;
+		a_watcher->GetCollisionFilterInfo(filter);
+		pick.rayInput.filterInfo.filter = (filter.filter & 0xFFFF0000) | std::to_underlying(RE::COL_LAYER::kLOS);
+		world->PickObject(pick);
+		// clear, or the ray stopped on their own body
+		return !pick.rayOutput.HasHit() || pick.rayOutput.hitFraction * distance >= distance - 150.0f;
+	}
+
 	std::vector<RE::Actor*> Witnesses(RE::Actor* a_target, float a_distance)
 	{
 		std::vector<RE::Actor*> out;

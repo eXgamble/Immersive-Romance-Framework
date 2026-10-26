@@ -50,7 +50,7 @@ line they say.
 - **Gifts:** "I have something for you." opens the gift menu (gold included) for a candidate from Friend up; she
   answers as she says goodbye. Stolen and quest items can't be given, and an insult isn't taken.
 - **Moods** on top of the stage: wary (you attacked her lately), hurt (broken heart), jealous (seen you with
-  another candidate), strained (low approval). No mood is the happy default: her plain lines. Her
+  another woman following you, for the rest of that day), strained (low approval). No mood is the happy default: her plain lines. Her
   greetings, goodbyes and idle chatter can follow them; her idles follow every stage, so a partner never falls
   back to a friend's chatter.
 - **Tolerances**, per candidate: being caught straying, hitting them (a stray hit in a fight vs. turning on
@@ -70,7 +70,7 @@ line they say.
 - **Beside you:** a partner who follows you fights to her own profile (role, nerve, gear) and grows in level up to
   her cap. She can die if you don't get her up in time; an essential one is only knocked out.
 - **On the road:** lines in ruins, caves, towns and inns, after a fight, a dragon, a rest; a jealous line when
-  she sees you travelling with another candidate.
+  she sees you travelling with another woman (another candidate, or any female follower but the old people).
 
 ## For add-on authors
 

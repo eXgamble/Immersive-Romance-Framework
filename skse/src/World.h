@@ -9,6 +9,10 @@ namespace World
 	// a_watcher can see a_target right now (within a_distance, the game's own detection)
 	bool Sees(RE::Actor* a_watcher, RE::Actor* a_target, float a_distance);
 
+	// a_watcher sees a_target with her own eyes: within a_distance, in front of her (half circle), and nothing solid
+	// between her eyes and their head (a physics ray: GetLineOfSight never works between two NPCs)
+	bool InSight(RE::Actor* a_watcher, RE::Actor* a_target, float a_distance);
+
 	// Loaded actors (high process) within a_distance who see a_target, the player and their followers left out
 	std::vector<RE::Actor*> Witnesses(RE::Actor* a_target, float a_distance);
 
