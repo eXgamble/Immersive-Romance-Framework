@@ -12,8 +12,8 @@ Mod events:
   "IRF_StageChanged"  sender = the candidate, numArg = the new stage, strArg = the cause
   "IRF_Strayed"       sender = the partner strayed from, numArg = 1 if caught, strArg = the deed
 
-This file is under the MIT license (see the framework's LICENSE): compile your own scripts against it under
-any license.}
+This file is part of the framework (GPL-3.0, see the framework's LICENSE). Its additional permission lets you
+compile your own scripts against it under any license.}
 
 ; True when an add-on registered this actor as a candidate
 bool Function IsCandidate(Actor akActor) global native

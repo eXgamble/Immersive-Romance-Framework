@@ -321,7 +321,7 @@ The generator takes them per text: `{ "text": "...", "girls": 1, "boys": ">=1" }
 
 ### Papyrus
 
-`Scripts/Source/IRF.psc` (MIT): `IsCandidate`, `GetStage`, `GetApproval`, `GetPartner`, `GetWhy`, `GetWho`,
+`Scripts/Source/IRF.psc`: `IsCandidate`, `GetStage`, `GetApproval`, `GetPartner`, `GetWhy`, `GetWho`,
 `IsBrokenHearted`, `IsIntimacyAllowed` (for mods that start scenes), `RequestStage` (story beats from your own
 quests), `ModApproval`, `SetPlayerInterest`, `GetAdoptedBoys`, `GetAdoptedGirls`. Test tools can read and stage the framework through
 `IRFGetDebugAPI()` (`skse/include/IRFDebugAPI.h`). Mod events: `IRF_StageChanged` (sender = candidate, numArg = new stage, strArg = cause),
@@ -347,4 +347,4 @@ timing (walking, packages, who looks where) is tested by hand and written down i
 
 GPL-3.0 (see LICENSE), with one additional permission: add-ons and other mods may use the framework's Papyrus
 API scripts and its records (compile against them, add lines to its topics, read its factions) under any license
-of their own. `mod/Source/Scripts/IRF.psc` itself is MIT.
+of their own.

@@ -680,5 +680,4 @@ As the copyright holder of Immersive Romance Framework, I grant this additional 
 mods may use the framework's Papyrus API (mod/Source/Scripts/IRF.psc and the native functions it declares) and
 its plugin records (add dialogue lines to its topics, read and condition on its factions, list its plugin as a
 master) without that use making them a work based on the framework. Such add-ons and mods may be distributed
-under any license their authors choose. mod/Source/Scripts/IRF.psc is additionally available under the MIT
-license.
+under any license their authors choose.
