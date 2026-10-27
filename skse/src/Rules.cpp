@@ -105,6 +105,7 @@ namespace Rules
 		IRF_RULE(partnerHealthPerLevel);
 		IRF_RULE(partnerSkillPerLevel);
 		IRF_RULE(confessDelayDays);
+		IRF_RULE(confessMinDatingDays);
 		IRF_RULE(confessDistance);
 		IRF_RULE(standUpCost);
 		IRF_RULE(firstDateDistance);

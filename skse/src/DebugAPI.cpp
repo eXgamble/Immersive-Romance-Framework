@@ -221,6 +221,9 @@ namespace
 		if (s.readyDay != State::kNever) {
 			s.readyDay -= d;
 		}
+		if (s.datingDay != State::kNever) {
+			s.datingDay -= d;
+		}
 		s.recentDay -= d;
 		s.lastKnowDay -= d;
 		if (s.dateUntilDay > 0.0f) {

@@ -2,7 +2,8 @@
 
 #include "Types.h"
 
-// Becoming Committed: a while after her approval reaches the commitment bar (confessDelayDays, still Dating) she comes
+// Becoming Committed: a while after her approval reaches the commitment bar (confessDelayDays, still Dating; and at
+// least confessMinDatingDays after you started Dating) she comes
 // up to you, somewhere safe and out of combat, and tells you how much you mean to her (her add-on's "confess" line, no
 // marriage hint). You get one reply ("You mean a lot to me too.") and she answers it ("confess.reply"); when that talk
 // ends she is Committed. Approval falling below the bar first cancels it. Once per relationship (again only after a

@@ -40,8 +40,8 @@ line they say.
   her up (approval, and she tells you about it next time); ask again another day. One date at a time.
 - **Straying** (only once you have a partner): going on a date with someone else, kissing someone else (and
   intimate scenes, for mods that add them). Talking and gifts never count.
-- **Her confession makes her Committed:** a day after her approval reaches the commitment bar (75) she comes up to
-  you, somewhere safe (a town, an inn, a home; anywhere but a dungeon while she follows you) and out of combat, and
+- **Her confession makes her Committed:** a day after her approval reaches the commitment bar (75), and no sooner than 3 days
+  after you started dating, she comes up to you, somewhere safe (a town, an inn, a home; anywhere but a dungeon while she follows you) and out of combat, and
   tells you how much you mean to her. You answer "You mean a lot to me too." and she replies; when that talk ends
   she's Committed. If approval falls below the bar first, she waits until it's back. Once per relationship (again
   after a win-back): if she drops back to Dating later (approval below

@@ -15,7 +15,7 @@ namespace Rules
 		bool exposeScenes = true;    // two partners have it out (off: both simply catch you)
 		bool familyTalks = true;     // she and an adopted child talk at home
 		bool stayHome = true;        // a wife with children won't leave town with you
-		bool confession = true;      // newly Committed, she comes to tell you how she feels
+		bool confession = true;      // at the commitment bar she comes to tell you how she feels, and becomes Committed (off: at once)
 		bool serviceRefusal = true;  // her family or friends refuse you their shop or training over a broken heart
 		bool roadLines = true;       // her lines on the road (places, after a fight, dragons, resting)
 
@@ -74,6 +74,7 @@ namespace Rules
 		int partnerSkillPerLevel = 2;
 
 		float confessDelayDays = 1.0f;        // at the commitment bar, she tells you how much you mean to her after this long
+		float confessMinDatingDays = 3.0f;    // ... and not before you've been Dating this long
 		float confessDistance = 3000.0f;      // ... when you're this close (she walks over)
 		int   childAwayDays = 5;              // an adopted child misses you after this many days apart (2x, 3x: more)
 		float momentCooldownSeconds = 90.0f;  // between two road lines

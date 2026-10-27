@@ -300,6 +300,9 @@ namespace Romance
 
 		auto& s = State::Of(a_actor->GetFormID());
 		s.readyDay = State::kNever;  // any stage change ends the wait for her confession
+		if (a_stage == Stage::kDating && old < Stage::kDating) {
+			s.datingDay = State::Today();  // her confession waits until you've been together a while (confessMinDatingDays)
+		}
 		if (a_stage > Stage::kCommitted && a_stage <= Stage::kMarried) {
 			s.confessed = true;  // past that moment
 		} else if (a_stage == Stage::kEx) {

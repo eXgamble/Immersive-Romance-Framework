@@ -65,6 +65,7 @@ namespace State
 			v('plds', c.pleadsLeft);
 			v('pldd', c.nextPleadDay);
 			v('redy', c.readyDay);
+			v('dtng', c.datingDay);
 			v('cnfs', c.confessed);
 			v('askd', c.knowAsked);
 			v('askl', c.lastKnowDay);
