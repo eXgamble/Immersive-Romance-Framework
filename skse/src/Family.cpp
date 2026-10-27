@@ -134,8 +134,15 @@ namespace Family
 		float      bestDay = std::numeric_limits<float>::max();
 		for (int i = 0; i < static_cast<int>(candidate->family.size()); ++i) {
 			const auto& t = candidate->family[i];
-			if (t.home != home || (t.mood >= 0 && t.mood != mood) || (t.child == 1 && boys.empty()) || (t.child == 2 && girls.empty())) {
+			if (!(t.homes & (1u << Rank(home))) || (t.mood >= 0 && t.mood != mood) || (t.child == 1 && boys.empty()) || (t.child == 2 && girls.empty())) {
 				continue;
+			}
+			const auto living = [](RE::FormID a_ref) {
+				const auto who = RE::TESForm::LookupByID<RE::Actor>(a_ref);
+				return who && !who->IsDead();
+			};
+			if ((t.alive && !living(t.alive)) || (t.dead && living(t.dead))) {
+				continue;  // about someone who isn't (or is still) alive
 			}
 			const auto it = g_played.find({ her->GetFormID(), i + 1 });
 			const float day = it == g_played.end() ? -1.0f + static_cast<float>(std::rand() % 100) / 1000.0f : it->second;  // skse-lint: ok a tie-break, once a day

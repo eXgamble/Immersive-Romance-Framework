@@ -119,8 +119,10 @@ namespace Candidates
 	// A family conversation (her add-on's own): her and an adopted child, lines in turn, when home is in this state
 	struct FamilyTalk
 	{
-		IRF::Home                                       home{ IRF::Home::kFine };
+		std::uint8_t                                    homes{ 0 };   // the home states it plays in (bit 1 << IRF::Home)
 		int                                             mood{ -1 };   // her mood (IRF::Mood), -1 any
+		RE::FormID                                      alive{ 0 };   // only while this person lives ("alive": a placed actor)
+		RE::FormID                                      dead{ 0 };    // only after they died
 		int                                             child{ 0 };   // 0 any child, 1 a boy, 2 a girl
 		std::vector<std::pair<bool, RE::TESTopicInfo*>> steps;        // (said by the child, the line), in order
 	};

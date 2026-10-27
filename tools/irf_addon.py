@@ -42,7 +42,8 @@ Spec (JSON):
              committed|engaged|spouse>", "expose.counter.<same>", "expose.question", "expose.believed",
              "expose.disbelieved", "expose.disowned", "expose.true" (and "expose.reply.<outcome>" when her answer in the
              talk should differ from her line after it)
-  "family": [ {"when": {"home": "happy|fine|strained|bad|heartbroken", "mood": "jealous|wary|..."}, "child": "boy|girl",
+  "family": [ {"when": {"home": "happy|fine|strained|bad|heartbroken" (or a list), "mood": "jealous|wary|...",
+                         "alive": "Skyrim.esm|0x013487", "dead": ...}, "child": "boy|girl",
               "lines": [{"child": "Text"}, {"her": "Text"}, ...]} ]   her conversations with the adopted children, when
              home is that way (her heart and approval) and, given, she's in that mood; either may start, any number of
              turns; the framework picks one a day (the least recent that fits) and stages it
@@ -615,11 +616,14 @@ def main(spec_path, out_dir, relock=False, into=None):
     family = []
     for n, talk in enumerate(spec.get("family", []), start=1):
         when = talk.get("when", {})
-        if when.get("home", "fine") not in FAMILY_HOMES:
-            sys.exit(f'family {n}: "home" is one of {FAMILY_HOMES}')
-        entry = {"home": when.get("home", "fine"), "lines": []}
-        if when.get("mood"):
-            entry["mood"] = when["mood"]
+        homes = when.get("home", "fine")
+        homes = homes if isinstance(homes, list) else [homes]
+        if not homes or any(h not in FAMILY_HOMES for h in homes):
+            sys.exit(f'family {n}: "home" is one or more of {FAMILY_HOMES}')
+        entry = {"home": homes, "lines": []}
+        for key in ("mood", "alive", "dead"):  # her mood; only while someone lives / after they died (a placed actor)
+            if when.get(key):
+                entry[key] = when[key]
         if talk.get("child") in ("boy", "girl"):
             entry["child"] = talk["child"]
         for k, line in enumerate(talk["lines"], start=1):

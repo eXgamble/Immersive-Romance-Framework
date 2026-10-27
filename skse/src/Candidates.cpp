@@ -642,7 +642,8 @@ namespace Candidates
 				TakeLines(r, req, candidate.npc, std::format("reply.{}", reply), candidate.lines, problems);
 			}
 
-			// her conversations with the children: "family": [{"home", "mood"?, "child"?, "lines": [{"who", "line"}]}]
+			// her conversations with the children: "family": [{"home" (one or a list), "mood"?, "alive"?, "dead"?, "child"?,
+			// "lines": [{"who", "line"}]}]
 			// (the child's lines are said by whichever child it is: no speaker check, only that they're IRF_SayTopic lines)
 			const std::map<std::string, Home> homes{ { "happy", Home::kHappy }, { "fine", Home::kFine }, { "strained", Home::kStrained },
 				{ "bad", Home::kBad }, { "heartbroken", Home::kHeartbroken } };
@@ -652,14 +653,31 @@ namespace Candidates
 			for (const auto& t : j.value("family", nlohmann::json::array())) {
 				++talk;
 				FamilyTalk ft;
-				const auto home = homes.find(t.value("home", "fine"s));
+				auto homeList = t.value("home", nlohmann::json("fine"));
+				if (!homeList.is_array()) {
+					homeList = nlohmann::json::array({ homeList });
+				}
+				bool known = true;
+				for (const auto& h : homeList) {
+					const auto it = homes.find(h.is_string() ? h.get<std::string>() : ""s);
+					known = known && it != homes.end();
+					if (it != homes.end()) {
+						ft.homes |= static_cast<std::uint8_t>(1u << Rank(it->second));
+					}
+				}
 				const auto mood = t.value("mood", ""s);
-				if (home == homes.end() || (!mood.empty() && !moods.contains(mood))) {
+				if (!known || ft.homes == 0 || (!mood.empty() && !moods.contains(mood))) {
 					problems.push_back(std::format("family {}: unknown home or mood", talk));
 					continue;
 				}
-				ft.home = home->second;
 				ft.mood = mood.empty() ? -1 : moods.at(mood);
+				for (const auto& [key, slot] : { std::pair{ "alive", &ft.alive }, std::pair{ "dead", &ft.dead } }) {
+					if (const auto who = t.contains(key) ? ParseForm(t[key].get<std::string>()) : nullptr) {
+						*slot = who->GetFormID();
+					} else if (t.contains(key)) {
+						problems.push_back(std::format("family {}: '{}' is not loaded", talk, key));
+					}
+				}
 				const auto child = t.value("child", "any"s);
 				ft.child = child == "boy" ? 1 : child == "girl" ? 2 : 0;
 				int step = 0;
