@@ -609,14 +609,14 @@ namespace Romance
 	namespace
 	{
 		// Her own spouse perk (her add-on's spouseBonus): on while you're married and the marriage is in good standing,
-		// paused while she's hurt or things are strained (approval below band3), gone if she dies (Widowed). The framework owns
+		// paused while she's hurt or things are bad (approval below band2), gone if she dies (Widowed). The framework owns
 		// when; the add-on owns what. IRF_SpouseBonusFaction (1 = on) lets lines read it, and the IRF_SpouseBonus mod
 		// event ("on" / "off") tells add-on scripts
 		void SyncSpouseBonus(RE::Actor* a_actor, const Candidates::Candidate& a_candidate, Stage a_stage, const State::Candidate& a_state)
 		{
 			const auto& f = Forms::Get();
 			const bool  wanted = a_stage == Stage::kMarried && !a_actor->IsDead() && !a_state.hurt && a_state.silentUntilDay <= State::Today() &&
-			                    GetApproval(a_actor) >= Rules::Get().band3;
+			                    GetApproval(a_actor) >= Rules::Get().band2;
 			const bool  now = InFaction(a_actor, f.spouseBonus) && Rank(a_actor, f.spouseBonus) > 0;
 			if (wanted == now) {
 				return;

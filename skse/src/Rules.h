@@ -55,7 +55,7 @@ namespace Rules
 		int waryDays = 5;           // default wary-tolerance: days she's wary of you after an attack
 		int jealousDays = 1;        // her jealous mood after seeing you with another woman: the rest of that day (1) or more
 		// approval bands ("How are we?", how things are at home: 4 and 5 happy, 3 fine, 2 strained, 1 bad): where each starts.
-		// Below band3 the marriage is strained: her strained mood, and her spouse perk pauses
+		// Below band3 she's strained (her mood); below band2 things are bad and her spouse perk pauses
 		int band2 = 25;
 		int band3 = 50;
 		int band4 = 70;

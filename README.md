@@ -48,7 +48,7 @@ line they say.
   `uncommitBar`, 60: some leeway, so one bad fight doesn't undo it), the bar makes her Committed again at once, as it does with
   the confession switched off.
 - **Spouse perks:** each spouse can have her own perk (her add-on decides what it is). The framework decides when:
-  on while you're married and the marriage is good, paused while she's hurt or the marriage is strained (approval below 50), gone if she
+  on while you're married and the marriage is good, paused while she's hurt or things are bad (approval below 25), gone if she
   dies. An add-on can name an ability or perk (`spouseBonus`), condition lines on `IRF_SpouseBonusFaction 0x863`
   == 1 (a circle member's service, like Eorlund tempering your weapons), or listen for `IRF_SpouseBonus` in a
   script (Ysolda's store profits). Vanilla's own spouse perks stay as they are.

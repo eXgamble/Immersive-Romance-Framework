@@ -63,8 +63,8 @@
   "jealousDays": 1,         // jealous for the rest of that day (1) or more
 
   // approval bands, where each starts (band 1 from 0): her "How are we?" answer, and how things are at home for the
-  // children's greetings and family talks (bands 4 and 5 happy, 3 fine, 2 strained, 1 bad). Below band3 the
-  // marriage is strained: her strained mood, and her spouse perk pauses
+  // children's greetings and family talks (bands 4 and 5 happy, 3 fine, 2 strained, 1 bad). Below band3 she's
+  // strained (her mood); below band2 things are bad and her spouse perk pauses
   "band2": 25,
   "band3": 50,
   "band4": 70,
