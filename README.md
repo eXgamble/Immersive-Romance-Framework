@@ -334,6 +334,20 @@ spouse, strArg = "on" / "off", numArg = 1 / 0).
 `skse/build.bat` (Visual Studio 2026 Build Tools, vcpkg, CommonLibSSE-NG v10 as a submodule). The DLL is copied
 into `mod/SKSE/Plugins/`. Test add-ons live in `test/` (specs in `test/specs/`).
 
+## Tests
+
+- `python test/check.py` (seconds, no game): every add-on spec still builds, and its manifest is the one the add-on
+  ships; the SKSE lint.
+- `python test/smoke/smoke.py` (about 3 minutes, the game): starts a new game on the Develop profile (through
+  Alternate Start's statue when it's installed), saves `Test_IRF_Smoke` next to Camilla, then runs each test from
+  that save: stages, caught and amends, breakups, one-liners, greetings, circle reactions, the first date, a family
+  conversation under the scene director. `--list` names them; give names to run only those. It needs DevBench, IRF -
+  Debug and the Camilla add-on, and takes the PC over while it runs. Run it after a big change, before a release,
+  and after adding or removing mods in the list.
+
+When a bug is fixed or a feature added, a test comes with it if it reproduces reliably. A bug that hangs on AI
+timing (walking, packages, who looks where) is tested by hand and written down in its commit instead.
+
 ## License
 
 GPL-3.0 (see LICENSE), with one additional permission: add-ons and other mods may use the framework's Papyrus
