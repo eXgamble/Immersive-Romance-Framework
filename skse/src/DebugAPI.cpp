@@ -218,7 +218,9 @@ namespace
 		s.waryUntilDay -= d;
 		s.jealousUntilDay -= d;
 		s.nextPleadDay -= d;
-		s.committedDay -= d;
+		if (s.readyDay != State::kNever) {
+			s.readyDay -= d;
+		}
 		s.recentDay -= d;
 		s.lastKnowDay -= d;
 		if (s.dateUntilDay > 0.0f) {

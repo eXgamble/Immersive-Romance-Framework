@@ -1,5 +1,6 @@
 #include "Romance.h"
 
+#include "Confess.h"
 #include "Expose.h"
 
 #include "FirstDate.h"
@@ -172,13 +173,21 @@ namespace Romance
 			const auto  stage = GetStage(a_actor);
 			const auto  approval = GetApproval(a_actor);
 			const auto& r = Rules::Get();
+			auto&       s = State::Of(a_actor->GetFormID());
 			if (stage == Stage::kDating && approval >= r.commitBar && GateOpen(*candidate, Stage::kCommitted)) {
-				SetStage(a_actor, Stage::kCommitted, "approval passed the commitment bar");
+				if (!Confess::Wanted(a_actor)) {
+					SetStage(a_actor, Stage::kCommitted, "approval passed the commitment bar");
+				} else if (s.readyDay == State::kNever) {
+					s.readyDay = State::Today();  // she tells you first: that makes her Committed (Confess)
+					logger::info("Romance: {} is ready to be Committed; she'll tell you", a_actor->GetDisplayFullName());
+				}
+			} else if (stage == Stage::kDating && s.readyDay != State::kNever) {
+				s.readyDay = State::kNever;
+				logger::info("Romance: {} isn't ready to be Committed any more", a_actor->GetDisplayFullName());
 			} else if (stage == Stage::kCommitted && approval < r.commitBar) {
 				SetStage(a_actor, Stage::kDating, "approval fell below the commitment bar");
 			}
 			if (stage >= Stage::kDating && stage <= Stage::kEngaged && approval < r.floorDating) {
-				auto& s = State::Of(a_actor->GetFormID());
 				if (s.pendingBreakup == Why::kNone) {
 					s.pendingBreakup = a_why == Why::kNone ? Why::kAbsence : a_why;
 					logger::info("Romance: {} has had enough (why {}); she ends it at the next talk", a_actor->GetDisplayFullName(), IRF::Rank(s.pendingBreakup));
@@ -290,9 +299,8 @@ namespace Romance
 		logger::info("Romance: {} {} -> {} ({})", a_actor->GetDisplayFullName(), IRF::Rank(old), IRF::Rank(a_stage), a_cause);
 
 		auto& s = State::Of(a_actor->GetFormID());
-		if (a_stage == Stage::kCommitted && old < Stage::kCommitted) {
-			s.committedDay = State::Today();  // she tells you how much you mean to her a little later (Confess)
-		} else if (a_stage > Stage::kCommitted && a_stage <= Stage::kMarried) {
+		s.readyDay = State::kNever;  // any stage change ends the wait for her confession
+		if (a_stage > Stage::kCommitted && a_stage <= Stage::kMarried) {
 			s.confessed = true;  // past that moment
 		} else if (a_stage == Stage::kEx) {
 			s.confessed = false;  // a new relationship (a win-back) gets its own

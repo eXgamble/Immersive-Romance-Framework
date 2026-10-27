@@ -13,7 +13,7 @@
     "exposeScenes": true,    // two partners have it out (off: both simply catch you)
     "familyTalks": true,     // she and an adopted child talk at home
     "stayHome": true,        // a wife with children won't leave town with you
-    "confession": true,      // newly Committed, she comes to tell you how she feels
+    "confession": true,      // at the commitment bar she comes to tell you how she feels, and that makes her Committed (off: at once)
     "serviceRefusal": true,  // her family or friends refuse you their shop or training over a broken heart
     "roadLines": true        // her lines on the road (places, after a fight, dragons, resting)
   },
@@ -26,7 +26,7 @@
   "askDateApproval": 35,    // a Friend says yes to "Would you spend an evening with me?" from this much (and hints at it)
   "standUpCost": 10,        // you didn't come to the first date
   "firstDateDistance": 1000.0, // at her spot and this close, after sunset: she comes over
-  "commitBar": 60,          // Dating -> Committed at this; below it again -> back to Dating
+  "commitBar": 60,          // Dating -> Committed from this, once she tells you (her confession); below it again -> back to Dating
   "floorDating": 1,         // below this from Dating up, they end it
 
   // what raises approval
@@ -84,8 +84,8 @@
   "partnerHealthPerLevel": 10,
   "partnerSkillPerLevel": 2,
 
-  // newly Committed: she comes up to you and says how much you mean to her
-  "confessDelayDays": 1.0,   // this long after she becomes Committed
+  // becoming Committed: she comes up to you and says how much you mean to her; when that talk ends she is Committed
+  "confessDelayDays": 1.0,   // this long after her approval reaches commitBar (still Dating until she has said it)
   "confessDistance": 3000.0, // when you're this close, somewhere safe, out of combat
 
   // adopted children

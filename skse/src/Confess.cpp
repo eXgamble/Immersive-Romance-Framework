@@ -53,6 +53,12 @@ namespace Confess
 			return false;
 		}
 
+		// Dating, at the bar, hasn't told you
+		bool Waiting(RE::Actor* a_partner)
+		{
+			return State::Of(a_partner->GetFormID()).readyDay != State::kNever && Wanted(a_partner);
+		}
+
 		bool Busy(RE::Actor* a_actor)
 		{
 			const auto& f = Forms::Get();
@@ -61,34 +67,44 @@ namespace Confess
 		}
 	}
 
+	bool Wanted(RE::Actor* a_partner)
+	{
+		const auto candidate = Candidates::Find(a_partner);
+		return Rules::Get().confession && candidate && candidate->lines.contains("confess") && !State::Of(a_partner->GetFormID()).confessed;
+	}
+
 	void Check()
 	{
-		if (!Rules::Get().confession && !g_coming && !g_said) {
-			return;
-		}
 		RE::Actor* partner = nullptr;
 		for (const auto p : Romance::Partners()) {
-			if (Romance::GetStage(p) == Stage::kCommitted && !State::Of(p->GetFormID()).confessed) {
-				partner = p;  // with two partners, the first who hasn't told you yet
-				break;
+			const auto& s = State::Of(p->GetFormID());
+			if (Romance::GetStage(p) != Stage::kDating || s.readyDay == State::kNever) {
+				continue;
 			}
+			if (!Wanted(p)) {
+				if (!g_said || g_said.get().get() != p) {  // told you, but the talk never closed (a load), or switched off
+					Romance::SetStage(p, Stage::kCommitted, "approval passed the commitment bar");
+				}
+				continue;
+			}
+			partner = partner ? partner : p;  // with two partners, the first who's ready
 		}
 		const auto today = State::Today();
 		if (const auto coming = g_coming.get()) {
-			if (today - g_comingDay > 0.05f || Romance::GetStage(coming.get()) != Stage::kCommitted) {
+			if (today - g_comingDay > 0.05f || Romance::GetStage(coming.get()) != Stage::kDating || !Waiting(coming.get())) {
 				Off(coming.get());  // she never reached you (an hour of game time), or things changed: another time
 				g_coming = {};
 				logger::info("Confess: {} didn't reach you, another time", coming->GetDisplayFullName());
 			}
 			return;
 		}
-		if (!partner || g_said || Romance::GetStage(partner) != Stage::kCommitted) {
+		if (!partner || g_said) {
 			return;
 		}
 		const auto candidate = Candidates::Find(partner);
 		const auto& s = State::Of(partner->GetFormID());
 		const auto& r = Rules::Get();
-		if (!candidate || s.confessed || today - s.committedDay < r.confessDelayDays) {
+		if (!candidate || today - s.readyDay < r.confessDelayDays) {
 			return;
 		}
 		if (s.pendingBreakup != Why::kNone || s.hurt || s.silentUntilDay > today || s.lockUntilDay > today || s.confrontPending) {
@@ -130,10 +146,14 @@ namespace Confess
 
 	void OnDialogueClosed()
 	{
-		if (const auto said = g_said.get()) {
-			Off(said.get());  // her answer to your reply needed the moment until now
-		}
+		const auto said = g_said.get();
 		g_said = {};
+		if (said) {
+			Off(said.get());  // her answer to your reply needed the moment until now
+			if (Romance::GetStage(said.get()) == Stage::kDating) {
+				Romance::SetStage(said.get(), Stage::kCommitted, "she told you how much you mean to her");
+			}
+		}
 	}
 
 	void OnGameLoaded()

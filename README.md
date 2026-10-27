@@ -40,9 +40,12 @@ line they say.
   her up (approval, and she tells you about it next time); ask again another day. One date at a time.
 - **Straying** (only once you have a partner): going on a date with someone else, kissing someone else (and
   intimate scenes, for mods that add them). Talking and gifts never count.
-- **Committed has its moment:** a day after she becomes Committed she comes up to you, somewhere safe (a town, an
-  inn, a home; anywhere but a dungeon while she follows you) and out of combat, and tells you how much you mean to
-  her. You answer "You mean a lot to me too." and she replies. Once per relationship (again after a win-back).
+- **Her confession makes her Committed:** a day after her approval reaches the commitment bar (60) she comes up to
+  you, somewhere safe (a town, an inn, a home; anywhere but a dungeon while she follows you) and out of combat, and
+  tells you how much you mean to her. You answer "You mean a lot to me too." and she replies; when that talk ends
+  she's Committed. If approval falls below the bar first, she waits until it's back. Once per relationship (again
+  after a win-back): if she drops back to Dating later, the bar makes her Committed again at once, as it does with
+  the confession switched off.
 - **Spouse perks:** each spouse can have her own perk (her add-on decides what it is). The framework decides when:
   on while you're married and the marriage is good, paused while she's hurt or approval is below 40, gone if she
   dies. An add-on can name an ability or perk (`spouseBonus`), condition lines on `IRF_SpouseBonusFaction 0x863`
@@ -98,7 +101,7 @@ line they say.
   more important one breaks off a lesser one that hasn't got to its talk yet (it comes again later); a lesser one
   waits for its next chance (two partners exposed with the stage taken: both simply catch you). While a scene is on,
   its actors say only its lines (and a fight's): a jealous or caught line waits until it's over. A scene still on
-  after two game hours is taken as stuck and gives up the stage.
+  after about two game hours is taken as stuck and gives up the stage.
 - **Her family and friends** (the circle) react: a line the next time you meet (also when you adopt a child,
   married to her), and if you broke her heart they may refuse you their shop or training until you make amends.
   Now and then their everyday hellos and goodbyes are about the two of you (and your children).

@@ -43,7 +43,7 @@ namespace State
 		float jealousUntilDay{ 0.0f };
 		int   pleadsLeft{ 0 };           // a pleading ex you left: times she'll still ask you back ...
 		float nextPleadDay{ 0.0f };      // ... from this day
-		float committedDay{ 0.0f };      // when she last became Committed
+		float readyDay{ kNever };        // Dating, approval reached the commitment bar this day: Committed once she tells you (Confess)
 		bool  confessed{ false };        // she told you how much you mean to her (once per relationship)
 		std::uint16_t knowAsked{ 0 };    // the get-to-know questions you asked (bit 0 = question 1)
 		float lastKnowDay{ -10.0f };     // the last day you asked one you hadn't (one a day)

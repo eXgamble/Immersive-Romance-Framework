@@ -64,7 +64,7 @@ namespace State
 			v('jeal', c.jealousUntilDay);
 			v('plds', c.pleadsLeft);
 			v('pldd', c.nextPleadDay);
-			v('cmtd', c.committedDay);
+			v('redy', c.readyDay);
 			v('cnfs', c.confessed);
 			v('askd', c.knowAsked);
 			v('askl', c.lastKnowDay);
