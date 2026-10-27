@@ -67,8 +67,9 @@ Spec (JSON):
                 "reactions": { "amends": "Text" },
                 "greetings": { "goodbye.spouse": ["Text", {"text": "...", "kids": ">=1"}] },   their everyday hellos
                        and goodbyes while she is at that stage with you (sets as hers: dating, love, marry, maramal,
-                       spouse, and ex, widowed); mixed with their vanilla ones: one of theirs plays "greetShare"
-                       (default 25) % of the time
+                       spouse, and ex, widowed, killed); mixed with their vanilla ones: one of theirs plays "greetShare"
+                       (default 25) % of the time. {"text": ..., "brushoff": true} (a hello or a reaction): always
+                       plays and ends the talk, so you get no options with them (her brother after you killed her)
                 "refuse": { "on": ["brokenHeart"], "until": "amends", "services": ["trade"], "lines": "Text" } } ]
 }
 
@@ -131,7 +132,7 @@ WEDDING = "07404E:Skyrim.esm"  # RelationshipMarriageWedding: runs once the wedd
 # the stages listed (IRF_GreetFaction / IRF_StageFaction 2 Dating, 3 Committed, 4 Engaged, 5 Married) and every
 # set that fits joins ONE random pick per topic. "maramal" stops once the wedding is booked.
 SETS = {"dating": [2, 3, 4], "love": [3, 4, 5], "marry": [3], "maramal": [4], "spouse": [5]}
-CIRCLE_SETS = {**SETS, "ex": [6], "widowed": [7]}  # a circle member's greetings: hers, and after it ended
+CIRCLE_SETS = {**SETS, "ex": [6], "widowed": [7], "killed": [8]}  # a circle member's greetings: hers, and after it ended
 CIRCLE_GREET_SHARE = 25
 HAPPY_BAND = 4  # IRF_BandFaction from here up: she's happy with you (her "howarewe.4": "I'm happy.")
 EXCHANGE_SHARE = 50  # a line she answers (with "reply"): this % of the time when it fits
@@ -460,6 +461,11 @@ def texts(value):
     return value if isinstance(value, list) else [value]
 
 
+def brushoff(text):
+    """{"text": ..., "brushoff": true}: a circle member's line that ends the talk at once (a hello: you get no options)"""
+    return isinstance(text, dict) and bool(text.get("brushoff"))
+
+
 def spoken(text):
     """the words a line says (what its voice file records): its text, or its responses joined"""
     words = text["text"] if isinstance(text, dict) else text
@@ -582,7 +588,7 @@ def main(spec_path, out_dir, relock=False, into=None):
             variants = texts(value)  # first that fits (no random pick): a rival's or a winner's line before the plain one
             for text in variants:
                 key = f"circle.{index}.reaction.{event}"
-                emit(key, f"IRF{short}_{mshort}_{event}", REACTION_HELLO, text, mnpc, REACTION_F, EVENTS[event])
+                emit(key, f"IRF{short}_{mshort}_{event}", REACTION_HELLO, text, mnpc, REACTION_F, EVENTS[event], goodbye=brushoff(text))
                 reactions.setdefault(event, []).append(lines[key][-1])
         if reactions:
             entry["reactions"] = reactions
@@ -605,8 +611,9 @@ def main(spec_path, out_dir, relock=False, into=None):
                 key = f"circle.{index}.{name}"
                 eid = word_id(f"IRF{short}_{mshort}_{name.replace('.', '_')}", text)
                 random = None if len(run) < 2 else ("end" if i == len(run) - 1 else "start")
-                record = info(eid, topic, text, mnpc, None, None, None, False, random,
-                              stage_rows_on(her, ranks) + booked + [random_row(percent)])
+                thin = [] if brushoff(text) else [random_row(percent)]  # a brush-off always plays: no talk with them
+                record = info(eid, topic, text, mnpc, None, None, None, brushoff(text), random,
+                              stage_rows_on(her, ranks) + booked + thin)
                 records.append(record)
                 lines.setdefault(key, []).append(eid)
                 greetings.setdefault(name, []).append(eid)

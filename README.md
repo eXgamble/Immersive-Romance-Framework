@@ -330,6 +330,10 @@ well); the spouse's add-on's lines for it go in IRF_ChildHelloTopic 0x852 (spec 
 "strained", "bad", "heartbroken"}`; said by whichever child: no GetIsID, `GetFactionRank IRF_StageFaction == 5` on her
 reference).
 
+**A circle member who won't talk to you** (her brother once you've killed her): give his hellos for that stage
+`"brushoff": true` in the spec (`"hello.killed": [{"text": "Murderer.", "brushoff": true}]`, a reaction too). A
+brush-off always plays and ends the talk at once (the Goodbye flag), so you get no dialogue options with him.
+
 **Her own follower comments** (towns, guilds, quests, a bandit camp ahead: an expansion's worth of road talk) belong in
 the add-on: its own quest and lines, triggered the vanilla way (location conditions or Story Manager events, `GetStage`,
 the player's factions, Say Once). Give each of those lines one framework condition, `GetFactionRank IRF_ChatFaction`
