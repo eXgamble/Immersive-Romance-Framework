@@ -1,14 +1,17 @@
 """Immersive Romance Framework: the fast checks (seconds, no game).
 
-    python test/check.py
+    python test/check.py                      the SKSE lint
+    python test/check.py --addons <folder>    ... and the add-ons that folder's irf-addons.json lists
 
-- every add-on spec still builds, and the manifest it builds is the one the add-on ships (an add-on whose spec
-  changed without a rebuild fails here: its lines and the manifest would no longer agree)
 - the SKSE code passes the skse-dev-rules lint (when the checker is installed)
+- every listed add-on spec still builds with tools/irf_addon.py, and the manifest it builds is the one the add-on
+  ships (an add-on whose spec changed without a rebuild fails here: its lines and the manifest would no longer agree)
 
-Run it after changing the generator, a spec or the C++ (build.bat runs the lint itself). The in-game tests are
-test/smoke/smoke.py.
+irf-addons.json (in an add-on repo): [{"spec": "addons/her.json", "addon": "addons/IRF - Her",
+"manifest": "Her Name.json", "into": "Build.esp" (optional)}, ...], paths relative to that folder.
+Run it after changing the generator, a spec or the C++ (build.bat runs the lint itself).
 """
+import argparse
 import json
 import os
 import subprocess
@@ -17,12 +20,6 @@ import tempfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CANDIDATES = "SKSE/Plugins/ImmersiveRomanceFramework/Candidates"
-# spec -> (the add-on folder, its manifest's file name, the plugin the build goes into)
-ADDONS = [
-    ("addons/camilla.json", "addons/Immersive Romance - Camilla", "Camilla Valerius.json", "IRCamillaBuild.esp"),
-    ("test/specs/camilla.json", "test/IRF - Camilla (test)", "Camilla Valerius.json", None),
-    ("test/specs/faendal.json", "test/IRF - Faendal (test)", "Faendal.json", None),
-]
 LINT = os.path.join(os.path.expanduser("~"), ".claude", "skills", "skse-dev-rules", "scripts", "skse_lint.py")
 
 
@@ -50,11 +47,20 @@ def diff(a, b, path=""):
 
 
 def main():
+    parser = argparse.ArgumentParser(usage=__doc__)
+    parser.add_argument("--addons", help="a folder with an irf-addons.json")
+    args = parser.parse_args()
+    addons = []
+    if args.addons:
+        with open(os.path.join(args.addons, "irf-addons.json"), encoding="utf-8") as f:
+            addons = json.load(f)
     failed = 0
     with tempfile.TemporaryDirectory() as tmp:
-        for i, (spec, folder, manifest, into) in enumerate(ADDONS):
+        for i, a in enumerate(addons):
+            spec, folder, manifest, into = a["spec"], a["addon"], a["manifest"], a.get("into")
+            base = args.addons
             out = os.path.join(tmp, str(i))
-            cmd = [sys.executable, "-I", os.path.join(ROOT, "tools", "irf_addon.py"), os.path.join(ROOT, spec), out]
+            cmd = [sys.executable, "-I", os.path.join(ROOT, "tools", "irf_addon.py"), os.path.join(base, spec), out]
             if into:
                 cmd += ["--into", into]
             run = subprocess.run(cmd, capture_output=True, text=True)
@@ -64,7 +70,7 @@ def main():
                 continue
             with open(os.path.join(out, "manifest.json"), encoding="utf-8") as f:
                 built = json.load(f)
-            with open(os.path.join(ROOT, folder, CANDIDATES, manifest), encoding="utf-8") as f:
+            with open(os.path.join(base, folder, CANDIDATES, manifest), encoding="utf-8") as f:
                 shipped = json.load(f)
             d = diff(built, shipped)
             if d:
