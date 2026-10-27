@@ -51,6 +51,8 @@
   "pleadEvery": 2,          // ... this many days apart
   "spouseBonusBelow": 40,   // her spouse perk pauses while approval is below this (a strained marriage)
   "crimeScale": 1,          // a crime they see: alignment x severity x this (theft 1, pickpocket 2, assault 4, murder 10)
+  "murderLeaveAlignment": 2, // a murder she sees, her alignment this or higher: she turns wary (her waryDays), stops
+                             // following and goes home, and won't come along again for her attackLockDays
 
   // breakups and reactions
   "winBackDays": 7,         // after a breakup, "Could we try again?" works after this many days

@@ -12,6 +12,8 @@ namespace Crimes
 
 	// An item entered the player's inventory (TESContainerChangedEvent); call from an SKSE task
 	void OnItemTaken(RE::FormID a_from, RE::FormID a_item, std::int32_t a_count);
+	// As if she saw you commit that crime (RE::PackageNS::CRIME_TYPES; IRF - Debug's "murder" deed)
+	void Witnessed(RE::Actor* a_witness, std::uint32_t a_crimeType);
 	// An item left the player's inventory
 	void OnItemGiven(RE::FormID a_item);
 }

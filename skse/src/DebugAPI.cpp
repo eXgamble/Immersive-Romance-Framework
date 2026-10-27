@@ -4,6 +4,7 @@
 
 #include "Candidates.h"
 #include "Children.h"
+#include "Crimes.h"
 #include "Events.h"
 #include "FirstDate.h"
 #include "Follower.h"
@@ -167,6 +168,8 @@ namespace
 			Romance::BreakUp(actor, Who::kPlayer, Why::kChoice);  // you end it (her heartbreak style applies)
 		} else if (deed.starts_with("line:")) {
 			Events::TestLine(actor, deed.substr(5));  // as if she had said that line ("line:kiss.yes", "line:date")
+		} else if (deed == "murder") {
+			Crimes::Witnessed(actor, RE::PackageNS::CRIME_TYPES::kMurder);  // she saw you murder someone
 		} else if (deed.starts_with("moment:")) {
 			World::SayMoment(actor, static_cast<Moment>(std::atoi(deed.c_str() + 7)));  // her one-liner for that moment ("moment:6" jealous)
 		} else if (deed == "jealous") {

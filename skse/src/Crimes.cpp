@@ -1,8 +1,10 @@
 #include "Crimes.h"
 
 #include "Candidates.h"
+#include "Follower.h"
 #include "Romance.h"
 #include "Rules.h"
+#include "State.h"
 #include "World.h"
 
 namespace Crimes
@@ -62,6 +64,20 @@ namespace Crimes
 			if (alignment > 0) {
 				World::SayMoment(a_witness, murder && candidate->lines.contains("crime.disapprove.murder") ? Moment::kMurderDisapprove : Moment::kCrimeDisapprove);
 				Romance::Hurt(a_witness, { amount, false }, Why::kCrime, murder ? "saw you murder someone" : "saw you break the law");
+				if (murder && alignment >= Rules::Get().murderLeaveAlignment) {
+					// a good heart won't walk beside a murderer: wary of you, she leaves you there and goes home (as when
+					// you hit her: her waryDays, no following for her attackLockDays)
+					auto&      s = State::Of(a_witness->GetFormID());
+					const auto today = State::Today();
+					s.waryUntilDay = std::max(s.waryUntilDay, today + static_cast<float>(candidate->attributes.waryDays));
+					s.lockUntilDay = std::max(s.lockUntilDay, today + static_cast<float>(candidate->attributes.attackLockDays));
+					if (candidate->attributes.waryStyle == Candidates::WaryStyle::kAfraid) {
+						s.lockUntilDay = std::max(s.lockUntilDay, s.waryUntilDay);  // she keeps away while she's afraid of you
+					}
+					Follower::Dismiss(a_witness);
+					Romance::Sync(a_witness);
+					logger::info("Crimes: {} leaves you over the murder", a_witness->GetDisplayFullName());
+				}
 			} else {
 				World::SayMoment(a_witness, murder && candidate->lines.contains("crime.approve.murder") ? Moment::kMurderApprove : Moment::kCrimeApprove);
 				Romance::ModApproval(a_witness, amount, murder ? "liked your murder" : "liked your crime");
@@ -221,6 +237,13 @@ namespace Crimes
 			if (actor && actor != from && actor->Is3DLoaded() && !actor->IsDead() && World::Sees(actor, player, distance)) {
 				Judge(actor, type);
 			}
+		}
+	}
+
+	void Witnessed(RE::Actor* a_witness, std::uint32_t a_crimeType)
+	{
+		if (a_witness) {
+			Judge(a_witness, a_crimeType);
 		}
 	}
 

@@ -76,6 +76,7 @@ namespace Rules
 		IRF_RULE(pleadEvery);
 		IRF_RULE(spouseBonusBelow);
 		IRF_RULE(crimeScale);
+		IRF_RULE(murderLeaveAlignment);
 		IRF_RULE(winBackDays);
 		IRF_RULE(winBackApproval);
 		IRF_RULE(amendsApproval);

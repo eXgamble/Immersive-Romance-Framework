@@ -45,6 +45,7 @@ namespace Rules
 		int pleadEvery = 2;         // ... this many days apart
 		int spouseBonusBelow = 40;  // her spouse perk pauses while approval is below this (the marriage is strained)
 		int crimeScale = 1;         // approval per alignment point per crime severity point
+		int murderLeaveAlignment = 2;  // a murder she sees, at this alignment or higher: wary, and she leaves you and goes home
 		int winBackDays = 7;
 		int winBackApproval = 15;   // approval they start from when they take you back
 		int amendsApproval = 0;     // added when amends are made
