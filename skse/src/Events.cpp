@@ -14,6 +14,7 @@
 #include "Gifts.h"
 #include "Replies.h"
 #include "Romance.h"
+#include "Script.h"
 #include "Rules.h"
 #include "Scenes.h"
 #include "State.h"
@@ -512,6 +513,13 @@ namespace Events
 							Family::OnLineBegan(ref->As<RE::Actor>(), key);
 						}
 						Family::Tick();
+					}
+					const auto ref = handle.get();
+					const auto speaker = ref ? ref->As<RE::Actor>() : nullptr;
+					if (began && speaker && key.starts_with("idle.") && speaker->GetFactionRank(Forms::Get().idleRest, false) != 1) {
+						// her idles rest a while (her idle lines carry IRF_IdleRestFaction != 1); Papyrus wakes them
+						speaker->AddToFaction(Forms::Get().idleRest, 1);
+						Script::CallStatic("IRF_Internal"sv, "RestIdles"sv, speaker, Forms::Get().idleRest, Rules::Get().idleCooldownSeconds);
 					}
 				});
 				if (a_event->type != RE::TESTopicInfoEvent::TopicInfoEventType::kTopicEnd) {
@@ -1030,6 +1038,11 @@ namespace Events
 
 	void OnGameLoaded()
 	{
+		for (const auto& candidate : Candidates::All()) {  // a load ends any rest (its Papyrus wait may not resume)
+			if (const auto actor = Candidates::ActorOf(candidate); actor && actor->GetFactionRank(Forms::Get().idleRest, false) == 1) {
+				actor->AddToFaction(Forms::Get().idleRest, 0);
+			}
+		}
 		g_down.clear();
 		g_lastHit.clear();
 		g_lastPlace = Moment::kNone;

@@ -78,6 +78,7 @@ namespace Rules
 		float confessDistance = 3000.0f;      // ... when you're this close (she walks over)
 		int   childAwayDays = 5;              // an adopted child misses you after this many days apart (2x, 3x: more)
 		float momentCooldownSeconds = 90.0f;  // between two road lines
+		float idleCooldownSeconds = 180.0f;   // after one of her idles, her own idles rest this long (real seconds)
 		float witnessDistance = 2048.0f;      // ~30 m: farther than this, nobody "saw" it
 		float caughtDistance = 2048.0f;
 		float jealousDistance = 1536.0f;

@@ -111,6 +111,7 @@ namespace Rules
 		IRF_RULE(firstDateDistance);
 		IRF_RULE(childAwayDays);
 		IRF_RULE(momentCooldownSeconds);
+		IRF_RULE(idleCooldownSeconds);
 		IRF_RULE(witnessDistance);
 		IRF_RULE(caughtDistance);
 		IRF_RULE(jealousDistance);

@@ -97,6 +97,8 @@
 
   // lines and sight
   "momentCooldownSeconds": 90.0,  // between two road lines
+  "idleCooldownSeconds": 180.0,   // after one of her idle lines, her own idles rest this long (real seconds; the
+                                  // game's own idle chatter for her voice may still fill the gap)
   "witnessDistance": 2048.0,      // farther than this, nobody saw it
   "caughtDistance": 2048.0,       // your partner sees you stray within this
   "jealousDistance": 1536.0,      // your partner sees you and her within this

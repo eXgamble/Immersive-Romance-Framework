@@ -75,6 +75,7 @@ namespace Forms
 		kExposeSideBTopic = 0x879,    //   "(Persuade) I don't know who you are. Let's get out of here, <Alias=ExposeA>."
 		kFamilyFaction = 0x87B,       // IRF_FamilyFaction: on her, which family conversation is playing (Family)
 		kFamilyStepFaction = 0x87C,   // IRF_FamilyStepFaction: on its speaker, which of its lines
+		kIdleRestFaction = 0x87D,     // IRF_IdleRestFaction: 1 on her for idleCooldownSeconds after one of her idles
 		kExposeTrueTopic = 0x87A,     //   "(Persuade) It's not true. I don't even know this person."   "It's true." 
 		kPleadYesTopic = 0x85E,
 		kPleadNoTopic = 0x860,
@@ -128,6 +129,7 @@ namespace Forms
 		RE::TESFaction* expose{ nullptr };
 		RE::TESFaction* family{ nullptr };
 		RE::TESFaction* familyStep{ nullptr };
+		RE::TESFaction* idleRest{ nullptr };
 		RE::TESTopic*   exposeSideA{ nullptr };
 		RE::TESTopic*   exposeSideB{ nullptr };
 		RE::TESTopic*   exposeTrue{ nullptr };
