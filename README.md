@@ -59,7 +59,8 @@ line they say.
   comes up to you, says why she can't come and goes home; after a fast travel a message says it.
 - **A letter home:** married, a day or more since you last saw your wife, a courier you meet (the one who brings
   you letters, or one on the road) takes a letter home for you: "Could you take a letter home for me?" Her absence
-  starts over, and the next time you meet she has her own line about it (`reaction.letter`, optional).
+  starts over, and the next time you meet she has her own line about it (`reaction.letter`, optional; it plays only
+  while things are fine or better at home, band 3+: the generator adds the condition).
 - **Gifts are for courting:** "I have something for you." opens the gift menu (gold included) for a Friend; she
   answers as she says goodbye. Stolen and quest items can't be given, and an insult isn't taken. From Dating up she
   turns gifts down (her `gift.decline` line): she'd rather you took her along, and the road together is where

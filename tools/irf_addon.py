@@ -136,6 +136,7 @@ WEDDING = "07404E:Skyrim.esm"  # RelationshipMarriageWedding: runs once the wedd
 SETS = {"dating": [2, 3, 4], "love": [3, 4, 5], "marry": [3], "maramal": [4], "spouse": [5]}
 CIRCLE_SETS = {**SETS, "ex": [6], "widowed": [7], "killed": [8]}  # a circle member's greetings: hers, and after it ended
 CIRCLE_GREET_SHARE = 25
+FINE_BAND = 3  # IRF_BandFaction from here up: things are fine at home or better
 HAPPY_BAND = 4  # IRF_BandFaction from here up: she's happy with you (her "howarewe.4": "I'm happy.")
 EXCHANGE_SHARE = 50  # a line she answers (with "reply"): this % of the time when it fits
 MARRIED = 5
@@ -274,8 +275,10 @@ def requirements(attributes):
     for rank, name in enumerate(EXPOSE_OUTCOMES, start=1):
         add(f"expose.{name}", SAY, EXPOSE_F, rank, required=False, extra=[moment_row(EXPOSE_OUTCOME)])
     for name, code in EVENTS.items():
-        add(f"reaction.{name}", REACTION_HELLO, REACTION_F, code, required=False)
-        add(f"recent.{name}", RECENT_HELLO, RECENT_F, code, required=False)
+        # her letter lines only while things are fine or better at home (IRF_BandFaction 3+)
+        fine = [condition("GetFactionRankConditionData", "Faction", fw(BAND_F), FINE_BAND, "GreaterThanOrEqualTo")] if name == "letter" else []
+        add(f"reaction.{name}", REACTION_HELLO, REACTION_F, code, required=False, extra=fine)
+        add(f"recent.{name}", RECENT_HELLO, RECENT_F, code, required=False, extra=fine)
     return r
 
 
