@@ -691,7 +691,17 @@ namespace Candidates
 					}
 					const bool byChild = l.value("who", "her"s) == "child";
 					ft.steps.emplace_back(byChild, info->As<RE::TESTopicInfo>());
-					candidate.lines[std::format("family.{}.{}", talk, step)].push_back(info->As<RE::TESTopicInfo>());
+					const auto key = std::format("family.{}.{}", talk, step);
+					candidate.lines[key].push_back(info->As<RE::TESTopicInfo>());
+					// other versions of the same line (by the player's sex, ...): the game plays the one that fits
+					for (const auto& v : l.value("versions", nlohmann::json::array())) {
+						const auto other = ParseForm(v.is_string() ? v.get<std::string>() : ""s);
+						if (other && other->As<RE::TESTopicInfo>()) {
+							candidate.lines[key].push_back(other->As<RE::TESTopicInfo>());
+						} else {
+							problems.push_back(std::format("family {} line {}: a version is not a dialogue line", talk, step));
+						}
+					}
 				}
 				if (ft.steps.size() < 2) {
 					problems.push_back(std::format("family {}: a conversation needs two lines at least", talk));

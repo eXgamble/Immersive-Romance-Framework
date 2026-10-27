@@ -45,6 +45,7 @@ Spec (JSON):
   "family": [ {"when": {"home": "happy|fine|strained|bad|heartbroken" (or a list), "mood": "jealous|wary|...",
                          "alive": "Skyrim.esm|0x013487", "dead": ...}, "child": "boy|girl",
               "lines": [{"child": "Text"}, {"her": "Text"}, ...]} ]   her conversations with the adopted children, when
+             (a line may be versions: {"her": [{"text": ..., "player": "male"}, {"text": ..., "player": "female"}]})
              home is that way (her heart and approval) and, given, she's in that mood; either may start, any number of
              turns; the framework picks one a day (the least recent that fits) and stages it
   "placeholders": true,                      fill every required key that has no text
@@ -628,7 +629,8 @@ def main(spec_path, out_dir, relock=False, into=None):
             entry["child"] = talk["child"]
         for k, line in enumerate(talk["lines"], start=1):
             by_child = "child" in line
-            text = line["child"] if by_child else line["her"]
+            said = line["child"] if by_child else line["her"]
+            versions = said if isinstance(said, list) else [said]  # versions: [{"text", "player": "male"}, ...]
             step = condition("GetFactionRankConditionData", "Faction", fw(FAMILY_STEP_F), k, "EqualTo")
             if by_child:
                 which = {"type": "ConditionFloat", "fields": {"CompareOperator": "EqualTo", "ComparisonValue": str(n)},
@@ -636,14 +638,20 @@ def main(spec_path, out_dir, relock=False, into=None):
                                                                "sets": [{"path": "Faction", "value": fw(FAMILY_F)}, {"path": "Reference", "value": HER[0]}]}}]}
             else:
                 which = condition("GetFactionRankConditionData", "Faction", fw(FAMILY_F), n, "EqualTo")
-            record = info(word_id(f"IRF{short}_family_{n}_{k}{'_child' if by_child else ''}", text), SAY, text, npc,
-                          MOMENT_F, FAMILY_MOMENT, "EqualTo", False, None, [step, which])
-            if by_child:  # whichever child it is: no GetIsID
-                for op in record["ops"]:
-                    if op.get("field_path") == "Conditions":
-                        op["composes"] = op["composes"][1:]
-            records.append(record)
-            entry["lines"].append({"who": "child" if by_child else "her", "line": record["editorid"]})
+            made = []
+            for text in versions:
+                record = info(word_id(f"IRF{short}_family_{n}_{k}{'_child' if by_child else ''}", text), SAY, text, npc,
+                              MOMENT_F, FAMILY_MOMENT, "EqualTo", False, None, [step, which])
+                if by_child:  # whichever child it is: no GetIsID
+                    for op in record["ops"]:
+                        if op.get("field_path") == "Conditions":
+                            op["composes"] = op["composes"][1:]
+                records.append(record)
+                made.append(record["editorid"])
+            spoken_line = {"who": "child" if by_child else "her", "line": made[0]}
+            if len(made) > 1:
+                spoken_line["versions"] = made[1:]  # the same step, another version (the game plays the one that fits)
+            entry["lines"].append(spoken_line)
         if len(entry["lines"]) < 2:
             sys.exit(f"family {n}: a conversation needs two lines at least")
         family.append(entry)
