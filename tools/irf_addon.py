@@ -239,6 +239,7 @@ def requirements(attributes):
     add("firstdate", FORCEGREET, MOMENT_F, FIRSTDATE_MOMENT)
     add("firstdate.reply", FIRSTDATE_REPLY, MOMENT_F, FIRSTDATE_MOMENT, goodbye=True)
     add("firstdate.after", SAY, MOMENT_F, FIRSTDATE_AFTER)
+    add("date.after", SAY, MOMENT_F, 17, required=False)  # an evening together is over, outside: "I had a great time."
     add("stoodup", REACTION_HELLO, REACTION_F, EVENTS["stoodUp"])
     for rank, name in enumerate(["gift.insulted", "gift.disliked", "gift", "gift.liked", "gift.loved"], start=1):
         add(name, GIFT_ANSWER, GIFT_F, rank)

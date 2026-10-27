@@ -104,3 +104,25 @@ Function EndDate(Quest akQuest, Actor akDate, bool abKept) global
 	akQuest.Stop()
 	akDate.EvaluatePackage()
 EndFunction
+
+; An evening together: the screen fades to black, time passes, and you're both back outside (afX..afZ from akDoor:
+; where its exit puts you, facing afAngle degrees), her at your side; she says her line once it's light again
+Function EveningTogether(Actor akHer, ObjectReference akDoor, float afX, float afY, float afZ, float afAngle, float afHours) global
+	Actor player = Game.GetPlayer()
+	Game.DisablePlayerControls()
+	Game.FadeOutGame(true, true, 0.0, 1.0)
+	Utility.Wait(1.5)
+	EveningTime(afHours)
+	player.MoveTo(akDoor, afX, afY, afZ)
+	player.SetAngle(0.0, 0.0, afAngle)
+	akHer.MoveTo(player, 80.0 * Math.Sin(afAngle + 90.0), 80.0 * Math.Cos(afAngle + 90.0), 0.0)
+	akHer.SetAngle(0.0, 0.0, afAngle - 90.0)
+	Utility.Wait(1.0)
+	Game.FadeOutGame(false, true, 0.5, 1.5)
+	Game.EnablePlayerControls()
+	Utility.Wait(2.0)
+	EveningDone(akHer)
+EndFunction
+
+Function EveningTime(float afHours) global native
+Function EveningDone(Actor akHer) global native

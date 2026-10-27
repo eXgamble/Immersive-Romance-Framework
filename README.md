@@ -31,7 +31,10 @@ line they say.
   fighting and clearing places together raise it. A gift can also be disliked, or an insult (a human heart).
 - **Getting to know her:** "I'd like to get to know you better." (once a day, Friend to Married) opens her own
   questions (1 to 10, her add-on writes them). A question you hadn't asked gives approval; asking again does nothing.
-  It's only talk: it never starts courting and never counts as straying. From Dating up, "Spend the evening with me." from 6 to 10 pm, in a town and out of combat, is a date (every second day); kiss her as often as you like, the first kiss of the day counts.
+  It's only talk: it never starts courting and never counts as straying. From Dating up, "Spend the evening with me." from 6 to 10 pm, in a town and out of combat, is an evening together (every second day): the screen fades, 2 hours
+  pass, and you're both outside the town's inn (in her own town while she isn't following you: outside her home), where
+  she says her `date.after` line and goes back to her day. The inns are listed in `Evenings/*.json` (each inn's exit
+  door); a town without one offers no evening; kiss her as often as you like, the first kiss of the day counts.
 - **Asking her out:** "Would you spend an evening with me?" is always there for a Friend. Below askDateApproval she
   says not yet; a Friend who knows you're taken (and won't compete for you) says no; from it she says yes and names
   her place. Once she'd say yes, about half her greetings hint at it. Yes starts **the first date**: the journal says
@@ -172,6 +175,8 @@ A candidate whose manifest is missing a required line, or whose lines don't carr
     "absenceTolerance": { "days": [3, 6, 10], "cost": 4 },  // apart longer than each (band 1-3) costs cost per band;
                                                    // days left out: Rules.json absence1..3 (3, 6, 10)
     "brokenHeartDays": 2,                          // silent this long after catching you, then hurt until amends
+    "evening": { "home": "Skyrim.esm|0x0133E9" },   // her home's exit door: an evening in her town (she isn't
+                                                   // following you) ends outside it instead of the inn
     "confession": { "minDatingDays": 3 },          // her confession (which makes her Committed) waits until you've
                                                    // been Dating this long (default: Rules.json confessMinDatingDays, 3)
     "modesty": 1,                                  // 0 kisses anywhere .. 3 only at home, alone

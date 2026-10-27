@@ -8,6 +8,7 @@
 #include "Events.h"
 #include "Follower.h"
 #include "Forms.h"
+#include "Evening.h"
 #include "Gifts.h"
 #include "Papyrus.h"
 #include "Romance.h"
@@ -57,6 +58,7 @@ namespace
 				Rules::Load();
 				Candidates::Load();
 				Gifts::Load();
+				Evening::Load();
 				Events::Register();
 				Crimes::Install();
 			}

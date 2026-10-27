@@ -1,6 +1,7 @@
 #include "Romance.h"
 
 #include "Confess.h"
+#include "Evening.h"
 #include "Expose.h"
 
 #include "FirstDate.h"
@@ -873,7 +874,7 @@ namespace Romance
 		SetRank(a_actor, f.secret, secretable ? (candidate->attributes.refusesSecret ? 2 : 1) : 0);
 		// an evening together: from Dating up, evenings, every dateEveryDays
 		const bool datable = stage >= Stage::kDating && stage <= Stage::kMarried && !silent && !hurt && !cold && today - s.lastDateDay >= r.dateEveryDays;
-		SetRank(a_actor, f.date, datable && World::DateTime() ? 1 : 0);
+		SetRank(a_actor, f.date, datable && World::DateTime() && Evening::Spot(a_actor) ? 1 : 0);
 		// gifts: a Friend takes one a day; Dating to Engaged she declines them (she'd rather travel with you); a wife takes
 		// one every wifeGiftEveryDays. Between gifts the line waits
 		const bool married = stage == Stage::kMarried;

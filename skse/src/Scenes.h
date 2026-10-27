@@ -16,6 +16,7 @@ namespace Scenes
 		kNone,
 		kFamily,     // a family conversation
 		kConfess,    // newly Committed, she comes to tell you
+		kEvening,    // an evening together: the fade, the walk out, her line after
 		kFirstDate,  // she comes over at her spot, and the talk
 		kExpose,     // two partners have it out
 		kStayHome,   // a wife with children won't leave town (you're leaving: it can't wait)

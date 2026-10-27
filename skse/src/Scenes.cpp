@@ -27,6 +27,8 @@ namespace Scenes
 				return "family conversation";
 			case Kind::kConfess:
 				return "confession";
+			case Kind::kEvening:
+				return "evening";
 			case Kind::kFirstDate:
 				return "first date";
 			case Kind::kExpose:
@@ -46,6 +48,8 @@ namespace Scenes
 				return Kind::kFamily;
 			case Moment::kConfess:
 				return Kind::kConfess;
+			case Moment::kDateAfter:
+				return Kind::kEvening;
 			case Moment::kFirstDate:
 				return Kind::kFirstDate;
 			case Moment::kExposeAsk:

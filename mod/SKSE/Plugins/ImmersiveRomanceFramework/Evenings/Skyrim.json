@@ -1,0 +1,24 @@
+{
+  // Where an evening together ends: outside each town's inn. "inn" is the inn's location, "door" its exit door
+  // (inside the inn): you come out where that door puts you. A mod adds its own towns with a file of its own here
+  // (later files win a town). A town not listed offers no evening.
+  "inns": [
+    { "town": "Riverwood",     "inn": "Skyrim.esm|0x01CB8C", "door": "Skyrim.esm|0x013419" },
+    { "town": "Whiterun",      "inn": "Skyrim.esm|0x01F86D", "door": "Skyrim.esm|0x016072" },
+    { "town": "Solitude",      "inn": "Skyrim.esm|0x0200A5", "door": "Skyrim.esm|0x016A8A" },
+    { "town": "Windhelm",      "inn": "Skyrim.esm|0x0209EA", "door": "Skyrim.esm|0x0D18B4" },
+    { "town": "Riften",        "inn": "Skyrim.esm|0x02247E", "door": "Skyrim.esm|0x016C3C" },
+    { "town": "Markarth",      "inn": "Skyrim.esm|0x01F30E", "door": "Skyrim.esm|0x0793A4" },
+    { "town": "Falkreath",     "inn": "Skyrim.esm|0x05CA26", "door": "Skyrim.esm|0x03A196" },
+    { "town": "Morthal",       "inn": "Skyrim.esm|0x01EB96", "door": "Skyrim.esm|0x01738C" },
+    { "town": "Dawnstar",      "inn": "Skyrim.esm|0x020065", "door": "Skyrim.esm|0x013D41" },
+    { "town": "Winterhold",    "inn": "Skyrim.esm|0x01EB7C", "door": "Skyrim.esm|0x01759E" },
+    { "town": "Rorikstead",    "inn": "Skyrim.esm|0x01F883", "door": "Skyrim.esm|0x0174AF" },
+    { "town": "Ivarstead",     "inn": "Skyrim.esm|0x0226AA", "door": "Skyrim.esm|0x017066" },
+    { "town": "Dragon Bridge", "inn": "Skyrim.esm|0x020008", "door": "Skyrim.esm|0x013E40" },
+    { "town": "Kynesgrove",    "inn": "Skyrim.esm|0x020A02", "door": "Skyrim.esm|0x0172DA" },
+    { "town": "Nightgate Inn", "inn": "Skyrim.esm|0x020054", "door": "Skyrim.esm|0x017062" },
+    { "town": "Old Hroldan",   "inn": "Skyrim.esm|0x01F7CB", "door": "Skyrim.esm|0x017490" },
+    { "town": "Raven Rock",    "inn": "Dragonborn.esm|0x019A24", "door": "Dragonborn.esm|0x017F1F" }
+  ]
+}

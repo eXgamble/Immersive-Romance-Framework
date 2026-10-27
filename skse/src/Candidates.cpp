@@ -200,6 +200,7 @@ namespace Candidates
 			add("firstdate.reply", f.firstDateReply, f.moment, Rank(Moment::kFirstDate));
 			list.back().goodbye = true;
 			add("firstdate.after", f.say, f.moment, Rank(Moment::kFirstDateAfter));
+			add("date.after", f.say, f.moment, Rank(Moment::kDateAfter), false);  // after an evening together (optional)
 			add("stoodup", f.reactionHello, f.reaction, Rank(Event::kStoodUp));
 			// from Dating up she'd rather have you take her along than take gifts (optional: without it, no gifts from Dating)
 			add("gift.decline", f.giveTopic, f.give, 2, false);
@@ -420,6 +421,13 @@ namespace Candidates
 				const auto place = date.contains("place") ? FormAt(date, "place") : nullptr;
 				out.dateSpot = spot ? spot->As<RE::TESObjectREFR>() : nullptr;
 				out.datePlace = place ? place->As<RE::BGSLocation>() : nullptr;
+			}
+			if (const auto evening = a.value("evening", nlohmann::json::object()); evening.contains("home")) {
+				const auto home = FormAt(evening, "home");
+				out.eveningHome = home ? home->As<RE::TESObjectREFR>() : nullptr;
+				if (!out.eveningHome) {
+					a_problems.push_back("evening.home is not a loaded reference (her home's exit door)");
+				}
 			}
 			if (!out.dateSpot) {
 				a_problems.push_back("firstDate.spot is not a loaded reference (where she waits for your first date)");

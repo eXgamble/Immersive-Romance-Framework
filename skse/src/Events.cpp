@@ -1,5 +1,6 @@
 #include "Events.h"
 
+#include "Evening.h"
 #include "Expose.h"
 #include "Family.h"
 
@@ -332,6 +333,7 @@ namespace Events
 				s.lastDateDay = today;
 				Romance::Strayed(a_speaker, "a date with someone else");  // from every other partner
 				Romance::ModApproval(a_speaker, r.dateGain, "an evening together");
+				Evening::Begin(a_speaker);  // the fade and the walk out, once the talk closes
 				if (Romance::IsPartner(a_speaker)) {
 					Spread(a_speaker, false);
 				}
@@ -427,6 +429,7 @@ namespace Events
 						Expose::OnDialogueClosed();
 						Family::OnDialogueClosed();
 						Confess::OnDialogueClosed();
+						Evening::OnDialogueClosed();
 						FirstDate::OnDialogueClosed();
 						Replies::OnDialogueClosed();
 						FirstDate::Check();
@@ -1049,6 +1052,7 @@ namespace Events
 		Scenes::OnGameLoaded();
 		Expose::OnGameLoaded();
 		Family::OnGameLoaded();
+		Evening::OnGameLoaded();
 		g_refusing = {};
 		g_talkingChild = {};
 		Gifts::OnGameLoaded();

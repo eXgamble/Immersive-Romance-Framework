@@ -10,6 +10,7 @@
 #include "Follower.h"
 #include "Forms.h"
 #include "Romance.h"
+#include "Evening.h"
 #include "Scenes.h"
 #include "State.h"
 #include "World.h"
@@ -46,6 +47,23 @@ namespace Papyrus
 					Family::OnArrived();
 				}
 			});
+		}
+
+		// IRF_Internal.EveningTogether: the screen is black (time passes), and then you're both outside
+		void EveningTime(RE::StaticFunctionTag*, float a_hours)
+		{
+			SKSE::GetTaskInterface()->AddTask([a_hours]() { Evening::PassTime(a_hours); });
+		}
+
+		void EveningDone(RE::StaticFunctionTag*, RE::Actor* a_her)
+		{
+			if (a_her) {
+				SKSE::GetTaskInterface()->AddTask([handle = a_her->GetHandle()]() {
+					if (const auto her = handle.get()) {
+						Evening::Done(her.get());
+					}
+				});
+			}
 		}
 
 		// IRF_Internal.BeatLater: the scene director's clock while a scene is on
@@ -146,6 +164,8 @@ namespace Papyrus
 		constexpr auto script = "IRF"sv;
 		a_vm->RegisterFunction("Arrived"sv, "IRF_Internal"sv, Arrived);
 		a_vm->RegisterFunction("Beat"sv, "IRF_Internal"sv, Beat);
+		a_vm->RegisterFunction("EveningTime"sv, "IRF_Internal"sv, EveningTime);
+		a_vm->RegisterFunction("EveningDone"sv, "IRF_Internal"sv, EveningDone);
 		a_vm->RegisterFunction("IsCandidate"sv, script, IsCandidate);
 		a_vm->RegisterFunction("GetStage"sv, script, GetStage);
 		a_vm->RegisterFunction("GetApproval"sv, script, GetApproval);
