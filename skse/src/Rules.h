@@ -24,7 +24,7 @@ namespace Rules
 		int standUpCost = 10;     // you didn't come to the first date
 		float firstDateDistance = 1000.0f;  // at her spot and this close, after sunset: she comes over
 		int commitBar = 75;       // Dating -> Committed from this (once she tells you, Confess)
-		int uncommitBar = 63;     // Committed -> back to Dating below this (leeway: one bad fight doesn't undo it)
+		int uncommitBar = 60;     // Committed -> back to Dating below this (leeway: one bad fight doesn't undo it)
 		int floorDating = 1;      // at or below 0 from Dating up: they end it (approval ran out)
 
 		int knowGain = 3;       // a question you hadn't asked her yet (one a day)

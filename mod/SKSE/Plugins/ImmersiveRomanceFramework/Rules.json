@@ -27,7 +27,7 @@
   "standUpCost": 10,        // you didn't come to the first date
   "firstDateDistance": 1000.0, // at her spot and this close, after sunset: she comes over
   "commitBar": 75,          // Dating -> Committed from this, once she tells you (her confession)
-  "uncommitBar": 63,        // Committed -> back to Dating below this (the leeway: one bad fight doesn't undo it)
+  "uncommitBar": 60,        // Committed -> back to Dating below this (the leeway: one bad fight doesn't undo it)
   "floorDating": 1,         // below this from Dating up, they end it
 
   // what raises approval
