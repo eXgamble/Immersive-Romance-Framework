@@ -274,6 +274,8 @@ namespace Candidates
 			add("expose.true", f.say, f.expose, 4, false);
 			add("crime.approve", f.say, f.moment, Rank(Moment::kCrimeApprove), a_attributes.alignment < 0);
 			add("crime.disapprove", f.say, f.moment, Rank(Moment::kCrimeDisapprove), a_attributes.alignment > 0);
+			add("crime.approve.murder", f.say, f.moment, Rank(Moment::kMurderApprove), false);  // a murder, when she has words for it
+			add("crime.disapprove.murder", f.say, f.moment, Rank(Moment::kMurderDisapprove), false);
 
 			// optional: the candidate's own reactions to events, and lines for a while after an event
 			for (const auto& [event, name] : EventNames()) {

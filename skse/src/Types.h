@@ -110,6 +110,8 @@ namespace IRF
 		kExposeQuestion = 30,  // her force greet "Is this true?" and her answers to yours
 		kExposeOutcome = 31,   // IRF_ExposeFaction: 1 she believes you, 2 she doesn't, 3 you denied her, 4 you told the truth
 		kFamily = 32,          // a family conversation (Family): IRF_FamilyFaction on her (which), IRF_FamilyStepFaction on the speaker
+		kMurderApprove = 33,     // she saw you murder someone and liked it (optional: else her crime.approve line)
+		kMurderDisapprove = 34,  // ... and didn't (optional: else her crime.disapprove line)
 	};
 
 	// How things are at home, for a family conversation: her heart, then her approval band (as "How are we?")

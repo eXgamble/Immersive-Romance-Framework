@@ -240,6 +240,9 @@ def requirements(attributes):
         elif name == "crime.disapprove":
             required = alignment > 0
         add(name, SAY, MOMENT_F, code, required)
+    # a murder she saw (optional: without them her crime line plays)
+    add("crime.approve.murder", SAY, MOMENT_F, 33, required=False)
+    add("crime.disapprove.murder", SAY, MOMENT_F, 34, required=False)
     # two partners have it out (optional: the scene plays only when both add-ons have their lines). In either role:
     # A (heard or saw it) asks, B claims you, A answers, B asks you "Is this true?" and answers yours, A's last word.
     # Claims and answers go by the speaker's own stage. The "expose.reply.*" lines (hers to your answer, in the talk)

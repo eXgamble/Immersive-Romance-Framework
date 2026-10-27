@@ -57,12 +57,14 @@ namespace Crimes
 				return;
 			}
 			logger::info("Crimes: {} saw a crime (type {}), alignment {}", a_witness->GetDisplayFullName(), a_type, alignment);
+			// a murder has its own lines when her add-on gives them; otherwise her line for any crime
+			const bool murder = a_type == RE::PackageNS::CRIME_TYPES::kMurder;
 			if (alignment > 0) {
-				World::SayMoment(a_witness, Moment::kCrimeDisapprove);
-				Romance::Hurt(a_witness, { amount, false }, Why::kCrime, "saw you break the law");
+				World::SayMoment(a_witness, murder && candidate->lines.contains("crime.disapprove.murder") ? Moment::kMurderDisapprove : Moment::kCrimeDisapprove);
+				Romance::Hurt(a_witness, { amount, false }, Why::kCrime, murder ? "saw you murder someone" : "saw you break the law");
 			} else {
-				World::SayMoment(a_witness, Moment::kCrimeApprove);
-				Romance::ModApproval(a_witness, amount, "liked your crime");
+				World::SayMoment(a_witness, murder && candidate->lines.contains("crime.approve.murder") ? Moment::kMurderApprove : Moment::kCrimeApprove);
+				Romance::ModApproval(a_witness, amount, murder ? "liked your murder" : "liked your crime");
 			}
 		}
 

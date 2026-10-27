@@ -283,7 +283,8 @@ mood lines; the generator does this. A spouse's idle lines also carry `(IRF_Stag
   already there when the framework was added). A reaction plays once, at the next meeting, within a week; a recent line plays for a while
   after the event.
 - **moments:** 1 `caught`, 2 `revive`, 3 `attacked`, 8 `stayhome` (in its own topic, above), 4 `crime.approve` (required when alignment < 0),
-  5 `crime.disapprove` (when alignment > 0), 6 `jealous`, 10 `road.afterfight`, 11 `road.dragon`,
+  5 `crime.disapprove` (when alignment > 0), 33 `crime.approve.murder` / 34 `crime.disapprove.murder` (optional: a
+  murder she saw; without them her crime line plays), 6 `jealous`, 10 `road.afterfight`, 11 `road.dragon`,
   12 `road.nearlydead`, 13 `road.rest`, 20 `road.nordicruin`, 21 `road.dwarvenruin`, 22 `road.cave`,
   23 `road.dungeon`, 24 `road.town`, 25 `road.inn`, 26 `road.hometown`.
 - **Circle lines** take the member's `GetIsID`: reactions in IRF_ReactionHelloTopic by event, the refusal in
