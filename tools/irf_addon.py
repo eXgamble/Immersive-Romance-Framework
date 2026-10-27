@@ -142,7 +142,7 @@ OPS = {"==": "EqualTo", "!=": "NotEqualTo", ">=": "GreaterThanOrEqualTo", "<=": 
 
 EVENTS = {"dating": 2, "committed": 3, "engaged": 4, "married": 5, "amends": 6,
           "playerEnded": 7, "theyEnded": 8, "brokenHeart": 9, "seeingSomeone": 10, "widowed": 11, "wonBack": 12, "killed": 13,
-          "stoodUp": 14, "adopted": 15}
+          "stoodUp": 14, "adopted": 15, "letter": 16}
 WHYS = {"cheating": 1, "violence": 2, "absence": 3, "bleedouts": 4, "crime": 5, "choice": 6}
 REFUSE_MOMENT = 7  # a circle member refusing service
 STAYHOME_MOMENT = 8  # a spouse with children won't leave town

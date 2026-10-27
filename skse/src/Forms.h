@@ -55,6 +55,10 @@ namespace Forms
 		kChildHelloTopic = 0x852,    // IRF_ChildHelloTopic: the children's greetings (IRF_ChildFaction 1-3, 11-13)
 		kAdoptedBoys = 0x859,        // IRF_AdoptedBoys: how many boys Hearthfire has you raising (for any line's conditions)
 		kAdoptedGirls = 0x85A,       // IRF_AdoptedGirls: and girls
+		// a letter home from the road: a courier's "Could you take a letter home for me?" (IRF_LetterTopic 0x87F in IRF_Quest)
+		// shows once GameDaysPassed reaches IRF_LetterDay (a day after you last saw your wife; never while she follows you)
+		kLetterDay = 0x87D,
+		kLetterLine = 0x880,
 
 		// her mood and her idle chatter
 		kMoodFaction = 0x85B,        // rank = Mood
@@ -174,6 +178,8 @@ namespace Forms
 		RE::TESTopic*   childHello{ nullptr };
 		RE::TESGlobal*  adoptedBoys{ nullptr };
 		RE::TESGlobal*  adoptedGirls{ nullptr };
+		RE::TESGlobal*  letterDay{ nullptr };
+		RE::TESTopicInfo* letterLine{ nullptr };
 		RE::TESFaction* moodFaction{ nullptr };
 		RE::TESTopic*   idle{ nullptr };
 		RE::TESFaction* plead{ nullptr };

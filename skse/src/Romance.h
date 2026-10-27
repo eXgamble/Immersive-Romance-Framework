@@ -60,6 +60,11 @@ namespace Romance
 	// The candidate and the player spent time together (for absence)
 	void Contact(RE::Actor* a_actor);
 
+	// A letter home: IRF_LetterDay follows your wife (a day after you last saw her; never while she's with you), and a
+	// courier's line sends it (her absence starts over, her "reaction.letter" line waits for you)
+	void LetterSync();
+	void SendLetter();
+
 	// Brings a candidate's ranks in line with the save. a_talking: the player is about to talk to them (absence,
 	// word getting back and the answers are worked out then). Cheap; run on look, talk and load.
 	void Sync(RE::Actor* a_actor, bool a_talking = false);

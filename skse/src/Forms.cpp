@@ -118,6 +118,8 @@ namespace Forms
 		s.childHello = f.Own<RE::TESTopic>(kChildHelloTopic, "IRF_ChildHelloTopic");
 		s.adoptedBoys = f.Own<RE::TESGlobal>(kAdoptedBoys, "IRF_AdoptedBoys");
 		s.adoptedGirls = f.Own<RE::TESGlobal>(kAdoptedGirls, "IRF_AdoptedGirls");
+		s.letterDay = f.Own<RE::TESGlobal>(kLetterDay, "IRF_LetterDay");
+		s.letterLine = f.Own<RE::TESTopicInfo>(kLetterLine, "IRF_LetterLine");
 		s.moodFaction = f.Own<RE::TESFaction>(kMoodFaction, "IRF_MoodFaction");
 		s.idle = f.Own<RE::TESTopic>(kIdleTopic, "IRF_IdleTopic");
 		s.plead = f.Own<RE::TESFaction>(kPleadFaction, "IRF_PleadFaction");

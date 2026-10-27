@@ -570,7 +570,44 @@ namespace Romance
 	{
 		if (Candidates::Find(a_actor)) {
 			State::Of(a_actor->GetFormID()).lastContactDay = State::Today();
+			LetterSync();
 		}
+	}
+
+	namespace
+	{
+		RE::Actor* Wife()
+		{
+			for (const auto partner : Partners()) {
+				if (GetStage(partner) == Stage::kMarried) {
+					return partner;
+				}
+			}
+			return nullptr;
+		}
+	}
+
+	void LetterSync()
+	{
+		const auto global = Forms::Get().letterDay;
+		if (!global) {
+			return;
+		}
+		const auto wife = Wife();
+		global->value = wife && !wife->IsPlayerTeammate() ? State::Of(wife->GetFormID()).lastContactDay + 1.0f : 1.0e6f;
+	}
+
+	void SendLetter()
+	{
+		const auto wife = Wife();
+		if (!wife) {
+			return;
+		}
+		State::Of(wife->GetFormID()).lastContactDay = State::Today();  // her absence starts over
+		Notify(wife, Event::kLetter);
+		Script::CallStatic("Debug"sv, "Notification"sv, RE::BSFixedString(std::format("Your letter is on its way to {}.", wife->GetDisplayFullName())));
+		logger::info("Romance: a letter home to {}", wife->GetDisplayFullName());
+		LetterSync();
 	}
 
 	void SyncOther(RE::Actor* a_actor)
@@ -837,6 +874,7 @@ namespace Romance
 		Follower::SyncProfile(a_actor);
 		SyncSpouseBonus(a_actor, *candidate, stage, s);
 		SyncChat(a_actor);
+		LetterSync();
 	}
 
 	void SyncAll()

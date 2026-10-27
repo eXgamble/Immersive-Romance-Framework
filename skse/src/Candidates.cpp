@@ -39,6 +39,7 @@ namespace Candidates
 				{ Event::kKilled, "killed" },
 				{ Event::kStoodUp, "stoodUp" },
 				{ Event::kAdopted, "adopted" },
+				{ Event::kLetter, "letter" },
 			};
 			return names;
 		}

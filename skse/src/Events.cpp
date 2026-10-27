@@ -482,6 +482,9 @@ namespace Events
 				std::string key;
 				if (a_event && a_event->type == RE::TESTopicInfoEvent::TopicInfoEventType::kTopicEnd && a_event->speakerRef) {
 					const auto info = RE::TESForm::LookupByID<RE::TESTopicInfo>(a_event->topicInfoFormID);
+					if (info && info == Forms::Get().letterLine) {
+						Queue([]() { Romance::SendLetter(); });  // a courier takes a letter home
+					}
 					const auto child = a_event->speakerRef->As<RE::Actor>();
 					if (info && info->parentTopic == Forms::Get().childHello && Children::IsChild(child) && child->GetFactionRank(Forms::Get().child, false) > 0) {
 						Queue([handle = child->GetHandle()]() {

@@ -168,6 +168,8 @@ namespace
 			Romance::BreakUp(actor, Who::kPlayer, Why::kChoice);  // you end it (her heartbreak style applies)
 		} else if (deed.starts_with("line:")) {
 			Events::TestLine(actor, deed.substr(5));  // as if she had said that line ("line:kiss.yes", "line:date")
+		} else if (deed == "letter") {
+			Romance::SendLetter();  // as if a courier took a letter home to your wife
 		} else if (deed == "murder") {
 			Crimes::Witnessed(actor, RE::PackageNS::CRIME_TYPES::kMurder);  // she saw you murder someone
 		} else if (deed.starts_with("moment:")) {

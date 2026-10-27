@@ -72,6 +72,7 @@ namespace IRF
 		kKilled = 13,           // the player killed them, and someone saw it
 		kStoodUp = 14,          // the player didn't come to the first date (her "stoodup" line at the next meeting)
 		kAdopted = 15,          // married to them, the player adopted a child (Hearthfire)
+		kLetter = 16,           // her spouse sent her a letter from the road (a courier): her "reaction.letter" line next time
 		kBreakupSpeech = 20,    // + Why: the candidate's own speech as she leaves you (21 cheating .. 25 crime)
 		kConfront = 30,         // word got back: she confronts you
 	};
