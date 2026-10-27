@@ -13,6 +13,10 @@ namespace Events
 	void Attack(RE::Actor* a_actor, std::string_view a_how);
 	void OnGameLoaded();
 
+	// You look at someone (the crosshair; debug "meet"): up close (400 units) it's meeting them - absence, word getting
+	// back and jealousy are worked out before the game picks their hello - and her confession and date are looked for
+	void Meet(RE::Actor* a_actor);
+
 	// Debug: does what a line does when said (a_key: "kiss.yes", "date", "breakup", ...), as if a_actor had said it
 	void TestLine(RE::Actor* a_actor, const std::string& a_key);
 

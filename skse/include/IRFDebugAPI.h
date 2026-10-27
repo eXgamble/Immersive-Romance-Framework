@@ -80,7 +80,7 @@ namespace IRFDebug
 		bool (*setStage)(std::uint32_t a_ref, std::int32_t a_stage) = nullptr;
 		bool (*setApproval)(std::uint32_t a_ref, std::int32_t a_value) = nullptr;
 		// As if it happened: "caught", "bleedout", "attack", "crime", "jealous", "absence", "breakup" (she ends it at
-		// the next talk), "dumped" (you end it), "amends", "xp"; "line:<key>" does what her line <key> does when said
+		// the next talk), "dumped" (you end it), "amends", "xp", "meet" (as if you looked at her); "line:<key>" does what her line <key> does when said
 		// ("line:kiss.yes", "line:date": straying checks included)
 		bool (*deed)(std::uint32_t a_ref, const char* a_deed) = nullptr;
 		// Moves her clocks back a_days, as if they had passed (an adopted child's too)

@@ -367,22 +367,9 @@ namespace Events
 				if (actor && !actor->IsPlayerRef()) {
 					// up close counts as meeting them: absence and word getting back are worked out now, before the
 					// game picks their hello (the dialogue menu opens too late for that, measured 2026-10-25)
-					const auto player = RE::PlayerCharacter::GetSingleton();
-					const bool meeting = player->GetPosition().GetDistance(actor->GetPosition()) < 400.0f;
-					Queue([handle = actor->GetHandle(), meeting]() {
+					Queue([handle = actor->GetHandle()]() {
 						if (const auto a = handle.get()) {
-							Children::Count();
-							Expose::Check();
-							Family::Check();  // at home: she and a child may talk
-							Children::Sync(a.get());
-							Romance::Sync(a.get(), meeting);
-							if (meeting && Romance::IsPartner(a.get())) {
-								CheckJealous(a.get());
-							}
-							if (Romance::IsPartner(a.get())) {
-								Confess::Check();
-							}
-							FirstDate::Check();
+							Meet(a.get());
 						}
 					});
 				}
@@ -1057,6 +1044,23 @@ namespace Events
 		REL::Relocation<std::uintptr_t> confirm{ RE::VTABLE___FastTravelConfirmCallback[0] };
 		FastTravelConfirm::func = confirm.write_vfunc(0x1, FastTravelConfirm::thunk);  // a vtable slot: chains with others
 		logger::info("Events: sinks registered");
+	}
+
+	void Meet(RE::Actor* a_actor)
+	{
+		const bool meeting = RE::PlayerCharacter::GetSingleton()->GetPosition().GetDistance(a_actor->GetPosition()) < 400.0f;
+		Children::Count();
+		Expose::Check();
+		Family::Check();  // at home: she and a child may talk
+		Children::Sync(a_actor);
+		Romance::Sync(a_actor, meeting);
+		if (meeting && Romance::IsPartner(a_actor)) {
+			CheckJealous(a_actor);
+		}
+		if (Romance::IsPartner(a_actor)) {
+			Confess::Check();
+		}
+		FirstDate::Check();
 	}
 
 	void TestLine(RE::Actor* a_actor, const std::string& a_key)

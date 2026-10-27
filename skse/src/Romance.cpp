@@ -79,15 +79,18 @@ namespace Romance
 			return a_quest && std::ranges::find(quests, a_quest) != quests.end();
 		}
 
-		// A running story quest (not generic dialogue, not ours, not the marriage or follower system) holds them
+		// A running story quest (not generic dialogue, not ours, not the marriage or follower system) holds them. One
+		// without a name never shows in the journal, so it's no story: the world interactions (WITavern grabs a
+		// tavern's patrons for a moment, and once silenced her at her date)
 		bool QuestBusy(RE::Actor* a_actor)
 		{
 			const auto& f = Forms::Get();
 			for (const auto quest : AliasQuests(a_actor)) {
-				if (!Running(quest) || quest->GetType() == RE::QUEST_DATA::Type::kNone) {
+				if (!Running(quest) || quest->GetType() == RE::QUEST_DATA::Type::kNone || std::string_view(quest->GetFullName()).empty()) {
 					continue;
 				}
-				if (std::ranges::find(f.quests, quest) != f.quests.end() || quest == f.followerQuest || quest == f.marriage || quest == f.wedding) {
+				if (std::ranges::find(f.quests, quest) != f.quests.end() || quest == f.firstDateQuest || quest == f.followerQuest ||
+				    quest == f.marriage || quest == f.wedding) {  // the first date's own quest holds her too
 					continue;
 				}
 				return true;

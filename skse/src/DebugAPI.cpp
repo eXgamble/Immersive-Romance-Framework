@@ -186,6 +186,8 @@ namespace
 			s.hurt = false;
 			s.silentUntilDay = 0.0f;
 			Romance::Notify(actor, Event::kAmends);
+		} else if (deed == "meet") {
+			Events::Meet(actor);  // as if you looked at her (an Activate never moves the crosshair)
 		} else if (deed == "xp") {
 			Follower::AddXp(actor, 100, "debug");
 		} else {

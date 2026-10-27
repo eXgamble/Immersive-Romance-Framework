@@ -36,6 +36,8 @@ namespace FirstDate
 		bool            g_turning{ false };  // you strayed: walked back toward her (IRF_Internal.TurnBack)
 		bool            g_turnStopped{ false };
 		std::chrono::steady_clock::time_point g_turnStart;
+		std::chrono::steady_clock::time_point g_turnEnd;  // the last turn back ended: the next waits kTurnGap
+		constexpr float                       kTurnGap = 10.0f;  // seconds (a walk back that can't start ends at once)
 		int              g_apart{ 0 };  // checks in a row she wasn't where you are (a door she didn't follow through)
 		std::atomic<int> g_walk{ 0 };   // the walk's check (IRF_Internal.WalkHome) that's current; read by the native
 
@@ -258,6 +260,7 @@ namespace FirstDate
 					Script::Call(player, "ObjectReference"sv, "MoveTo"sv, static_cast<RE::TESObjectREFR*>(player), 0.0f, 0.0f, 0.0f, false);
 					g_turning = false;
 					g_turnStopped = false;
+					g_turnEnd = std::chrono::steady_clock::now();
 				}
 				return;
 			}
@@ -273,7 +276,8 @@ namespace FirstDate
 				Door(actor);
 				return;
 			}
-			if (apart > r.dateStrayDistance && !player->IsInCombat()) {
+			const auto sinceTurn = std::chrono::duration<float>(std::chrono::steady_clock::now() - g_turnEnd).count();
+			if (apart > r.dateStrayDistance && !player->IsInCombat() && sinceTurn >= kTurnGap) {
 				g_turning = true;
 				g_turnStopped = false;
 				g_turnStart = std::chrono::steady_clock::now();
@@ -469,6 +473,7 @@ namespace FirstDate
 	{
 		g_turning = false;
 		g_turnStopped = false;
+		g_turnEnd = std::chrono::steady_clock::now();
 	}
 
 	bool Blocking()
@@ -490,6 +495,7 @@ namespace FirstDate
 		g_fading = false;
 		g_turning = false;
 		g_turnStopped = false;
+		g_turnEnd = {};
 		g_asked = false;
 		g_atDoor = false;
 		g_kiss = false;
