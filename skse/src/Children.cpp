@@ -82,14 +82,14 @@ namespace Children
 				c.lastSeenDay = today;  // first met since adoption
 			}
 			const float away = today - c.lastSeenDay;
-			const auto  days = static_cast<float>(std::max(1, Rules::Get().childAwayDays));
-			if (away >= 3.0f * days) {
+			const auto& r = Rules::Get();
+			if (away >= static_cast<float>(r.childAway3)) {
 				return ChildMood::kAway3;
 			}
-			if (away >= 2.0f * days) {
+			if (away >= static_cast<float>(r.childAway2)) {
 				return ChildMood::kAway2;
 			}
-			if (away >= days) {
+			if (away >= static_cast<float>(std::max(1, r.childAway1))) {
 				return ChildMood::kAway1;
 			}
 			if (today - c.lastMoodDay < 1.0f) {

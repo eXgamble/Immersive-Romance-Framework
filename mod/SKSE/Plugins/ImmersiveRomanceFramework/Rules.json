@@ -99,7 +99,9 @@
   "confessDistance": 3000.0, // when you're this close, somewhere safe, out of combat
 
   // adopted children
-  "childAwayDays": 5,       // a child misses you after this many days apart (twice, three times as long: more so)
+  "childAway1": 3,          // a child misses you after this many days apart (their "away1" greeting) ...
+  "childAway2": 6,          // ... more so after this many ("away2") ...
+  "childAway3": 10,         // ... and most after this many ("away3")
 
   // lines and sight
   "momentCooldownSeconds": 90.0,  // between two road lines

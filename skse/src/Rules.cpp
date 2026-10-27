@@ -111,7 +111,9 @@ namespace Rules
 		IRF_RULE(confessDistance);
 		IRF_RULE(standUpCost);
 		IRF_RULE(firstDateDistance);
-		IRF_RULE(childAwayDays);
+		IRF_RULE(childAway1);
+		IRF_RULE(childAway2);
+		IRF_RULE(childAway3);
 		IRF_RULE(momentCooldownSeconds);
 		IRF_RULE(witnessDistance);
 		IRF_RULE(caughtDistance);

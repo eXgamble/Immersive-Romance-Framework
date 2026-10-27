@@ -53,7 +53,7 @@ line they say.
   == 1 (a circle member's service, like Eorlund tempering your weapons), or listen for `IRF_SpouseBonus` in a
   script (Ysolda's store profits). Vanilla's own spouse perks stay as they are.
 - **Adopted children** (Hearthfire's adoption, unchanged), once you're married to a candidate: their greeting tells
-  you when something is wrong at home (you were away long, or the marriage is in a bad way); when all is well they
+  you when something is wrong at home (you were away 3, 6 or 10 days, or the marriage is in a bad way); when all is well they
   keep vanilla's. The framework says when; the words are the spouse's add-on's (`"children"` in the spec, both child
   voices), so an add-on without them keeps vanilla's greeting. The framework itself has no voiced lines at all. Your spouse stays home with them: she follows you inside the family's town, but at its edge she
   comes up to you, says why she can't come and goes home; after a fast travel a message says it.
