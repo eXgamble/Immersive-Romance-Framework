@@ -752,7 +752,7 @@ namespace Romance
 		const bool knowable = stage >= Stage::kFriend && stage <= Stage::kMarried && !silent && !hurt && !cold && !askedToday;
 		SetRank(a_actor, f.courtFaction, knowable ? 1 : 0);
 
-		// "Will you go on a date with me?": always there for a Friend (one date at a time); yes from askDateApproval,
+		// "Would you spend an evening with me?": always there for a Friend (one date at a time); yes from askDateApproval,
 		// not yet below it, no if she knows you're taken and won't compete. Once she'd say yes, she hints at it
 		const bool locked = s.lockUntilDay > today;
 		const bool taken = WontBeCourted(a_actor);

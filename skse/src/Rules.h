@@ -7,7 +7,7 @@ namespace Rules
 	struct Values
 	{
 		int startApproval = 20;   // when someone becomes a Friend
-		int askDateApproval = 35; // a Friend says yes to "Will you go on a date with me?" from this much
+		int askDateApproval = 35; // a Friend says yes to "Would you spend an evening with me?" from this much
 		int standUpCost = 10;     // you didn't come to the first date
 		float firstDateDistance = 1000.0f;  // at her spot and this close, after sunset: she comes over
 		int commitBar = 60;       // Dating -> Committed at this; below it again -> back to Dating

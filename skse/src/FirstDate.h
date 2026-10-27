@@ -2,7 +2,7 @@
 
 #include "Types.h"
 
-// The first date (user, 2026-10-25): an eligible Friend is always open to "Will you go on a date with me?". Below
+// The first date (user, 2026-10-25): an eligible Friend is always open to "Would you spend an evening with me?". Below
 // askDateApproval she turns you down, a Friend who knows you're taken (and won't compete) turns you down for it, and
 // from askDateApproval she says yes ("askdate.yes": where and when) and this starts. IRF_FirstDateQuest's objective
 // says where; her IRF_FirstDateWait package takes her to her date spot (her add-on's firstDate.spot) to wait.
