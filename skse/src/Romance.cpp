@@ -184,8 +184,8 @@ namespace Romance
 			} else if (stage == Stage::kDating && s.readyDay != State::kNever) {
 				s.readyDay = State::kNever;
 				logger::info("Romance: {} isn't ready to be Committed any more", a_actor->GetDisplayFullName());
-			} else if (stage == Stage::kCommitted && approval < r.commitBar) {
-				SetStage(a_actor, Stage::kDating, "approval fell below the commitment bar");
+			} else if (stage == Stage::kCommitted && approval < r.uncommitBar) {
+				SetStage(a_actor, Stage::kDating, "approval fell below uncommitBar");
 			}
 			if (stage >= Stage::kDating && stage <= Stage::kEngaged && approval < r.floorDating) {
 				if (s.pendingBreakup == Why::kNone) {

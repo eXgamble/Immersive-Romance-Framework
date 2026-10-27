@@ -59,6 +59,7 @@ namespace Rules
 		IRF_RULE(startApproval);
 		IRF_RULE(askDateApproval);
 		IRF_RULE(commitBar);
+		IRF_RULE(uncommitBar);
 		IRF_RULE(floorDating);
 		IRF_RULE(knowGain);
 		IRF_RULE(dateGain);
