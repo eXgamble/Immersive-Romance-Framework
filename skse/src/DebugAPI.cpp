@@ -1,4 +1,4 @@
-// The debug interface (include/IRFDebugAPI.h): what "IRF - Debug" reads and does. Game thread only, like the rest.
+// The debug interface (include/IRFDebugAPI.h): what test tools read and do. Game thread only, like the rest.
 
 #include "IRFDebugAPI.h"
 

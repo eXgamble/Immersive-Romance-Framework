@@ -3,7 +3,7 @@ rem Configure + build the Immersive Romance Framework SKSE plugin from a VS 2026
 call "C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\Common7\Tools\VsDevCmd.bat" -arch=amd64 -host_arch=amd64 >nul || exit /b 1
 cd /d "%~dp0"
 set SKSE_LINT=%USERPROFILE%\.claude\skills\skse-dev-rules\scripts\skse_lint.py
-if exist "%SKSE_LINT%" python "%SKSE_LINT%" src debug\src || exit /b 4
+if exist "%SKSE_LINT%" python "%SKSE_LINT%" src || exit /b 4
 cmake --preset release || exit /b 2
 cmake --build --preset release || exit /b 3
 echo BUILD OK

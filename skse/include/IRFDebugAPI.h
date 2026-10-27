@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-// Immersive Romance Framework's debug interface, used by "IRF - Debug" and free for any other tool.
+// Immersive Romance Framework's debug interface, for test tools.
 // ImmersiveRomanceFramework.dll exports IRFGetDebugAPI(); find it with GetModuleHandle + GetProcAddress, so the
 // framework runs the same without a debug tool. Every function runs on the game thread only (an SKSE task). New
 // functions and fields only ever go at the end, and kVersion goes up: a tool built for version N works with any

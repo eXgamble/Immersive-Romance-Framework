@@ -323,9 +323,8 @@ The generator takes them per text: `{ "text": "...", "girls": 1, "boys": ">=1" }
 
 `Scripts/Source/IRF.psc` (MIT): `IsCandidate`, `GetStage`, `GetApproval`, `GetPartner`, `GetWhy`, `GetWho`,
 `IsBrokenHearted`, `IsIntimacyAllowed` (for mods that start scenes), `RequestStage` (story beats from your own
-quests), `ModApproval`, `SetPlayerInterest`, `GetAdoptedBoys`, `GetAdoptedGirls`. Debug tools live in the optional
-**IRF - Debug** mod (its own README; script `IRFDebug`), which talks to the framework through `IRFGetDebugAPI()`
-(`skse/include/IRFDebugAPI.h`, free for other tools too). Mod events: `IRF_StageChanged` (sender = candidate, numArg = new stage, strArg = cause),
+quests), `ModApproval`, `SetPlayerInterest`, `GetAdoptedBoys`, `GetAdoptedGirls`. Test tools can read and stage the framework through
+`IRFGetDebugAPI()` (`skse/include/IRFDebugAPI.h`). Mod events: `IRF_StageChanged` (sender = candidate, numArg = new stage, strArg = cause),
 `IRF_Strayed` (sender = the partner strayed from, numArg = 1 if caught, strArg = the deed), `IRF_SpouseBonus` (sender = the
 spouse, strArg = "on" / "off", numArg = 1 / 0).
 
@@ -339,7 +338,7 @@ into `mod/SKSE/Plugins/`.
 - `python test/check.py` (seconds, no game): the SKSE lint; with `--addons <folder>`, also every add-on that
   folder's `irf-addons.json` lists: its spec still builds, and its manifest is the one the add-on ships.
 - In-game smoke tests live with the content add-ons (they need a candidate to test with): each run starts a new game,
-  stages the case with IRF - Debug and checks the framework's log and IRF - Debug's LogState.
+  stages the case through the debug interface and checks the framework's log.
 
 When a bug is fixed or a feature added, a test comes with it if it reproduces reliably. A bug that hangs on AI
 timing (walking, packages, who looks where) is tested by hand and written down in its commit instead.

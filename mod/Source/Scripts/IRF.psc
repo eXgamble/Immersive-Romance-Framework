@@ -52,5 +52,3 @@ Function SetPlayerInterest(string asInterest) global native
 int Function GetAdoptedBoys() global native
 int Function GetAdoptedGirls() global native
 
-; Debug tools (set stage, approval, deeds, days, adopt, reactions, the line inspector): the optional "IRF - Debug"
-; mod (script IRFDebug)

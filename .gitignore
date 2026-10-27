@@ -14,7 +14,4 @@ Thumbs.db
 # Built DLL (skse/build.bat copies it here)
 mod/SKSE/Plugins/*.dll
 
-# IRF - Debug build output and MO2 metadata
-debug-mod/SKSE/Plugins/*.dll
-debug-mod/meta.ini
 __pycache__/
