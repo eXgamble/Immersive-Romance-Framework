@@ -23,6 +23,7 @@ namespace FirstDate
 
 		constexpr float kFrom = 18.0f;  // the date's evening: from sunset ...
 		constexpr float kEnd = 23.5f;   // ... until it's late (then you stood her up)
+		constexpr float kTomorrow = 17.0f;  // asked from here on, it's tomorrow night: she'd have to leave for her spot soon
 
 		// the day (GameDaysPassed) the date's evening starts
 		float FromDay(float a_untilDay)
@@ -83,10 +84,10 @@ namespace FirstDate
 		if (!candidate || !candidate->attributes.dateSpot || g_date) {
 			return;
 		}
-		// tonight; asked in the evening (user, 2026-10-27) or later, tomorrow night
+		// tonight; asked from 5 pm (user, 2026-10-27), tomorrow night
 		const auto  calendar = RE::Calendar::GetSingleton();
 		const float hour = calendar ? calendar->GetHour() : 12.0f;
-		const bool  tomorrow = hour >= kFrom;
+		const bool  tomorrow = hour >= kTomorrow;
 		const float until = State::Today() + (kEnd - hour + (tomorrow ? 24.0f : 0.0f)) / 24.0f;
 		State::Of(a_actor->GetFormID()).dateUntilDay = until;
 		SyncFrom(until);

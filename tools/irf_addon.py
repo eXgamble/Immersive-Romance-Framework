@@ -151,7 +151,7 @@ REFUSE_MOMENT = 7  # a circle member refusing service
 STAYHOME_MOMENT = 8  # a spouse with children won't leave town
 CONFESS_MOMENT = 9  # newly Committed: she tells you how much you mean to her
 FIRSTDATE_MOMENT, FIRSTDATE_AFTER = 14, 15  # the first date at her spot, and her line after the kiss
-DATE_FROM_HOUR = 18  # asked out from this hour on, the first date is tomorrow night (her "askdate.tomorrow")
+TOMORROW_HOUR = 17  # asked out from this hour on, the first date is tomorrow night (her "askdate.tomorrow")
 HINT_GREET, HINT_SHARE = 1, 50  # she'd say yes to a date: her hint hello/goodbye, this % of the time (else vanilla's)
 MOMENTS = {"caught": 1, "revive": 2, "attacked": 3, "crime.approve": 4, "crime.disapprove": 5, "jealous": 6,
            "road.afterfight": 10, "road.dragon": 11, "road.nearlydead": 12, "road.rest": 13,
@@ -209,7 +209,7 @@ def requirements(attributes):
     for band in range(1, 6):
         add(f"howarewe.{band}", HOWAREWE, BAND_F, band)
     add("askdate.yes", ASKDATE, ASKDATE_F, 1)
-    add("askdate.tomorrow", ASKDATE, ASKDATE_F, 1, required=False, extra=[time_row(DATE_FROM_HOUR, "GreaterThanOrEqualTo")])  # from 6 pm: tomorrow night
+    add("askdate.tomorrow", ASKDATE, ASKDATE_F, 1, required=False, extra=[time_row(TOMORROW_HOUR, "GreaterThanOrEqualTo")])  # from 5 pm: tomorrow night
     add("askdate.notyet", ASKDATE, ASKDATE_F, 2)
     add("askdate.taken", ASKDATE, ASKDATE_F, 3)  # a Friend who knows you're taken (and won't compete)
     # once she'd say yes: a hello and a goodbye that hint at it, mixed with her vanilla ones
@@ -551,9 +551,9 @@ def main(spec_path, out_dir, relock=False, into=None):
         replies.append({"after": [after], "lines": answers})
 
     given = spec.get("lines", {})
-    if "askdate.tomorrow" in given:  # her plain yes only before 6 pm; from then her tomorrow one
+    if "askdate.tomorrow" in given:  # her plain yes only before 5 pm; from then her tomorrow one
         yes = reqs["askdate.yes"]
-        reqs["askdate.yes"] = yes[:6] + (yes[6] + [time_row(DATE_FROM_HOUR, "LessThan")],)
+        reqs["askdate.yes"] = yes[:6] + (yes[6] + [time_row(TOMORROW_HOUR, "LessThan")],)
     for name in EXPOSE_OUTCOMES:  # her answer in the talk: the plain outcome's words unless the add-on gives its own
         if f"expose.{name}" in given and f"expose.reply.{name}" not in given:
             given[f"expose.reply.{name}"] = given[f"expose.{name}"]

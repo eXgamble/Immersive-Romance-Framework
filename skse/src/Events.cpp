@@ -293,7 +293,7 @@ namespace Events
 					Romance::ModApproval(a_speaker, r.knowGain, "getting to know them");  // only talk: never courting or straying
 				}
 			} else if ((a_key == "askdate.yes" || a_key == "askdate.tomorrow") && stage == Stage::kFriend) {
-				FirstDate::Start(a_speaker);  // tonight (tomorrow night from 6 pm) at her spot; the date makes her Dating
+				FirstDate::Start(a_speaker);  // tonight (tomorrow night from 5 pm) at her spot; the date makes her Dating
 			} else if (a_key == "follow.yes") {
 				Follower::Recruit(a_speaker);
 			} else if (a_key == "kiss.yes") {

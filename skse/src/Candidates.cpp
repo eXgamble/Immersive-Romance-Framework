@@ -189,7 +189,7 @@ namespace Candidates
 				add(std::format("howarewe.{}", band), f.howAreWe, f.band, band);
 			}
 			add("askdate.yes", f.askDateTopic, f.askDate, 1);
-			add("askdate.tomorrow", f.askDateTopic, f.askDate, 1, false);  // her yes from 6 pm: tomorrow night (optional)
+			add("askdate.tomorrow", f.askDateTopic, f.askDate, 1, false);  // her yes from 5 pm: tomorrow night (optional)
 			add("askdate.notyet", f.askDateTopic, f.askDate, 2);
 			add("askdate.taken", f.askDateTopic, f.askDate, 3);  // a Friend who knows you're taken (and won't compete)
 			// once she'd say yes: one extra hello and goodbye that hint at it (the add-on mixes them with vanilla's)
