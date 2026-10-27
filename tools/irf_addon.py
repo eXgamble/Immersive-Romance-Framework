@@ -150,7 +150,7 @@ WHYS = {"cheating": 1, "violence": 2, "absence": 3, "bleedouts": 4, "crime": 5, 
 REFUSE_MOMENT = 7  # a circle member refusing service
 STAYHOME_MOMENT = 8  # a spouse with children won't leave town
 CONFESS_MOMENT = 9  # newly Committed: she tells you how much you mean to her
-FIRSTDATE_MOMENT, FIRSTDATE_AFTER = 14, 15  # the first date at her spot, and her line after the kiss
+FIRSTDATE_MOMENT, FIRSTDATE_AFTER = 14, 15  # the first date: her greeting at her spot, and her line after the kiss
 TOMORROW_HOUR = 17  # asked out from this hour on, the first date is tomorrow night (her "askdate.tomorrow")
 HINT_GREET, HINT_SHARE = 1, 50  # she'd say yes to a date: her hint hello/goodbye, this % of the time (else vanilla's)
 MOMENTS = {"caught": 1, "revive": 2, "attacked": 3, "crime.approve": 4, "crime.disapprove": 5, "jealous": 6,
@@ -236,9 +236,9 @@ def requirements(attributes):
     add("stayhome", FORCEGREET, MOMENT_F, STAYHOME_MOMENT, goodbye=True)
     add("confess", FORCEGREET, MOMENT_F, CONFESS_MOMENT)
     add("confess.reply", CONFESS_REPLY, MOMENT_F, CONFESS_MOMENT, goodbye=True)
-    # the first date: she comes up to you at her spot, answers "Of course I came.", her line after the kiss; and
-    # if you never came, her line at your next meeting
-    add("firstdate", FORCEGREET, MOMENT_F, FIRSTDATE_MOMENT)
+    # the first date: her greeting when you talk to her at her spot, her answer to "Of course I came.", her line
+    # after the kiss; and if you never came, her line at your next meeting
+    add("firstdate", HELLO, MOMENT_F, FIRSTDATE_MOMENT)
     add("firstdate.reply", FIRSTDATE_REPLY, MOMENT_F, FIRSTDATE_MOMENT, goodbye=True)
     add("firstdate.after", SAY, MOMENT_F, FIRSTDATE_AFTER)
     add("date.after", SAY, MOMENT_F, 17, required=False)  # an evening together is over, outside: "I had a great time."

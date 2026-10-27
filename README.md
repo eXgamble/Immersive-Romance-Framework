@@ -39,7 +39,7 @@ line they say.
   says not yet; a Friend who knows you're taken (and won't compete for you) says no; from it she says yes and names
   her place. Once she'd say yes, about half her greetings hint at it. Yes starts **the first date**: the journal says
   "Meet <her> at <her place> after sunset", that evening, or tomorrow evening when you ask her from 5 pm on (her
-  `askdate.tomorrow` line says so). From sunset that evening she goes there and waits; come and she comes over, you
+  `askdate.tomorrow` line says so). From sunset that evening she goes there and waits; go up to her and talk and she greets you with the date, you
   answer "Of course I came.", it ends in a kiss and you're Dating. Not there by the end of that evening: you stood
   her up (approval, and she tells you about it next time); ask again another day. One date at a time.
 - **Straying** (only once you have a partner): going on a date with someone else, kissing someone else (and
@@ -283,7 +283,7 @@ mood lines; the generator does this. A spouse's idle lines also carry `(IRF_Stag
 | `askdate.yes` (she names her place and time) / `.notyet` / `.taken` ("Would you spend an evening with me?", a Friend) | IRF_AskDateTopic 0x82A | IRF_AskDateFaction 0x818 | 1 / 2 / 3 |
 | `askdate.tomorrow` (optional: her yes from 5 pm on, the date is tomorrow night; the generator plays `askdate.yes` only before 5 pm then. Without it her `askdate.yes` plays at any hour, so word it to fit both) | IRF_AskDateTopic 0x82A | IRF_AskDateFaction 0x818 | 1 |
 | `hello.hint`, `goodbye.hint` (she'd say yes: add `GetRandomPercent < 50` so vanilla's greetings still come up; the generator does) | Hello / Goodbye | IRF_GreetFaction | 1 |
-| `firstdate` (at her spot after sunset she comes up to you; LinkTo IRF_FirstDateReplyTopic 0x871) | IRF_ForceGreetTopic 0x848 | IRF_MomentFaction | 14 |
+| `firstdate` (her greeting when you talk to her at her spot after sunset; LinkTo IRF_FirstDateReplyTopic 0x871) | IRF_HelloTopic 0x806 | IRF_MomentFaction | 14 |
 | `firstdate.reply` (her answer to "Of course I came."; Goodbye flag: the kiss follows) | IRF_FirstDateReplyTopic 0x871 | IRF_MomentFaction | 14 |
 | `firstdate.after` (after the kiss) | IRF_SayTopic 0x829 | IRF_MomentFaction | 15 |
 | `stoodup` (you didn't come: at your next meeting) | IRF_ReactionHelloTopic 0x823 | IRF_ReactionFaction | 14 |

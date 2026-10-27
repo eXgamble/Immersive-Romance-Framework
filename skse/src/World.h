@@ -23,7 +23,7 @@ namespace World
 	bool Roll(int a_percent);
 
 	// Both in the same interior, or both outside in the same worldspace
-	bool SamePlace(RE::Actor* a_a, RE::Actor* a_b);
+	bool SamePlace(RE::TESObjectREFR* a_a, RE::TESObjectREFR* a_b);
 
 	// 18:00 to 23:30: evening (the first date waits for it)
 	bool Evening();

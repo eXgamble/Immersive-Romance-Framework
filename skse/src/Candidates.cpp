@@ -195,9 +195,9 @@ namespace Candidates
 			// once she'd say yes: one extra hello and goodbye that hint at it (the add-on mixes them with vanilla's)
 			add("hello.hint", f.hello, f.greet, Rank(GreetState::kHint));
 			add("goodbye.hint", f.goodbye, f.greet, Rank(GreetState::kHint));
-			// the first date: she comes up to you at her spot, answers your reply, and her line after the kiss;
+			// the first date: her greeting at her spot, her answer to your reply, and her line after the kiss;
 			// if you never came, her line at your next meeting
-			add("firstdate", f.forceGreetTopic, f.moment, Rank(Moment::kFirstDate));
+			add("firstdate", f.hello, f.moment, Rank(Moment::kFirstDate));  // her greeting when you talk to her at her spot
 			add("firstdate.reply", f.firstDateReply, f.moment, Rank(Moment::kFirstDate));
 			list.back().goodbye = true;
 			add("firstdate.after", f.say, f.moment, Rank(Moment::kFirstDateAfter));

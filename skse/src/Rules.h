@@ -22,7 +22,7 @@ namespace Rules
 		int startApproval = 20;   // when someone becomes a Friend
 		int askDateApproval = 35; // a Friend says yes to "Would you spend an evening with me?" from this much
 		int standUpCost = 10;     // you didn't come to the first date
-		float firstDateDistance = 1000.0f;  // at her spot and this close, after sunset: she comes over
+		float firstDateDistance = 1000.0f;  // she's this close to her spot after sunset: talk to her for the date
 		int commitBar = 75;       // Dating -> Committed from this (once she tells you, Confess)
 		int uncommitBar = 60;     // Committed -> back to Dating below this (leeway: one bad fight doesn't undo it)
 		int floorDating = 1;      // at or below 0 from Dating up: they end it (approval ran out)

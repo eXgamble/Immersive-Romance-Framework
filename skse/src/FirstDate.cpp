@@ -17,7 +17,6 @@ namespace FirstDate
 	{
 		// game thread (SKSE tasks)
 		RE::ActorHandle g_date;      // the date is set with her (IRF_FirstDateQuest running)
-		RE::ActorHandle g_greeting;  // she's coming up to you at her spot
 		RE::ActorHandle g_on;        // she said "firstdate": the date ends with the talk
 		bool            g_sent{ false };  // the date's evening has come: she was sent to her spot
 
@@ -50,10 +49,18 @@ namespace FirstDate
 			return cell ? cell->GetLocation() : nullptr;
 		}
 
-		void GreetOff(RE::Actor* a_actor)
+		// her "firstdate" greeting: on while she's at her spot on the date's evening (moment kFirstDate, kept in the
+		// save with her factions)
+		bool IsReady(RE::Actor* a_actor)
 		{
-			Script::CallStatic("IRF_Internal"sv, "ForceGreet"sv, Forms::Get().sayQuest, a_actor, false);
-			if (a_actor->GetFactionRank(Forms::Get().moment, false) == Rank(Moment::kFirstDate)) {
+			return a_actor->GetFactionRank(Forms::Get().moment, false) == Rank(Moment::kFirstDate);
+		}
+
+		void Ready(RE::Actor* a_actor, bool a_ready)
+		{
+			if (a_ready) {
+				a_actor->AddToFaction(Forms::Get().moment, static_cast<std::int8_t>(Rank(Moment::kFirstDate)));
+			} else if (IsReady(a_actor)) {
 				a_actor->AddToFaction(Forms::Get().moment, 0);
 			}
 		}
@@ -64,10 +71,9 @@ namespace FirstDate
 			Script::CallStatic("IRF_Internal"sv, "EndDate"sv, Forms::Get().firstDateQuest, a_actor, a_kept);
 			State::Of(a_actor->GetFormID()).dateUntilDay = 0.0f;
 			SyncFrom(0.0f);
-			GreetOff(a_actor);
+			Ready(a_actor, false);
 			g_date = {};
 			g_sent = false;
-			g_greeting = {};
 			Scenes::End(Scenes::Kind::kFirstDate);
 		}
 
@@ -133,29 +139,21 @@ namespace FirstDate
 			g_sent = true;
 			Script::Call(actor, "Actor"sv, "EvaluatePackage"sv);  // her wait package is on now: off to her spot
 		}
-		if (g_greeting || !World::Evening() || !actor->Is3DLoaded() || Busy(actor)) {
-			return;
+		if (g_on || Busy(actor)) {
+			return;  // the date's talk is on, or not now (her greeting stays as it is)
 		}
-		const auto player = RE::PlayerCharacter::GetSingleton();
-		const auto spot = candidate->attributes.dateSpot;
+		// at her spot after sunset, her greeting is the date: you go up to her and talk (user, 2026-10-27: no force
+		// greet). Looking at her runs this check, so it's on before any talk with her, however early you came
+		const auto  spot = candidate->attributes.dateSpot;
 		const float close = Rules::Get().firstDateDistance;
-		if (!World::SamePlace(player, actor) || player->GetPosition().GetDistance(actor->GetPosition()) > close ||
-			(spot && actor->GetPosition().GetDistance(spot->GetPosition()) > close)) {
-			return;  // not both there yet
-		}
-		const auto breakOff = [] {
-			if (const auto greeting = g_greeting.get()) {
-				GreetOff(greeting.get());  // she comes over once the other scene is done
+		const bool  there = World::Evening() && actor->Is3DLoaded() && spot && World::SamePlace(spot, actor) &&
+		                   actor->GetPosition().GetDistance(spot->GetPosition()) <= close;
+		if (there != IsReady(actor)) {
+			Ready(actor, there);
+			if (there) {
+				logger::info("FirstDate: {} waits at her spot; talk to her for the date", actor->GetDisplayFullName());
 			}
-			g_greeting = {};
-		};
-		if (!Scenes::Begin(Scenes::Kind::kFirstDate, { actor }, breakOff)) {
-			return;
 		}
-		actor->AddToFaction(Forms::Get().moment, static_cast<std::int8_t>(Rank(Moment::kFirstDate)));
-		Script::CallStatic("IRF_Internal"sv, "ForceGreet"sv, Forms::Get().sayQuest, actor, true);
-		g_greeting = actor->GetHandle();
-		logger::info("FirstDate: you came; {} comes over", actor->GetDisplayFullName());
 	}
 
 	void OnSaid(RE::Actor* a_actor)
@@ -163,13 +161,10 @@ namespace FirstDate
 		if (g_on) {
 			return;
 		}
-		// she's said it: her come-over package goes now, or it greets you again as the talk closes (seen 2026-10-25);
-		// the moment stays for her answer to your reply
-		Script::CallStatic("IRF_Internal"sv, "ForceGreet"sv, Forms::Get().sayQuest, a_actor, false);
-		g_greeting = {};
+		// she's said it: the moment stays for her answer to your reply
 		g_on = a_actor->GetHandle();
 		if (!Scenes::On(Scenes::Kind::kFirstDate)) {
-			Scenes::Begin(Scenes::Kind::kFirstDate, { a_actor }, {});  // you went up to her yourself
+			Scenes::Begin(Scenes::Kind::kFirstDate, { a_actor }, {});  // the stage is the date's until the talk ends
 		}
 		Scenes::Settle(Scenes::Kind::kFirstDate);  // the talk is on
 		Romance::Strayed(a_actor, "a date with someone else");  // with a partner it's straying
@@ -197,7 +192,6 @@ namespace FirstDate
 	void OnGameLoaded()
 	{
 		g_date = {};
-		g_greeting = {};
 		g_on = {};
 		g_sent = false;
 		float until = 0.0f;

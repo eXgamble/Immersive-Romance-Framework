@@ -187,7 +187,7 @@ namespace World
 		return false;
 	}
 
-	bool SamePlace(RE::Actor* a_a, RE::Actor* a_b)
+	bool SamePlace(RE::TESObjectREFR* a_a, RE::TESObjectREFR* a_b)
 	{
 		const auto ca = a_a->GetParentCell();
 		const auto cb = a_b->GetParentCell();

@@ -25,7 +25,7 @@
   "startApproval": 20,      // when someone becomes a Friend
   "askDateApproval": 35,    // a Friend says yes to "Would you spend an evening with me?" from this much (and hints at it)
   "standUpCost": 10,        // you didn't come to the first date
-  "firstDateDistance": 1000.0, // at her spot and this close, after sunset: she comes over
+  "firstDateDistance": 1000.0, // she's this close to her spot after sunset: talk to her for the date
   "commitBar": 75,          // Dating -> Committed from this, once she tells you (her confession)
   "uncommitBar": 60,        // Committed -> back to Dating below this (the leeway: one bad fight doesn't undo it)
   "floorDating": 1,         // below this from Dating up, they end it
