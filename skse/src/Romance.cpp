@@ -841,7 +841,8 @@ namespace Romance
 
 		const bool booked = Running(f.wedding) && InAliasOf(a_actor, f.wedding);
 		const bool partnerStage = stage >= Stage::kDating && stage <= Stage::kMarried;
-		const bool refuseFollow = locked || hurt || booked || s.pendingBreakup != Why::kNone;
+		const bool badMarriage = stage == Stage::kMarried && approval < r.band2;  // things are bad at home: she won't come along
+		const bool refuseFollow = locked || hurt || booked || badMarriage || s.pendingBreakup != Why::kNone;
 		SetRank(a_actor, f.follow, partnerStage && !following && !silent ? (refuseFollow ? 2 : 1) : 0);
 
 		// her mood on top of the stage: the strongest wins
