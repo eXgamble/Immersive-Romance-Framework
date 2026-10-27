@@ -789,7 +789,7 @@ namespace Romance
 		SetRank(a_actor, f.moodFaction, Rank(mood));
 
 		int kiss = 0;
-		if (stage >= Stage::kDating && stage <= Stage::kMarried && !silent && today - s.lastKissDay >= 1.0f) {  // once a day
+		if (stage >= Stage::kDating && stage <= Stage::kMarried && !silent) {
 			kiss = hurt || wary ? 3 : World::PrivateEnough(a_actor, candidate->attributes.modesty) ? 1 : 2;
 		}
 		SetRank(a_actor, f.kiss, kiss);

@@ -34,7 +34,7 @@
   "knowGain": 3,            // a question you hadn't asked her yet ("I'd like to get to know you better.", one a day)
   "dateGain": 3,            // "Spend the evening with me." (evenings, from Dating up) ...
   "dateEveryDays": 2.0,     // ... offered this often: the road together is where approval grows
-  "kissGain": 1,            // once a day: the kiss option is gone until a day has passed
+  "kissGain": 1,            // the first kiss of the day (kiss as often as you like)
   "giftGain": 3,            // a gift (one a day: the line waits until a day has passed)
   "giftLikedGain": 5,       // a gift they like, instead
   "giftLovedGain": 8,       // a gift they love, instead
