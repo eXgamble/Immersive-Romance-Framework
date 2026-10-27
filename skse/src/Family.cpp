@@ -2,10 +2,10 @@
 
 #include "Candidates.h"
 #include "Children.h"
-#include "Expose.h"
 #include "Forms.h"
 #include "Romance.h"
 #include "Rules.h"
+#include "Scenes.h"
 #include "Script.h"
 #include "State.h"
 #include "World.h"
@@ -84,6 +84,7 @@ namespace Family
 			g_talk = nullptr;
 			g_number = 0;
 			g_step = -1;
+			Scenes::End(Scenes::Kind::kFamily);
 		}
 
 		bool Here(RE::Actor* a_actor, RE::Actor* a_near, float a_distance)
@@ -101,8 +102,12 @@ namespace Family
 	void Check()
 	{
 		const auto today = State::Today();
-		if (Running() || Expose::Running() || std::floor(today) == std::floor(g_lastDay)) {
-			return;  // cheap first: one a day, one at a time
+		if (Running()) {
+			Tick();  // a look, a place, a closed talk: one going on may have to end (its walker never arrived)
+			return;
+		}
+		if (std::floor(today) == std::floor(g_lastDay)) {
+			return;  // cheap first: one a day
 		}
 		const auto her = Romance::Partner();
 		const auto candidate = her ? Candidates::Find(her) : nullptr;
@@ -163,6 +168,9 @@ namespace Family
 			pool.insert(pool.end(), girls.begin(), girls.end());
 		}
 		const auto child = pool[static_cast<std::size_t>(std::rand()) % pool.size()];  // skse-lint: ok once a day
+		if (!Scenes::Begin(Scenes::Kind::kFamily, { her, child }, [] { End("another scene needs the stage"); }, [] { Tick(); })) {
+			return;  // another time
+		}
 		g_lastDay = today;
 		g_played[{ her->GetFormID(), best }] = today;
 		g_her = her->GetHandle();
@@ -246,6 +254,10 @@ namespace Family
 		const auto speaker = Speaker(g_step);
 		if (g_waitTalk) {
 			return;  // a talk with you is on: the line waits for it
+		}
+		if (speaker && !g_begun && RE::UI::GetSingleton()->IsMenuOpen(RE::DialogueMenu::MENU_NAME)) {
+			g_waitTalk = true;  // said while you talk to someone, it never plays: again once the talk is over
+			return;
 		}
 		if (speaker && !g_begun && State::Today() - g_stepDay > 0.002f) {  // ~3 game minutes: a line that didn't start
 			if (g_retries >= 2) {

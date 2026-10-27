@@ -88,6 +88,12 @@ line they say.
   recent first. The one who speaks first walks over; both are held for
   it. The child's lines are said by whichever child it is (a boy or a girl when a conversation asks), so they're
   voiced in both child voices. A fight or someone leaving ends it quietly; a talk with you pauses it.
+- **One scene at a time** (the scene director): every staged moment (she won't leave town, two partners have it
+  out, the first date, her confession, a family conversation) takes the stage first, in that order of importance. A
+  more important one breaks off a lesser one that hasn't got to its talk yet (it comes again later); a lesser one
+  waits for its next chance (two partners exposed with the stage taken: both simply catch you). While a scene is on,
+  its actors say only its lines (and a fight's): a jealous or caught line waits until it's over. A scene still on
+  after two game hours is taken as stuck and gives up the stage.
 - **Her family and friends** (the circle) react: a line the next time you meet (also when you adopt a child,
   married to her), and if you broke her heart they may refuse you their shop or training until you make amends.
   Now and then their everyday hellos and goodbyes are about the two of you (and your children).

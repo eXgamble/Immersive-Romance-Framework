@@ -5,6 +5,7 @@
 #include "Forms.h"
 #include "Romance.h"
 #include "Rules.h"
+#include "Scenes.h"
 #include "Script.h"
 #include "State.h"
 
@@ -118,11 +119,15 @@ namespace Children
 				Script::CallStatic("IRF_Internal"sv, "ForceGreet"sv, Forms::Get().sayQuest, spouse.get(), false);
 			}
 			g_stayHome = {};
+			Scenes::End(Scenes::Kind::kStayHome);
 		}
 
 		// Walked to the edge: she stops following, comes up to you and says why, then goes home
 		void ForceGreet(RE::Actor* a_spouse)
 		{
+			if (!Scenes::Begin(Scenes::Kind::kStayHome, { a_spouse }, {})) {
+				return;  // the scene on can't be broken off: at the next place
+			}
 			Follower::Dismiss(a_spouse);
 			a_spouse->AddToFaction(Forms::Get().moment, static_cast<std::int8_t>(Rank(Moment::kStayHome)));
 			Script::CallStatic("IRF_Internal"sv, "ForceGreet"sv, Forms::Get().sayQuest, a_spouse, true);

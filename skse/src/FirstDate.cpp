@@ -4,6 +4,7 @@
 #include "Forms.h"
 #include "Romance.h"
 #include "Rules.h"
+#include "Scenes.h"
 #include "Script.h"
 #include "State.h"
 #include "World.h"
@@ -46,6 +47,7 @@ namespace FirstDate
 			GreetOff(a_actor);
 			g_date = {};
 			g_greeting = {};
+			Scenes::End(Scenes::Kind::kFirstDate);
 		}
 
 		bool Busy(RE::Actor* a_actor)
@@ -109,6 +111,15 @@ namespace FirstDate
 			(spot && actor->GetPosition().GetDistance(spot->GetPosition()) > close)) {
 			return;  // not both there yet
 		}
+		const auto breakOff = [] {
+			if (const auto greeting = g_greeting.get()) {
+				GreetOff(greeting.get());  // she comes over once the other scene is done
+			}
+			g_greeting = {};
+		};
+		if (!Scenes::Begin(Scenes::Kind::kFirstDate, { actor }, breakOff)) {
+			return;
+		}
 		actor->AddToFaction(Forms::Get().moment, static_cast<std::int8_t>(Rank(Moment::kFirstDate)));
 		Script::CallStatic("IRF_Internal"sv, "ForceGreet"sv, Forms::Get().sayQuest, actor, true);
 		g_greeting = actor->GetHandle();
@@ -125,6 +136,10 @@ namespace FirstDate
 		Script::CallStatic("IRF_Internal"sv, "ForceGreet"sv, Forms::Get().sayQuest, a_actor, false);
 		g_greeting = {};
 		g_on = a_actor->GetHandle();
+		if (!Scenes::On(Scenes::Kind::kFirstDate)) {
+			Scenes::Begin(Scenes::Kind::kFirstDate, { a_actor }, {});  // you went up to her yourself
+		}
+		Scenes::Settle(Scenes::Kind::kFirstDate);  // the talk is on
 		Romance::Strayed(a_actor, "a date with someone else");  // with a partner it's straying
 		Romance::Contact(a_actor);
 	}

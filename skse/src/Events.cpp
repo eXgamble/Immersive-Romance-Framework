@@ -15,6 +15,7 @@
 #include "Replies.h"
 #include "Romance.h"
 #include "Rules.h"
+#include "Scenes.h"
 #include "State.h"
 #include "World.h"
 
@@ -1032,6 +1033,7 @@ namespace Events
 		g_overheard.clear();
 		g_greeterGoodbye = false;
 		g_afterGoodbye = false;
+		Scenes::OnGameLoaded();
 		Expose::OnGameLoaded();
 		Family::OnGameLoaded();
 		g_refusing = {};

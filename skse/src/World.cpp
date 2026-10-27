@@ -2,6 +2,7 @@
 
 #include "Candidates.h"
 #include "Forms.h"
+#include "Scenes.h"
 #include "Script.h"
 
 namespace World
@@ -110,6 +111,9 @@ namespace World
 		// a delayed line may wait for its speaker to arrive (a follower comes through a load door a moment after you)
 		if (!a_speaker || a_speaker->IsDead() || (a_delay <= 0.0f && !a_speaker->Is3DLoaded())) {
 			return;
+		}
+		if (!Scenes::MaySay(a_speaker, a_moment)) {
+			return;  // she's in a scene: a line from outside it would take her moment
 		}
 		a_speaker->AddToFaction(f.moment, static_cast<std::int8_t>(a_moment));
 		if (a_delay > 0.0f) {

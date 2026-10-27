@@ -10,6 +10,7 @@
 #include "Follower.h"
 #include "Forms.h"
 #include "Romance.h"
+#include "Scenes.h"
 #include "State.h"
 #include "World.h"
 
@@ -45,6 +46,12 @@ namespace Papyrus
 					Family::OnArrived();
 				}
 			});
+		}
+
+		// IRF_Internal.BeatLater: the scene director's clock while a scene is on
+		void Beat(RE::StaticFunctionTag*, std::int32_t a_beat)
+		{
+			SKSE::GetTaskInterface()->AddTask([a_beat]() { Scenes::OnBeat(a_beat); });
 		}
 
 		bool IsCandidate(RE::StaticFunctionTag*, RE::Actor* a_actor)
@@ -138,6 +145,7 @@ namespace Papyrus
 	{
 		constexpr auto script = "IRF"sv;
 		a_vm->RegisterFunction("Arrived"sv, "IRF_Internal"sv, Arrived);
+		a_vm->RegisterFunction("Beat"sv, "IRF_Internal"sv, Beat);
 		a_vm->RegisterFunction("IsCandidate"sv, script, IsCandidate);
 		a_vm->RegisterFunction("GetStage"sv, script, GetStage);
 		a_vm->RegisterFunction("GetApproval"sv, script, GetApproval);

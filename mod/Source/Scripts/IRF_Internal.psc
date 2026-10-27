@@ -64,6 +64,15 @@ EndFunction
 
 Function Arrived(int aiScene) global native
 
+; The scene director's clock while a scene is on: a beat afSeconds later (Wait doesn't count menu time, so a
+; loading screen holds it back)
+Function BeatLater(int aiBeat, float afSeconds) global
+	Utility.Wait(afSeconds)
+	Beat(aiBeat)
+EndFunction
+
+Function Beat(int aiBeat) global native
+
 ; She didn't come along on a fast travel: back where her day has her
 Function SendHome(Actor akSpouse) global
 	akSpouse.EvaluatePackage()

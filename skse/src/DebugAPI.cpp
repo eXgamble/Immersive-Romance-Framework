@@ -11,6 +11,7 @@
 #include "Romance.h"
 #include "Rules.h"
 #include "State.h"
+#include "World.h"
 
 namespace
 {
@@ -166,6 +167,8 @@ namespace
 			Romance::BreakUp(actor, Who::kPlayer, Why::kChoice);  // you end it (her heartbreak style applies)
 		} else if (deed.starts_with("line:")) {
 			Events::TestLine(actor, deed.substr(5));  // as if she had said that line ("line:kiss.yes", "line:date")
+		} else if (deed.starts_with("moment:")) {
+			World::SayMoment(actor, static_cast<Moment>(std::atoi(deed.c_str() + 7)));  // her one-liner for that moment ("moment:6" jealous)
 		} else if (deed == "jealous") {
 			s.jealousUntilDay = std::floor(State::Today()) + static_cast<float>(Rules::Get().jealousDays);
 		} else if (deed == "absence") {

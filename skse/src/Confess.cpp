@@ -4,6 +4,7 @@
 #include "Forms.h"
 #include "Romance.h"
 #include "Rules.h"
+#include "Scenes.h"
 #include "Script.h"
 #include "State.h"
 #include "World.h"
@@ -26,6 +27,7 @@ namespace Confess
 				a_partner->AddToFaction(Forms::Get().moment, 0);
 			}
 			Romance::SyncChat(a_partner);
+			Scenes::End(Scenes::Kind::kConfess);
 		}
 
 		// Following you she says it anywhere but a dungeon (a camp on the road, an inn); otherwise somewhere people live
@@ -96,6 +98,15 @@ namespace Confess
 		if (player->IsInCombat() || Busy(partner) || RE::UI::GetSingleton()->IsMenuOpen(RE::DialogueMenu::MENU_NAME) || !SafePlace(partner, *candidate)) {
 			return;
 		}
+		const auto breakOff = [] {
+			if (const auto coming = g_coming.get()) {
+				Off(coming.get());  // another time
+			}
+			g_coming = {};
+		};
+		if (!Scenes::Begin(Scenes::Kind::kConfess, { partner }, breakOff)) {
+			return;
+		}
 		const auto& f = Forms::Get();
 		partner->AddToFaction(f.moment, static_cast<std::int8_t>(Rank(Moment::kConfess)));
 		Script::CallStatic("IRF_Internal"sv, "ForceGreet"sv, f.sayQuest, partner, true);
@@ -110,6 +121,7 @@ namespace Confess
 		State::Of(a_partner->GetFormID()).confessed = true;
 		g_said = a_partner->GetHandle();
 		g_coming = {};
+		Scenes::Settle(Scenes::Kind::kConfess);  // the talk is on
 		logger::info("Confess: {} told you", a_partner->GetDisplayFullName());
 	}
 

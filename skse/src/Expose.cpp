@@ -1,12 +1,11 @@
 #include "Expose.h"
 
-#include "Family.h"
-
 #include "Candidates.h"
 #include "Follower.h"
 #include "Forms.h"
 #include "Romance.h"
 #include "Rules.h"
+#include "Scenes.h"
 #include "Script.h"
 #include "State.h"
 #include "World.h"
@@ -154,6 +153,7 @@ namespace Expose
 			g_b = {};
 			g_step = Step::kNone;
 			g_answer = Answer::kNone;
+			Scenes::End(Scenes::Kind::kExpose);
 		}
 
 		// she never forgives being denied to her face, unless she's your wife (no divorce): then her heart is broken
@@ -243,8 +243,8 @@ namespace Expose
 
 	bool Start(RE::Actor* a_b, RE::Actor* a_a)
 	{
-		if (Running() || Family::Running()) {
-			logger::info("Expose: a scene is already on");
+		if (Running()) {
+			logger::info("Expose: already on");
 			return false;
 		}
 		const auto player = RE::PlayerCharacter::GetSingleton();
@@ -259,7 +259,7 @@ namespace Expose
 			logger::info("Expose: not now (you're in a fight)");
 			return false;
 		}
-		if (!HasLines(a_b, a_a)) {
+		if (!HasLines(a_b, a_a) || !Scenes::Begin(Scenes::Kind::kExpose, { a_a, a_b }, [] { Abort("another scene needs the stage"); }, [] { Check(); })) {
 			return false;
 		}
 		const auto& f = Forms::Get();
