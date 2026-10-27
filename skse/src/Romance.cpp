@@ -836,8 +836,14 @@ namespace Romance
 		const bool locked = s.lockUntilDay > today;
 		const bool taken = WontBeCourted(a_actor);
 		const bool askable = approval >= r.askDateApproval && GateOpen(*candidate, Stage::kDating) && !locked;
-		const bool asking = stage == Stage::kFriend && !silent && !FirstDate::Pending();
+		if (stage != Stage::kFriend) {
+			s.dated = false;  // the goodnight's "Will you be mine?" was for a Friend
+		}
+		const bool asking = stage == Stage::kFriend && !silent && !FirstDate::Pending() && !s.dated;
 		SetRank(a_actor, f.askDate, asking ? (taken ? 3 : askable ? 1 : 2) : 0);
+		// the first date ended in a goodnight: "Will you be mine?" while approval holds (user, 2026-10-27)
+		const bool mine = stage == Stage::kFriend && s.dated && !silent && !locked && approval >= r.mineApproval;
+		SetRank(a_actor, f.mine, mine ? 1 : 0);
 		SetRank(a_actor, f.greet, IRF::Rank(GreetFor(stage, s, asking && askable && !taken)));
 
 		const bool booked = Running(f.wedding) && InAliasOf(a_actor, f.wedding);

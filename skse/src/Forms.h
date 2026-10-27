@@ -69,8 +69,23 @@ namespace Forms
 		kSpouseBonusFaction = 0x863, // 1 while her spouse perk is on (married, in good standing)
 		kChatFaction = 0x86E,        // 1 while she may chat on the road: an add-on's own follower comments read it
 		kFirstDateQuest = 0x86F,     // IRF_FirstDateQuest: her (alias 0, IRF_FirstDateWait 0x870), her spot (1), its place (2)
-		kFirstDateReplyTopic = 0x871, // IRF_FirstDateReplyTopic: "Of course I came." (linked from her first-date greeting)
+		kFirstDateReplyTopic = 0x871, // IRF_FirstDateReplyTopic: "Of course I came." (retired 2026-10-27: the date talk replaced it)
 		kDateFrom = 0x881,            // IRF_DateFrom: the date's evening starts (GameDaysPassed); IRF_FirstDateWait waits for it
+		// the first date, from the talk at her spot to her door (FirstDate): IRF_DatePhase (FirstDate::Phase; her follow
+		// package IRF_FirstDateFollow 0x89F reads it), the talk's options (IRF_DateAsked1-5: you asked option N,
+		// IRF_DateTalked: the closing option shows), and the topics (in IRF_ForceGreetBranch)
+		kDatePhase = 0x882,
+		kDateTalked = 0x883,
+		kDateAsked1 = 0x884,          // ... to 0x888
+		kMineFaction = 0x889,         // IRF_MineFaction: 1 while "Will you be mine?" is open (a goodnight at her door, approval)
+		kDateTalkTopic1 = 0x88A,      // IRF_DateTalkTopic1-5: your date options (her add-on's words)
+		kDateReplyTopic1A = 0x88F,    // IRF_DateReplyTopic1A, 1B, 2A ... 5B: your two replies to her answer
+		kDateEndTopic = 0x899,        // "(Stay until the fire burns low.)"
+		kWalkHomeTopic1 = 0x89A,      // your answers to "Walk me home?"
+		kWalkHomeTopic2 = 0x89B,
+		kDateKissTopic = 0x89C,       // at her door: "(Kiss her.)" ...
+		kDateGoodnightTopic = 0x89D,  // ... or "Goodnight."
+		kMineTopic = 0x89E,           // "Will you be mine?" (IRF_Quest, top level)
 		kCircleHelloTopic = 0x873,    // IRF_CircleHelloTopic / GoodbyeTopic (IRF_CircleQuest 0x872, open to any speaker):
 		kCircleGoodbyeTopic = 0x874,  // a circle member's everyday greetings about the two of you
 		kReplyFaction = 0x875,        // IRF_ReplyFaction: which reply she's saying (moment kReply)
@@ -189,6 +204,18 @@ namespace Forms
 		RE::TESQuest*   firstDateQuest{ nullptr };
 		RE::TESTopic*   firstDateReply{ nullptr };
 		RE::TESGlobal*  dateFrom{ nullptr };
+		RE::TESGlobal*  datePhase{ nullptr };
+		RE::TESGlobal*  dateTalked{ nullptr };
+		std::array<RE::TESGlobal*, 5> dateAsked{};
+		RE::TESFaction* mine{ nullptr };
+		std::array<RE::TESTopic*, 5>  dateTalk{};
+		std::array<RE::TESTopic*, 10> dateReply{};  // option N's replies at 2(N-1) and 2(N-1)+1
+		RE::TESTopic*   dateEnd{ nullptr };
+		RE::TESTopic*   walkHome1{ nullptr };
+		RE::TESTopic*   walkHome2{ nullptr };
+		RE::TESTopic*   dateKiss{ nullptr };
+		RE::TESTopic*   dateGoodnight{ nullptr };
+		RE::TESTopic*   mineTopic{ nullptr };
 		RE::TESTopic*   circleHello{ nullptr };
 		RE::TESTopic*   circleGoodbye{ nullptr };
 		RE::TESTopic*   pleadYes{ nullptr };

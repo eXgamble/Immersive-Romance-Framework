@@ -94,10 +94,12 @@ namespace IRF
 		kDragon = 11,
 		kNearlyDead = 12,
 		kRest = 13,
-		kFirstDate = 14,       // the first date: she comes up to you at her spot (and her answer to your reply)
+		kFirstDate = 14,       // the first date: her greeting at her spot, and the talk's lines
 		kFirstDateAfter = 15,  // ... and her line after the kiss
 		kReply = 16,           // her answer to someone's line (IRF_ReplyFaction: which one)
 		kDateAfter = 17,       // an evening together is over: you're both outside, and her line ("I had a great time.")
+		kWalkHome = 18,        // the first date's talk is over: "Walk me home?" (her force greet, and your answers)
+		kDateDoor = 19,        // ... at her door: her force greet, "(Kiss her.)" or "Goodnight."
 		kNordicRuin = 20,
 		kDwarvenRuin = 21,
 		kCave = 22,

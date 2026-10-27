@@ -49,6 +49,7 @@ namespace State
 		std::uint16_t knowAsked{ 0 };    // the get-to-know questions you asked (bit 0 = question 1)
 		float lastKnowDay{ -10.0f };     // the last day you asked one you hadn't (one a day)
 		float dateUntilDay{ 0.0f };      // the first date is set: come by this day (the end of that evening); 0 none
+		bool  dated{ false };            // the first date ended in a goodnight: "Will you be mine?" makes her Dating
 	};
 
 	// A reaction waiting for the next time you meet someone

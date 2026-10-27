@@ -17,6 +17,7 @@
 #include "Romance.h"
 #include "Rules.h"
 #include "Scenes.h"
+#include "Script.h"
 #include "State.h"
 #include "World.h"
 
@@ -292,6 +293,9 @@ namespace Events
 					s.lastKnowDay = today;
 					Romance::ModApproval(a_speaker, r.knowGain, "getting to know them");  // only talk: never courting or straying
 				}
+			} else if (a_key == "mine.yes" && stage == Stage::kFriend) {
+				s.dated = false;
+				Romance::SetStage(a_speaker, Stage::kDating, "will you be mine");  // after a goodnight at her door
 			} else if ((a_key == "askdate.yes" || a_key == "askdate.tomorrow") && stage == Stage::kFriend) {
 				FirstDate::Start(a_speaker);  // tonight (tomorrow night from 5 pm) at her spot; the date makes her Dating
 			} else if (a_key == "follow.yes") {
@@ -440,6 +444,13 @@ namespace Events
 					});
 					g_talking = {};
 				}
+				if (a_event && a_event->opening && a_event->menuName == RE::SleepWaitMenu::MENU_NAME && FirstDate::Blocking()) {
+					// walking her home: no sleeping or waiting (closed again, and why)
+					SKSE::GetTaskInterface()->AddUITask([]() {
+						RE::UIMessageQueue::GetSingleton()->AddMessage(RE::SleepWaitMenu::MENU_NAME, RE::UI_MESSAGE_TYPE::kHide, nullptr);
+					});
+					Queue([]() { Script::CallStatic("Debug"sv, "Notification"sv, RE::BSFixedString(FirstDate::BlockMessage())); });
+				}
 				if (a_event && !a_event->opening && a_event->menuName == RE::LoadingMenu::MENU_NAME) {
 					Queue([]() {
 						Children::OnLoadingDone();
@@ -529,6 +540,13 @@ namespace Events
 						Queue([handle = a_event->speakerRef->GetHandle()]() {
 							if (const auto ref = handle.get(); ref && ref->As<RE::Actor>()) {
 								FirstDate::OnSaid(ref->As<RE::Actor>());
+							}
+						});
+					}
+					if (key.starts_with("date.") && a_event->speakerRef) {  // the first date's talk, the walk, her door
+						Queue([handle = a_event->speakerRef->GetHandle(), key]() {
+							if (const auto ref = handle.get(); ref && ref->As<RE::Actor>()) {
+								FirstDate::OnLineBegan(ref->As<RE::Actor>(), key);
 							}
 						});
 					}
@@ -908,6 +926,21 @@ namespace Events
 			}
 		};
 
+		// Walking her home: "Yes" on the map's fast-travel box is refused, and why (enforced where it's used, never by
+		// switching the game's own fast-travel flag, which quests own)
+		struct FastTravelConfirm
+		{
+			static void thunk(RE::FastTravelConfirmCallback* a_this, std::uint8_t a_button)
+			{
+				if (a_button == 0 && FirstDate::Blocking()) {
+					RE::DebugMessageBox(FirstDate::BlockMessage().c_str());
+					return;
+				}
+				func(a_this, a_button);
+			}
+			static inline REL::Relocation<decltype(thunk)> func;
+		};
+
 		class FastTravel : public RE::BSTEventSink<RE::TESFastTravelEndEvent>
 		{
 		public:
@@ -1021,6 +1054,8 @@ namespace Events
 		if (const auto source = RE::LocationCleared::GetEventSource()) {
 			source->AddEventSink(&cleared);
 		}
+		REL::Relocation<std::uintptr_t> confirm{ RE::VTABLE___FastTravelConfirmCallback[0] };
+		FastTravelConfirm::func = confirm.write_vfunc(0x1, FastTravelConfirm::thunk);  // a vtable slot: chains with others
 		logger::info("Events: sinks registered");
 	}
 

@@ -70,6 +70,7 @@ namespace State
 			v('askd', c.knowAsked);
 			v('askl', c.lastKnowDay);
 			v('dtun', c.dateUntilDay);
+			v('dted', c.dated);
 			// strayHits: the current fight only, never saved
 		}
 

@@ -23,6 +23,9 @@ namespace Rules
 		int askDateApproval = 35; // a Friend says yes to "Would you spend an evening with me?" from this much
 		int standUpCost = 10;     // you didn't come to the first date
 		float firstDateDistance = 1000.0f;  // she's this close to her spot after sunset: talk to her for the date
+		float dateStrayDistance = 1500.0f;  // walking her home: this far from her and you're turned back toward her
+		float dateHomeDistance = 600.0f;    // ... and this close to her door, she stops you there
+		int mineApproval = 30;              // after a goodnight at her door, "Will you be mine?" while approval is at least this
 		int commitBar = 75;       // Dating -> Committed from this (once she tells you, Confess)
 		int uncommitBar = 60;     // Committed -> back to Dating below this (leeway: one bad fight doesn't undo it)
 		int floorDating = 1;      // at or below 0 from Dating up: they end it (approval ran out)

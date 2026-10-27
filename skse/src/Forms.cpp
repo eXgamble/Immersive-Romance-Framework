@@ -128,6 +128,22 @@ namespace Forms
 		s.firstDateQuest = f.Own<RE::TESQuest>(kFirstDateQuest, "IRF_FirstDateQuest");
 		s.firstDateReply = f.Own<RE::TESTopic>(kFirstDateReplyTopic, "IRF_FirstDateReplyTopic");
 		s.dateFrom = f.Own<RE::TESGlobal>(kDateFrom, "IRF_DateFrom");
+		s.datePhase = f.Own<RE::TESGlobal>(kDatePhase, "IRF_DatePhase");
+		s.dateTalked = f.Own<RE::TESGlobal>(kDateTalked, "IRF_DateTalked");
+		s.mine = f.Own<RE::TESFaction>(kMineFaction, "IRF_MineFaction");
+		for (std::uint32_t i = 0; i < 5; ++i) {
+			s.dateAsked[i] = f.Own<RE::TESGlobal>(kDateAsked1 + i, "IRF_DateAsked");
+			s.dateTalk[i] = f.Own<RE::TESTopic>(kDateTalkTopic1 + i, "IRF_DateTalkTopic");
+		}
+		for (std::uint32_t i = 0; i < 10; ++i) {
+			s.dateReply[i] = f.Own<RE::TESTopic>(kDateReplyTopic1A + i, "IRF_DateReplyTopic");
+		}
+		s.dateEnd = f.Own<RE::TESTopic>(kDateEndTopic, "IRF_DateEndTopic");
+		s.walkHome1 = f.Own<RE::TESTopic>(kWalkHomeTopic1, "IRF_WalkHomeTopic1");
+		s.walkHome2 = f.Own<RE::TESTopic>(kWalkHomeTopic2, "IRF_WalkHomeTopic2");
+		s.dateKiss = f.Own<RE::TESTopic>(kDateKissTopic, "IRF_DateKissTopic");
+		s.dateGoodnight = f.Own<RE::TESTopic>(kDateGoodnightTopic, "IRF_DateGoodnightTopic");
+		s.mineTopic = f.Own<RE::TESTopic>(kMineTopic, "IRF_MineTopic");
 		s.circleHello = f.Own<RE::TESTopic>(kCircleHelloTopic, "IRF_CircleHelloTopic");
 		s.circleGoodbye = f.Own<RE::TESTopic>(kCircleGoodbyeTopic, "IRF_CircleGoodbyeTopic");
 		s.pleadYes = f.Own<RE::TESTopic>(kPleadYesTopic, "IRF_PleadYesTopic");

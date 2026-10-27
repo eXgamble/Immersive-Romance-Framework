@@ -26,6 +26,9 @@
   "askDateApproval": 35,    // a Friend says yes to "Would you spend an evening with me?" from this much (and hints at it)
   "standUpCost": 10,        // you didn't come to the first date
   "firstDateDistance": 1000.0, // she's this close to her spot after sunset: talk to her for the date
+  "dateStrayDistance": 1500.0, // walking her home: this far from her and you're turned back toward her
+  "dateHomeDistance": 600.0,   // ... and this close to her door, she stops you there
+  "mineApproval": 30,          // after a goodnight at her door, "Will you be mine?" while approval is at least this
   "commitBar": 75,          // Dating -> Committed from this, once she tells you (her confession)
   "uncommitBar": 60,        // Committed -> back to Dating below this (the leeway: one bad fight doesn't undo it)
   "floorDating": 1,         // below this from Dating up, they end it

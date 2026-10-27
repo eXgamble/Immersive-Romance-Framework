@@ -117,6 +117,9 @@ namespace Rules
 		IRF_RULE(confessDistance);
 		IRF_RULE(standUpCost);
 		IRF_RULE(firstDateDistance);
+		IRF_RULE(dateStrayDistance);
+		IRF_RULE(dateHomeDistance);
+		IRF_RULE(mineApproval);
 		IRF_RULE(childAway1);
 		IRF_RULE(childAway2);
 		IRF_RULE(childAway3);

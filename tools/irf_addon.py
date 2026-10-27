@@ -101,7 +101,15 @@ CANDIDATE_F = 0x800  # IRF_CandidateFaction: every registered candidate, rank 0
 JEALOUS_OF_F = 0x876  # IRF_JealousOfFaction: who she got jealous of today: 1 a fighter, 2 not
 REPLY_F, REPLY_MOMENT = 0x875, 16  # her answer to someone's line: IRF_ReplyFaction == its number, in IRF_SayTopic
 HER = [None]  # her reference (houseCARL form), for conditions about her
-FIRSTDATE_REPLY = 0x871  # IRF_FirstDateReplyTopic: "Of course I came."
+# the first date's evening (user, 2026-10-27): your options (IRF_DateTalkTopic1-5), your two replies to each answer
+# (IRF_DateReplyTopic1A, 1B, ... 5B), the closing option; your answers to "Walk me home?"; at her door "(Kiss her.)"
+# and "Goodnight."; "Will you be mine?" after a goodnight (IRF_MineFaction 1). IRF_DateAskedN: option N used;
+# IRF_DateTalked: the closing option shows
+DATE_TALK, DATE_REPLY, DATE_END = 0x88A, 0x88F, 0x899
+WALK_HOME = [0x89A, 0x89B]
+DATE_KISS, DATE_GOODNIGHT, MINE, MINE_F = 0x89C, 0x89D, 0x89E, 0x889
+DATE_ASKED, DATE_TALKED = 0x884, 0x883
+DATE_OPTIONS = 5
 CIRCLE_HELLO, CIRCLE_GOODBYE = 0x873, 0x874  # a circle member's everyday greetings (IRF_CircleQuest: any speaker)
 # two partners have it out (the framework's Expose): moments, the outcome faction, your three answers to her question
 EXPOSE_ASK, EXPOSE_CLAIM, EXPOSE_COUNTER, EXPOSE_QUESTION, EXPOSE_OUTCOME = 27, 28, 29, 30, 31
@@ -115,7 +123,8 @@ FAMILY_HOMES = ["happy", "fine", "strained", "bad", "heartbroken"]
 # framework sets when); married to her
 CHILD_HELLO, CHILD_F = 0x852, 0x847
 CHILD_STATES = {"away1": 1, "away2": 2, "away3": 3, "strained": 11, "bad": 12, "heartbroken": 13}
-LINKS = {"confess": [CONFESS_REPLY], "firstdate": [FIRSTDATE_REPLY], "expose.question": [EXPOSE_SIDE_A, EXPOSE_SIDE_B, EXPOSE_TRUE]}  # the replies her line offers (LinkTo); "court" links to her questions (main)
+LINKS = {"confess": [CONFESS_REPLY], "expose.question": [EXPOSE_SIDE_A, EXPOSE_SIDE_B, EXPOSE_TRUE],
+         "date.walkhome": WALK_HOME, "date.door": [DATE_KISS, DATE_GOODNIGHT]}  # the replies her line offers (LinkTo); "court" links to her questions, the date's lines to its options (main)
 ASKDATE, FOLLOW, KISS, BREAKUP, AMENDS, WINBACK, SECRET, DATE, DENY, ADMIT = (
     0x82A, 0x82C, 0x82E, 0x830, 0x832, 0x834, 0x836, 0x838, 0x83A, 0x83C)
 # factions
@@ -150,7 +159,8 @@ WHYS = {"cheating": 1, "violence": 2, "absence": 3, "bleedouts": 4, "crime": 5, 
 REFUSE_MOMENT = 7  # a circle member refusing service
 STAYHOME_MOMENT = 8  # a spouse with children won't leave town
 CONFESS_MOMENT = 9  # newly Committed: she tells you how much you mean to her
-FIRSTDATE_MOMENT, FIRSTDATE_AFTER = 14, 15  # the first date: her greeting at her spot, and her line after the kiss
+FIRSTDATE_MOMENT, FIRSTDATE_AFTER = 14, 15  # the first date: her greeting at her spot (and the talk), her line after the kiss
+WALKHOME_MOMENT, DOOR_MOMENT = 18, 19  # ... "Walk me home?" after the fade, and at her door
 TOMORROW_HOUR = 17  # asked out from this hour on, the first date is tomorrow night (her "askdate.tomorrow")
 HINT_GREET, HINT_SHARE = 1, 50  # she'd say yes to a date: her hint hello/goodbye, this % of the time (else vanilla's)
 MOMENTS = {"caught": 1, "revive": 2, "attacked": 3, "crime.approve": 4, "crime.disapprove": 5, "jealous": 6,
@@ -239,7 +249,22 @@ def requirements(attributes):
     # the first date: her greeting when you talk to her at her spot, her answer to "Of course I came.", her line
     # after the kiss; and if you never came, her line at your next meeting
     add("firstdate", HELLO, MOMENT_F, FIRSTDATE_MOMENT)
-    add("firstdate.reply", FIRSTDATE_REPLY, MOMENT_F, FIRSTDATE_MOMENT, goodbye=True)
+    # the evening (all optional; main() spreads the add-on's "date.talk" list, "date.walkhome" answers, and the silent
+    # player-choice lines over these keys): your options, a used one gone; your replies; the closing option after one
+    for i in range(1, DATE_OPTIONS + 1):
+        add(f"date.talk.{i}", DATE_TALK + i - 1, MOMENT_F, FIRSTDATE_MOMENT, required=False,
+            extra=[condition("GetGlobalValueConditionData", "Global", fw(DATE_ASKED + i - 1), 0)])
+        add(f"date.talk.{i}.a", DATE_REPLY + 2 * (i - 1), MOMENT_F, FIRSTDATE_MOMENT, required=False)
+        add(f"date.talk.{i}.b", DATE_REPLY + 2 * (i - 1) + 1, MOMENT_F, FIRSTDATE_MOMENT, required=False)
+    add("date.end", DATE_END, MOMENT_F, FIRSTDATE_MOMENT, required=False, goodbye=True,
+        extra=[condition("GetGlobalValueConditionData", "Global", fw(DATE_TALKED), 1, "GreaterThanOrEqualTo")])
+    add("date.walkhome", FORCEGREET, MOMENT_F, WALKHOME_MOMENT, required=False)
+    for i, topic in enumerate(WALK_HOME, start=1):
+        add(f"date.walkhome.{i}", topic, MOMENT_F, WALKHOME_MOMENT, required=False, goodbye=True)
+    add("date.door", FORCEGREET, MOMENT_F, DOOR_MOMENT, required=False)
+    add("date.kiss", DATE_KISS, MOMENT_F, DOOR_MOMENT, required=False, goodbye=True)
+    add("date.goodnight", DATE_GOODNIGHT, MOMENT_F, DOOR_MOMENT, required=False, goodbye=True)
+    add("mine.yes", MINE, MINE_F, 1, required=False)
     add("firstdate.after", SAY, MOMENT_F, FIRSTDATE_AFTER)
     add("date.after", SAY, MOMENT_F, 17, required=False)  # an evening together is over, outside: "I had a great time."
     add("stoodup", REACTION_HELLO, REACTION_F, EVENTS["stoodUp"])
@@ -479,6 +504,51 @@ def info(editor_id, topic, text, speaker_npc, faction, rank, op, goodbye, random
     return {"record_type": "DialogResponses", "editorid": editor_id, "parent": fw(topic), "ops": ops}
 
 
+SILENT = " "  # a player's choice: a line of hers with no words (its prompt is what you say)
+
+
+def spread_date(given):
+    """the first date's evening, as an add-on writes it, spread over the line keys (and the links between them):
+    "date.talk": [{"prompt", "text", "replies": [{"prompt", "text"}, {"prompt", "text"}]}, ...] (up to 5);
+    "date.end": the closing option's words (optional); "date.walkhome": {"text", "answers": [two of yours]};
+    "date.door": her line; "date.kiss": your words (optional); "date.goodnight": {"prompt", "text"}; "mine.yes"."""
+    if "firstdate" not in given:
+        return
+    options = given.pop("date.talk", [])
+    if len(options) > DATE_OPTIONS:
+        sys.exit(f"date.talk: at most {DATE_OPTIONS} options")
+    menu = []
+    for i, option in enumerate(options, start=1):
+        replies = option.get("replies", [])
+        if len(replies) != 2:
+            sys.exit(f"date.talk {i}: two replies, one for each of your answers")
+        given[f"date.talk.{i}"] = {"prompt": option["prompt"], "text": option["text"]}
+        LINKS[f"date.talk.{i}"] = [DATE_REPLY + 2 * (i - 1), DATE_REPLY + 2 * (i - 1) + 1]
+        for side, reply in zip("ab", replies):
+            given[f"date.talk.{i}.{side}"] = {"prompt": reply["prompt"], "text": reply["text"]}
+        menu.append(DATE_TALK + i - 1)
+    menu.append(DATE_END)
+    end = given.get("date.end")
+    given["date.end"] = {"text": SILENT, "prompt": end} if isinstance(end, str) else {"text": SILENT}
+    LINKS["firstdate"] = menu  # her greeting opens the options; each of her last answers comes back to them
+    for i in range(1, len(options) + 1):
+        LINKS[f"date.talk.{i}.a"] = LINKS[f"date.talk.{i}.b"] = menu
+    walk = given.get("date.walkhome")
+    if isinstance(walk, dict):
+        given["date.walkhome"] = walk["text"]
+        answers = walk.get("answers", [])
+        for i in range(len(WALK_HOME)):
+            given[f"date.walkhome.{i + 1}"] = {"text": SILENT, "prompt": answers[i]} if i < len(answers) else {"text": SILENT}
+    elif walk is not None:
+        for i in range(len(WALK_HOME)):
+            given[f"date.walkhome.{i + 1}"] = {"text": SILENT}
+    if "date.door" in given:
+        kiss = given.get("date.kiss")
+        given["date.kiss"] = {"text": SILENT, "prompt": kiss} if isinstance(kiss, str) else {"text": SILENT}
+        if "date.goodnight" not in given or "mine.yes" not in given:
+            sys.exit("date.door: give date.goodnight (her line) and mine.yes (her yes to \"Will you be mine?\") too")
+
+
 def form_key(spec_form):
     """'Skyrim.esm|0x01347B' -> '01347B:Skyrim.esm' (houseCARL's form)"""
     plugin, local = spec_form.split("|")
@@ -551,6 +621,7 @@ def main(spec_path, out_dir, relock=False, into=None):
         replies.append({"after": [after], "lines": answers})
 
     given = spec.get("lines", {})
+    spread_date(given)
     if "askdate.tomorrow" in given:  # her plain yes only before 5 pm; from then her tomorrow one
         yes = reqs["askdate.yes"]
         reqs["askdate.yes"] = yes[:6] + (yes[6] + [time_row(TOMORROW_HOUR, "LessThan")],)

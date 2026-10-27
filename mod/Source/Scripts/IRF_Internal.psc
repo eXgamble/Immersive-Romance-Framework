@@ -96,14 +96,65 @@ EndFunction
 
 ; The date is over: kept (the objective is done) or missed (failed); she goes back to her day
 Function EndDate(Quest akQuest, Actor akDate, bool abKept) global
+	int objective = 10
+	If akQuest.IsObjectiveDisplayed(20)
+		objective = 20	; you were walking her home
+	EndIf
 	If abKept
-		akQuest.SetObjectiveCompleted(10)
+		akQuest.SetObjectiveCompleted(objective)
 	Else
-		akQuest.SetObjectiveFailed(10)
+		akQuest.SetObjectiveFailed(objective)
 	EndIf
 	akQuest.Stop()
 	akDate.EvaluatePackage()
 EndFunction
+
+; The first date's talk is over: the screen fades and time passes, and you're still there with her
+Function DateFade(Actor akHer, float afHours) global
+	Game.DisablePlayerControls()
+	Game.FadeOutGame(true, true, 0.0, 1.0)
+	Utility.Wait(1.5)
+	EveningTime(afHours)
+	Utility.Wait(1.0)
+	Game.FadeOutGame(false, true, 0.5, 1.5)
+	Game.EnablePlayerControls()
+	Utility.Wait(1.5)
+	DateFaded(akHer)
+EndFunction
+
+Function DateFaded(Actor akHer) global native
+
+; Walking her home: the journal says so, with a marker on her door (alias 3); her follow package is on (IRF_DatePhase)
+Function DateWalk(Quest akQuest, Actor akDate, ObjectReference akDoor) global
+	(akQuest.GetAlias(3) as ReferenceAlias).ForceRefTo(akDoor)
+	akQuest.SetObjectiveCompleted(10)
+	akQuest.SetObjectiveDisplayed(20)
+	akDate.EvaluatePackage()
+EndFunction
+
+; ... and the framework's check once a second while you walk her home (no game event says you've reached her door);
+; it ends with the walk, or when a newer walk took over (aiWalk)
+Function WalkHome(int aiWalk) global
+	While DateWalkTick(aiWalk)
+		Utility.Wait(1.0)
+	EndWhile
+EndFunction
+
+bool Function DateWalkTick(int aiWalk) global native
+
+; You strayed from her on the way: you're turned back toward her (as Fated Start turns you back at the camp). The
+; framework's check ends a walk that stalls (SetPlayerAIDriven off)
+Function TurnBack(Actor akHer, string asWhy) global
+	Debug.Notification(asWhy)
+	Game.DisablePlayerControls(true, true, false, true, true, true, true, true)
+	Game.SetPlayerAIDriven(true)
+	Game.GetPlayer().PathToReference(akHer, 1.0)
+	Game.SetPlayerAIDriven(false)
+	Game.EnablePlayerControls()
+	DateTurnedBack()
+EndFunction
+
+Function DateTurnedBack() global native
 
 ; An evening together: the screen fades to black, time passes, and you're both back outside (afX..afZ from akDoor:
 ; where its exit puts you, facing afAngle degrees), her at your side; she says her line once it's light again

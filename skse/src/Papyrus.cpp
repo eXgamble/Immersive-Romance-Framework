@@ -11,6 +11,7 @@
 #include "Forms.h"
 #include "Romance.h"
 #include "Evening.h"
+#include "FirstDate.h"
 #include "Scenes.h"
 #include "State.h"
 #include "World.h"
@@ -64,6 +65,30 @@ namespace Papyrus
 					}
 				});
 			}
+		}
+
+		// IRF_Internal.DateFade: the first date's fade is over
+		void DateFaded(RE::StaticFunctionTag*, RE::Actor* a_her)
+		{
+			if (a_her) {
+				SKSE::GetTaskInterface()->AddTask([handle = a_her->GetHandle()]() {
+					if (const auto her = handle.get()) {
+						FirstDate::Faded(her.get());
+					}
+				});
+			}
+		}
+
+		// IRF_Internal.WalkHome: once a second while you walk her home (the check itself runs as a task)
+		bool DateWalkTick(RE::StaticFunctionTag*, std::int32_t a_walk)
+		{
+			return FirstDate::WalkTick(a_walk);
+		}
+
+		// IRF_Internal.TurnBack: you're back with her
+		void DateTurnedBack(RE::StaticFunctionTag*)
+		{
+			SKSE::GetTaskInterface()->AddTask([]() { FirstDate::TurnedBack(); });
 		}
 
 		// IRF_Internal.BeatLater: the scene director's clock while a scene is on
@@ -166,6 +191,9 @@ namespace Papyrus
 		a_vm->RegisterFunction("Beat"sv, "IRF_Internal"sv, Beat);
 		a_vm->RegisterFunction("EveningTime"sv, "IRF_Internal"sv, EveningTime);
 		a_vm->RegisterFunction("EveningDone"sv, "IRF_Internal"sv, EveningDone);
+		a_vm->RegisterFunction("DateFaded"sv, "IRF_Internal"sv, DateFaded);
+		a_vm->RegisterFunction("DateWalkTick"sv, "IRF_Internal"sv, DateWalkTick);
+		a_vm->RegisterFunction("DateTurnedBack"sv, "IRF_Internal"sv, DateTurnedBack);
 		a_vm->RegisterFunction("IsCandidate"sv, script, IsCandidate);
 		a_vm->RegisterFunction("GetStage"sv, script, GetStage);
 		a_vm->RegisterFunction("GetApproval"sv, script, GetApproval);

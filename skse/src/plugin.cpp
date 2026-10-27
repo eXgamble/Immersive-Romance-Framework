@@ -9,6 +9,7 @@
 #include "Follower.h"
 #include "Forms.h"
 #include "Evening.h"
+#include "FirstDate.h"
 #include "Gifts.h"
 #include "Papyrus.h"
 #include "Romance.h"
@@ -75,6 +76,7 @@ namespace
 			if (g_ready) {
 				SKSE::GetTaskInterface()->AddTask([]() {
 					Romance::StartQuests();
+					FirstDate::Resume();  // a date saved halfway carries on
 					Children::Count();
 					Romance::SyncAll();
 					TellRejected();

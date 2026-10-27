@@ -39,9 +39,20 @@ line they say.
   says not yet; a Friend who knows you're taken (and won't compete for you) says no; from it she says yes and names
   her place. Once she'd say yes, about half her greetings hint at it. Yes starts **the first date**: the journal says
   "Meet <her> at <her place> after sunset", that evening, or tomorrow evening when you ask her from 5 pm on (her
-  `askdate.tomorrow` line says so). From sunset that evening she goes there and waits; go up to her and talk and she greets you with the date, you
-  answer "Of course I came.", it ends in a kiss and you're Dating. Not there by the end of that evening: you stood
-  her up (approval, and she tells you about it next time); ask again another day. One date at a time.
+  `askdate.tomorrow` line says so). From sunset that evening she waits there, standing. Not there by the end of that
+  evening: you stood her up (approval, and she tells you about it next time); ask again another day. One date at a
+  time. **The evening:**
+  - *The talk:* go up to her and talk; her greeting opens her date options (up to five, her add-on's words: a
+    compliment, a question about her). She answers, you pick one of two replies, she answers that, and you're back
+    at the options; a used one is gone. After the first, "(Stay until the fire burns low.)" ends the talk (so does
+    leaving it). Replies are flavor: no wrong answers.
+  - *The fade:* the screen fades, 2 hours pass, nothing moves. She comes up to you: "Walk me home?"; you answer and
+    she follows you. The journal says "Walk <her> home", with a marker on her door.
+  - *The walk:* sleeping, waiting and fast travel are refused ("I should walk <her> home first."); stray more than
+    about 20 m from her and you're turned back toward her. The clock doesn't matter.
+  - *Her door:* she comes up to you again. "(Kiss her.)": the kiss, her line after it, and you're Dating.
+    "Goodnight." (or leaving the talk): she stays a Friend, and from then on "Will you be mine?" makes her Dating,
+    while her approval is at least 30.
 - **Straying** (only once you have a partner): going on a date with someone else, kissing someone else (and
   intimate scenes, for mods that add them). Talking and gifts never count.
 - **Her confession makes her Committed:** a day after her approval reaches the commitment bar (75), and no sooner than 3 days
@@ -160,9 +171,11 @@ A candidate whose manifest is missing a required line, or whose lines don't carr
     "wary": { "days": 5, "style": "afraid" },      // after an attack: days she's wary; "afraid" keeps away (no
                                                    // following, no dates), "angry" takes any hit as an attack,
                                                    // "cold" gives talks and dates nothing; none kisses you
-    "firstDate": { "spot": "Skyrim.esm|0x08AFC4" },  // required: where she waits for your first date (a placed
-                                                   // marker or furniture); "place" (a location) names it in the
-                                                   // journal, by default the spot's cell's location
+    "firstDate": { "spot": "Skyrim.esm|0x08AFC4" },  // required: where she waits for your first date, standing (a
+                                                   // placed marker or object); "place" (a location) names it in the
+                                                   // journal, by default the spot's cell's location. The walk home
+                                                   // after it goes to "evening": {"home"} (her home's exit door):
+                                                   // without it, her door scene comes right after the fade
     "spouseBonus": "Plugin.esp|0x810",               // her own spouse perk: an ability (SPEL) or a perk you have
                                                    // while married to her and the marriage is good (optional)
     "heartbreak": { "style": "pleading", "pleads": 3, "every": 2 },  // when YOU end it: "accepting" (an ex at once),
@@ -283,8 +296,12 @@ mood lines; the generator does this. A spouse's idle lines also carry `(IRF_Stag
 | `askdate.yes` (she names her place and time) / `.notyet` / `.taken` ("Would you spend an evening with me?", a Friend) | IRF_AskDateTopic 0x82A | IRF_AskDateFaction 0x818 | 1 / 2 / 3 |
 | `askdate.tomorrow` (optional: her yes from 5 pm on, the date is tomorrow night; the generator plays `askdate.yes` only before 5 pm then. Without it her `askdate.yes` plays at any hour, so word it to fit both) | IRF_AskDateTopic 0x82A | IRF_AskDateFaction 0x818 | 1 |
 | `hello.hint`, `goodbye.hint` (she'd say yes: add `GetRandomPercent < 50` so vanilla's greetings still come up; the generator does) | Hello / Goodbye | IRF_GreetFaction | 1 |
-| `firstdate` (her greeting when you talk to her at her spot after sunset; LinkTo IRF_FirstDateReplyTopic 0x871) | IRF_HelloTopic 0x806 | IRF_MomentFaction | 14 |
-| `firstdate.reply` (her answer to "Of course I came."; Goodbye flag: the kiss follows) | IRF_FirstDateReplyTopic 0x871 | IRF_MomentFaction | 14 |
+| `firstdate` (her greeting when you talk to her at her spot after sunset; LinkTo her date options and the closing option) | IRF_HelloTopic 0x806 | IRF_MomentFaction | 14 |
+| `date.talk` (optional, up to 5): `[{"prompt": your words, "text": her answer, "replies": [{"prompt", "text"}, {"prompt", "text"}]}]`. The generator makes `date.talk.N` (its prompt, `GetGlobalValue IRF_DateAskedN == 0`, LinkTo your two replies) and `date.talk.N.a` / `.b` (your reply's prompt, her answer, LinkTo the options again) | IRF_DateTalkTopic1-5 0x88A-0x88E / IRF_DateReplyTopic1A..5B 0x88F-0x898 | IRF_MomentFaction | 14 |
+| `date.end` (optional: the closing option's words, default "(Stay until the fire burns low.)"; a silent Goodbye line, `GetGlobalValue IRF_DateTalked >= 1`) | IRF_DateEndTopic 0x899 | IRF_MomentFaction | 14 |
+| `date.walkhome` (after the fade she comes up to you: "Walk me home?"; optional, needs `evening.home`): `{"text", "answers": [your two]}`; the answers are silent Goodbye lines `date.walkhome.1` / `.2` | IRF_ForceGreetTopic 0x848 / IRF_WalkHomeTopic1-2 0x89A-0x89B | IRF_MomentFaction | 18 |
+| `date.door` (at her door, she comes up to you; optional: without it, the kiss), `date.kiss` (optional: your words, default "(Kiss her.)"), `date.goodnight` (`{"prompt", "text"}`: your goodnight and hers; Goodbye) | IRF_ForceGreetTopic / IRF_DateKissTopic 0x89C / IRF_DateGoodnightTopic 0x89D | IRF_MomentFaction | 19 |
+| `mine.yes` (her yes to "Will you be mine?", after a goodnight; needed with `date.door`) | IRF_MineTopic 0x89E | IRF_MineFaction 0x889 | 1 |
 | `firstdate.after` (after the kiss) | IRF_SayTopic 0x829 | IRF_MomentFaction | 15 |
 | `stoodup` (you didn't come: at your next meeting) | IRF_ReactionHelloTopic 0x823 | IRF_ReactionFaction | 14 |
 | `follow.yes` / `.no` | 0x82C | IRF_FollowAnswerFaction 0x819 | 1 / 2 |

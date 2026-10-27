@@ -195,11 +195,31 @@ namespace Candidates
 			// once she'd say yes: one extra hello and goodbye that hint at it (the add-on mixes them with vanilla's)
 			add("hello.hint", f.hello, f.greet, Rank(GreetState::kHint));
 			add("goodbye.hint", f.goodbye, f.greet, Rank(GreetState::kHint));
-			// the first date: her greeting at her spot, her answer to your reply, and her line after the kiss;
-			// if you never came, her line at your next meeting
+			// the first date (user, 2026-10-27): her greeting at her spot opens the talk; the talk's options (her answers,
+			// your two replies to each, hers to them) and the closing option; after the fade "Walk me home?" and your
+			// answers; at her door her line, "(Kiss her.)" or "Goodnight."; her line after the kiss; "Will you be
+			// mine?" after a goodnight. All but the greeting and the kiss line optional: without the talk the closing
+			// option comes at once, without the walk or the door she kisses you after the fade.
+			// If you never came, her line at your next meeting
 			add("firstdate", f.hello, f.moment, Rank(Moment::kFirstDate));  // her greeting when you talk to her at her spot
-			add("firstdate.reply", f.firstDateReply, f.moment, Rank(Moment::kFirstDate));
+			for (int i = 1; i <= 5; ++i) {
+				add(std::format("date.talk.{}", i), f.dateTalk[i - 1], f.moment, Rank(Moment::kFirstDate), false);
+				add(std::format("date.talk.{}.a", i), f.dateReply[2 * (i - 1)], f.moment, Rank(Moment::kFirstDate), false);
+				add(std::format("date.talk.{}.b", i), f.dateReply[2 * (i - 1) + 1], f.moment, Rank(Moment::kFirstDate), false);
+			}
+			add("date.end", f.dateEnd, f.moment, Rank(Moment::kFirstDate), false);
 			list.back().goodbye = true;
+			add("date.walkhome", f.forceGreetTopic, f.moment, Rank(Moment::kWalkHome), false);
+			add("date.walkhome.1", f.walkHome1, f.moment, Rank(Moment::kWalkHome), false);
+			list.back().goodbye = true;
+			add("date.walkhome.2", f.walkHome2, f.moment, Rank(Moment::kWalkHome), false);
+			list.back().goodbye = true;
+			add("date.door", f.forceGreetTopic, f.moment, Rank(Moment::kDateDoor), false);
+			add("date.kiss", f.dateKiss, f.moment, Rank(Moment::kDateDoor), false);
+			list.back().goodbye = true;
+			add("date.goodnight", f.dateGoodnight, f.moment, Rank(Moment::kDateDoor), false);
+			list.back().goodbye = true;
+			add("mine.yes", f.mineTopic, f.mine, 1, false);
 			add("firstdate.after", f.say, f.moment, Rank(Moment::kFirstDateAfter));
 			add("date.after", f.say, f.moment, Rank(Moment::kDateAfter), false);  // after an evening together (optional)
 			add("stoodup", f.reactionHello, f.reaction, Rank(Event::kStoodUp));
