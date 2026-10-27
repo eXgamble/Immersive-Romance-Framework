@@ -116,8 +116,10 @@ PNAM puts it in its place in its topic. Build: `irf_addon.py spec.json out --int
 ESL named Build.esp create `out/records.json` and apply `out/order.json`, rename it to the add-on's plugin, and ship
 `out/manifest.json` as its manifest. Close MO2 while the plugin is swapped (it unticks a plugin that goes missing).
 
-If a new line can't go where the spec puts it (the generator stops: "a new line can't go first in a topic"),
-`--relock` numbers every line afresh; rename the voice files to their new FormIDs after it. Once the add-on is out,
+New lines go anywhere in the spec without renumbering: each line's PNAM is the nearest line above it with an
+older FormID, so the game (which reads lines oldest first) slots a new one exactly where the spec puts it (checked in
+game). The one exception is a new line above every older line of a topic; the generator stops then. Move it below an
+older line, or, before release only, `--relock` renumbers everything (rename the voice files after it). Once the add-on is out,
 set `"released": "1.0"` in its spec: its FormIDs are then frozen (other mods' patches, translations and voice
 replacers point at them), and `--relock` is refused unless `--major` says the build is a breaking new major version.
 

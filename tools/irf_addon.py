@@ -711,21 +711,28 @@ def main(spec_path, out_dir, relock=False, into=None):
         if record.get("record_type") == "DialogResponses":
             topics.setdefault(record["parent"], []).append(record["editorid"])
     for topic, wanted in topics.items():
-        prev = {e: (wanted[i - 1] if i else None) for i, e in enumerate(wanted)}
+        # PNAM = the nearest line before it in the spec with a LOWER FormID: the game reads lines in FormID order and
+        # slots each right after its PNAM, so a line pointing at a later-read line would land at the end instead.
+        # This way a new line (the newest FormIDs) slots in where the spec puts it, and the older lines keep their
+        # links: no renumbering needed (released add-ons keep their FormIDs; user, 2026-10-26)
+        prev = {}
+        for i, e in enumerate(wanted):
+            prev[e] = next((wanted[j] for j in range(i - 1, -1, -1) if ids[wanted[j]] < ids[e]), None)
         placed = []
         for eid in sorted(wanted, key=lambda e: ids[e]):
             p = prev[eid]
             placed.insert(placed.index(p) + 1 if p in placed else len(placed), eid)
         if placed != wanted:
-            problems.append(f"{topic}: the game would read its lines in another order than the spec's "
-                            f"(a new line can't go first in a topic that already has older lines)")
+            problems.append(f"{topic}: a new line would go first in this topic, above all its older lines; the game "
+                            f"can't put a newer line there (it reads lines oldest first)")
         for eid in wanted:
             if prev[eid]:
                 order_ops.append({"formid": f"{ids[eid]:06X}:{into}", "field_path": "PreviousDialog",
                                   "value": f"{ids[prev[eid]]:06X}:{into}"})
     if problems:
         print("STOP: some lines wouldn't land where the spec puts them:\n  " + "\n  ".join(problems))
-        print("Move the new line below an older one, or pass --relock (only while no voice files exist).")
+        print("Move the new line below an older one (in a random set the order doesn't matter: put it last). Before "
+              "release --relock renumbers everything (then rename the voice files); after release that's a major version.")
         sys.exit(2)
 
     # build order: by FormID, a placeholder global holding each retired FormID
