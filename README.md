@@ -82,10 +82,11 @@ line they say.
   and everything above counts for each. Neither knows of the other until it comes out, and then she's caught you:
   - a date or kiss with one where the other sees it: the one who saw it catches you, and the one you were with
     learns about her right there and catches you too;
-  - one greets you as hers (a lovers' hello) where the other hears it (same place, within `exposeDistance`): once
-    the greeting (and her goodbye, if a talk closes) is over, both catch you, one after the other;
+  - one greets you as hers (a lovers' hello, or one of her partner idles) where the other hears it (same place,
+    within `exposeDistance`): once the line (and her goodbye, if a talk closes) is over, both catch you, one after
+    the other;
   - you get engaged to or marry one: word gets back to the other, and there's no denying it.
-  Travelling with both is only jealousy. The main partner (home, children, Papyrus `GetPartner`) is the one at the
+  Travelling with both is jealousy, and before long one of her idles gives you away. The main partner (home, children, Papyrus `GetPartner`) is the one at the
   highest stage.
 - **When it comes out in front of both, they have it out** (when both add-ons have the scene's lines; otherwise both
   simply catch you). The one who heard or saw it (A) walks up to the other (B): A asks who she is to you, B claims you

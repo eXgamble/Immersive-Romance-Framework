@@ -44,18 +44,22 @@ namespace Events
 		}
 
 		// A partner's hello in her lovers' sets (not a hurt, ex or friend one)
+		// A line that says she's yours: a lovers' hello, or one of her partner idles (user, 2026-10-27: travelling with two
+		// partners soon gives you away)
 		bool IsLoversGreeting(const std::string& a_key)
 		{
-			for (const auto set : { "dating"sv, "committed"sv, "engaged"sv, "spouse"sv, "love"sv, "marry"sv, "maramal"sv }) {
-				const auto prefix = std::format("hello.{}", set);
-				if (a_key == prefix || a_key.starts_with(prefix + ".")) {
-					return true;
+			for (const auto kind : { "hello"sv, "idle"sv }) {
+				for (const auto set : { "dating"sv, "committed"sv, "engaged"sv, "spouse"sv, "love"sv, "marry"sv, "maramal"sv }) {
+					const auto prefix = std::format("{}.{}", kind, set);
+					if (a_key == prefix || a_key.starts_with(prefix + ".")) {
+						return true;
+					}
 				}
 			}
 			return false;
 		}
 
-		// A partner greets you as hers ("hello.dating", "hello.spouse", ...) where another partner who doesn't know
+		// A partner greets you as hers ("hello.dating", "hello.spouse", ..., or one of her partner idles) where another partner who doesn't know
 		// about her hears it (same place, within exposeDistance, awake): it comes out, and both catch you on the spot, once the greeting is over (user,
 		// 2026-10-26). In a talk the talk closes first: a line said while the dialogue menu is open never plays.
 		RE::ActorHandle              g_greeter{};
