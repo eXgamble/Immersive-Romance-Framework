@@ -346,6 +346,24 @@ spouse, strArg = "on" / "off", numArg = 1 / 0).
 `skse/build.bat` (Visual Studio 2026 Build Tools, vcpkg, CommonLibSSE-NG v10 as a submodule). The DLL is copied
 into `mod/SKSE/Plugins/`.
 
+## Saves across updates
+
+An update must load the saves the last one made; only a quest rework may ask for a new game (and that's a major
+version). What a save holds, and the rule for each:
+
+- **The co-save** (`skse/src/State.cpp`) stores every value as a tagged field, so a load reads the tags it knows,
+  skips the rest, and leaves a missing field at its default. A new saved value is a member in `State.h` with a sensible
+  default (what an old save gets) and one line with a new tag in its `Fields` list. Never reuse a tag or change what
+  it holds: a new type or meaning is a new tag. A value only one session needs stays off the list.
+- **Enums** (`Types.h`) are saved by value, in the co-save and in faction ranks: add values, never renumber.
+- **The plugin's records**: FormIDs and EditorIDs are frozen (add-ons and voice files name them). Retire a record,
+  never delete it.
+- **Quests**: a change to a quest's aliases or stages doesn't reach saves where the quest already runs. That's a
+  quest rework.
+- **Rules.json** is read at every launch: changing a default is safe.
+
+The smoke test `save_load` saves and loads mid-romance and checks that nothing changed.
+
 ## Tests
 
 - `python test/check.py` (seconds, no game): the SKSE lint; with `--addons <folder>`, also every add-on that

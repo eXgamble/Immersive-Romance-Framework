@@ -1,5 +1,12 @@
 #include "State.h"
 
+// The co-save, built to outlive updates (format 2, 2026-10-27). Every saved value is a tagged field: a four-letter
+// tag, its size, its bytes. A load reads the tags it knows and steps over the rest, and a field the save lacks keeps
+// its default, so an update may add a field (a new tag) or stop saving one (its tag is skipped) and old saves still
+// load. One record per kind ('CAND', 'REAC', 'REFU', 'CHLD', 'PLYR'); a record kind this build doesn't know is skipped,
+// so a new kind is safe too.
+// The contract, once released: a tag is never reused and never given another type or meaning (that's a new tag);
+// enums are saved by value (Types.h: never renumber). Bumping kFormat drops every older save's state: a major version.
 namespace State
 {
 	namespace
@@ -11,8 +18,88 @@ namespace State
 		std::unordered_map<RE::FormID, Child>     g_children;
 
 		constexpr std::uint32_t kId = 'IRF0';
-		constexpr std::uint32_t kRecord = 'IRFS';
-		constexpr std::uint32_t kVersion = 9;
+		constexpr std::uint32_t kFormat = 2;
+		constexpr std::uint32_t kOldRecord = 'IRFS';  // format 1 (fixed layout, before 2026-10-27): not read
+		constexpr std::uint32_t kCandidates = 'CAND';
+		constexpr std::uint32_t kReactions = 'REAC';
+		constexpr std::uint32_t kRefusals = 'REFU';
+		constexpr std::uint32_t kChildren = 'CHLD';
+		constexpr std::uint32_t kPlayer = 'PLYR';
+		constexpr std::uint32_t kEnd = 0;  // after an entry's last field
+
+		struct Player {};  // the player's own values (g_interest)
+
+		// ---- the fields: one list, written and read through it (a visitor gets each tag and value)
+
+		template <class V>
+		void Fields(V& v, Candidate& c)
+		{
+			v('cont', c.lastContactDay);
+			v('slnt', c.silentUntilDay);
+			v('hurt', c.hurt);
+			v('why_', c.why);
+			v('who_', c.who);
+			v('brkd', c.breakupDay);
+			v('nfrg', c.unforgivable);
+			v('scrt', c.secret);
+			v('lock', c.lockUntilDay);
+			v('date', c.lastDateDay);
+			v('kiss', c.lastKissDay);
+			v('gift', c.lastGiftDay);
+			v('kild', c.killDay);
+			v('kils', c.killsToday);
+			v('rcnt', c.recent);
+			v('rcnd', c.recentDay);
+			v('pxp_', c.partnerXp);
+			v('plvl', c.appliedLevels);
+			v('prof', c.profileApplied);
+			v('conf', c.savedConfidence);
+			v('aggr', c.savedAggression);
+			v('pbrk', c.pendingBreakup);
+			v('know', c.knowSeeing);
+			v('saws', c.sawStraying);
+			v('cfrp', c.confrontPending);
+			v('cfrw', c.confrontWorks);
+			v('wary', c.waryUntilDay);
+			v('jeal', c.jealousUntilDay);
+			v('plds', c.pleadsLeft);
+			v('pldd', c.nextPleadDay);
+			v('cmtd', c.committedDay);
+			v('cnfs', c.confessed);
+			v('askd', c.knowAsked);
+			v('askl', c.lastKnowDay);
+			v('dtun', c.dateUntilDay);
+			// strayHits: the current fight only, never saved
+		}
+
+		template <class V>
+		void Fields(V& v, Reaction& r)
+		{
+			v('evnt', r.event);
+			v('untl', r.untilDay);
+		}
+
+		template <class V>
+		void Fields(V& v, Refusal& r)
+		{
+			v.Form('bcse', r.because);
+			v('untl', r.untilDay);
+		}
+
+		template <class V>
+		void Fields(V& v, Child& c)
+		{
+			v('seen', c.lastSeenDay);
+			v('mood', c.lastMoodDay);
+		}
+
+		template <class V>
+		void Fields(V& v, Player&)
+		{
+			v('intr', g_interest);
+		}
+
+		// ---- raw values
 
 		template <class T>
 		void Write(SKSE::SerializationInterface* a_intfc, const T& a_value)
@@ -26,172 +113,268 @@ namespace State
 			return a_intfc->ReadRecordData(&a_value, sizeof(T)) == sizeof(T);
 		}
 
-		void WriteSet(SKSE::SerializationInterface* a_intfc, const std::set<RE::FormID>& a_set)
+		bool Skip(SKSE::SerializationInterface* a_intfc, std::uint32_t a_size)
 		{
-			Write(a_intfc, static_cast<std::uint32_t>(a_set.size()));
-			for (const auto id : a_set) {
-				Write(a_intfc, id);
-			}
-		}
-
-		bool ReadSet(SKSE::SerializationInterface* a_intfc, std::set<RE::FormID>& a_set)
-		{
-			std::uint32_t count = 0;
-			if (!Read(a_intfc, count)) {
-				return false;
-			}
-			for (std::uint32_t i = 0; i < count; ++i) {
-				RE::FormID id = 0, resolved = 0;
-				if (!Read(a_intfc, id)) {
+			std::array<std::byte, 256> scratch;
+			while (a_size > 0) {
+				const auto chunk = (std::min)(a_size, static_cast<std::uint32_t>(scratch.size()));
+				if (a_intfc->ReadRecordData(scratch.data(), chunk) != chunk) {
 					return false;
 				}
-				if (a_intfc->ResolveFormID(id, resolved)) {
-					a_set.insert(resolved);
-				}
+				a_size -= chunk;
 			}
 			return true;
 		}
 
-		void OnSave(SKSE::SerializationInterface* a_intfc)
+		std::string TagName(std::uint32_t a_tag)
 		{
-			if (!a_intfc->OpenRecord(kRecord, kVersion)) {
-				logger::error("State: could not open the co-save record");
-				return;
+			std::string out;
+			for (int shift = 24; shift >= 0; shift -= 8) {
+				out += static_cast<char>((a_tag >> shift) & 0xFF);
 			}
-			Write(a_intfc, static_cast<std::uint32_t>(g_candidates.size()));
-			for (const auto& [id, c] : g_candidates) {
-				Write(a_intfc, id);
-				Write(a_intfc, c.lastContactDay);
-				Write(a_intfc, c.silentUntilDay);
-				Write(a_intfc, c.hurt);
-				Write(a_intfc, c.why);
-				Write(a_intfc, c.who);
-				Write(a_intfc, c.breakupDay);
-				Write(a_intfc, c.unforgivable);
-				Write(a_intfc, c.secret);
-				Write(a_intfc, c.lockUntilDay);
-				Write(a_intfc, c.lastDateDay);
-				Write(a_intfc, c.lastKissDay);
-				Write(a_intfc, c.lastGiftDay);
-				Write(a_intfc, c.killDay);
-				Write(a_intfc, c.killsToday);
-				Write(a_intfc, c.recent);
-				Write(a_intfc, c.recentDay);
-				Write(a_intfc, c.partnerXp);
-				Write(a_intfc, c.appliedLevels);
-				Write(a_intfc, c.profileApplied);
-				Write(a_intfc, c.savedConfidence);
-				Write(a_intfc, c.savedAggression);
-				Write(a_intfc, c.pendingBreakup);
-				Write(a_intfc, c.confrontPending);
-				Write(a_intfc, c.confrontWorks);
-				Write(a_intfc, c.waryUntilDay);
-				Write(a_intfc, c.jealousUntilDay);
-				Write(a_intfc, c.pleadsLeft);
-				Write(a_intfc, c.nextPleadDay);
-				Write(a_intfc, c.committedDay);
-				Write(a_intfc, c.confessed);
-				Write(a_intfc, c.knowAsked);
-				Write(a_intfc, c.lastKnowDay);
-				Write(a_intfc, c.dateUntilDay);
-				WriteSet(a_intfc, c.knowSeeing);
-				WriteSet(a_intfc, c.sawStraying);
+			return out;
+		}
+
+		// ---- visitors
+
+		struct Writer
+		{
+			SKSE::SerializationInterface* intfc;
+
+			void Head(std::uint32_t a_tag, std::uint32_t a_size)
+			{
+				Write(intfc, a_tag);
+				Write(intfc, a_size);
 			}
-			Write(a_intfc, static_cast<std::uint32_t>(g_reactions.size()));
-			for (const auto& [id, r] : g_reactions) {
-				Write(a_intfc, id);
-				Write(a_intfc, r.event);
-				Write(a_intfc, r.untilDay);
+
+			template <class T>
+			void operator()(std::uint32_t a_tag, const T& a_value)
+			{
+				static_assert(std::is_trivially_copyable_v<T>);
+				Head(a_tag, sizeof(T));
+				Write(intfc, a_value);
 			}
-			Write(a_intfc, static_cast<std::uint32_t>(g_refusals.size()));
-			for (const auto& [id, r] : g_refusals) {
-				Write(a_intfc, id);
-				Write(a_intfc, r.because);
-				Write(a_intfc, r.untilDay);
+
+			void operator()(std::uint32_t a_tag, const std::set<RE::FormID>& a_set)
+			{
+				Head(a_tag, static_cast<std::uint32_t>(a_set.size() * sizeof(RE::FormID)));
+				for (const auto id : a_set) {
+					Write(intfc, id);
+				}
 			}
-			Write(a_intfc, static_cast<std::uint32_t>(g_interest.size()));
-			a_intfc->WriteRecordData(g_interest.data(), static_cast<std::uint32_t>(g_interest.size()));
-			Write(a_intfc, static_cast<std::uint32_t>(g_children.size()));
-			for (const auto& [id, c] : g_children) {
-				Write(a_intfc, id);
-				Write(a_intfc, c.lastSeenDay);
-				Write(a_intfc, c.lastMoodDay);
+
+			void operator()(std::uint32_t a_tag, const std::string& a_text)
+			{
+				Head(a_tag, static_cast<std::uint32_t>(a_text.size()));
+				intfc->WriteRecordData(a_text.data(), static_cast<std::uint32_t>(a_text.size()));
+			}
+
+			void Form(std::uint32_t a_tag, RE::FormID a_id) { (*this)(a_tag, a_id); }
+		};
+
+		// Reads the one field whose tag came next; the rest of the list passes it by
+		struct Reader
+		{
+			SKSE::SerializationInterface* intfc;
+			std::uint32_t                 tag;
+			std::uint32_t                 size;
+			bool                          taken{ false };   // a field read it
+			bool                          broken{ false };  // the record ended inside it
+
+			bool Mine(std::uint32_t a_tag) const { return !taken && a_tag == tag; }
+
+			template <class T>
+			void operator()(std::uint32_t a_tag, T& a_value)
+			{
+				if (Mine(a_tag) && size == sizeof(T)) {  // another size isn't this field's type: skipped
+					taken = true;
+					broken = !Read(intfc, a_value);
+				}
+			}
+
+			void operator()(std::uint32_t a_tag, std::set<RE::FormID>& a_set)
+			{
+				if (!Mine(a_tag) || size % sizeof(RE::FormID) != 0) {
+					return;
+				}
+				taken = true;
+				for (std::uint32_t i = 0; i < size / sizeof(RE::FormID); ++i) {
+					RE::FormID id = 0, resolved = 0;
+					if (!Read(intfc, id)) {
+						broken = true;
+						return;
+					}
+					if (intfc->ResolveFormID(id, resolved)) {  // its plugin may be gone
+						a_set.insert(resolved);
+					}
+				}
+			}
+
+			void operator()(std::uint32_t a_tag, std::string& a_text)
+			{
+				if (Mine(a_tag) && size < 256) {
+					taken = true;
+					a_text.resize(size);
+					broken = intfc->ReadRecordData(a_text.data(), size) != size;
+				}
+			}
+
+			void Form(std::uint32_t a_tag, RE::FormID& a_id)
+			{
+				const bool mine = Mine(a_tag);
+				(*this)(a_tag, a_id);
+				if (mine && taken && !broken && !intfc->ResolveFormID(a_id, a_id)) {
+					a_id = 0;  // its plugin is gone
+				}
+			}
+		};
+
+		// Lists every tag, for the duplicate check at startup
+		struct Tags
+		{
+			std::vector<std::uint32_t> seen;
+
+			template <class T>
+			void operator()(std::uint32_t a_tag, const T&)
+			{
+				seen.push_back(a_tag);
+			}
+
+			void Form(std::uint32_t a_tag, RE::FormID) { seen.push_back(a_tag); }
+		};
+
+		template <class T>
+		void CheckTags(const char* a_kind)
+		{
+			T    entry{};
+			Tags tags;
+			Fields(tags, entry);
+			std::ranges::sort(tags.seen);
+			for (std::size_t i = 1; i < tags.seen.size(); ++i) {
+				if (tags.seen[i] == tags.seen[i - 1]) {
+					logger::critical("State: two {} fields share the tag '{}' (one of them never loads)", a_kind, TagName(tags.seen[i]));
+				}
 			}
 		}
 
-		bool ReadCandidate(SKSE::SerializationInterface* a_intfc, Candidate& c)
+		// ---- entries and records
+
+		template <class T>
+		void WriteFields(SKSE::SerializationInterface* a_intfc, T& a_entry)
 		{
-			return Read(a_intfc, c.lastContactDay) && Read(a_intfc, c.silentUntilDay) && Read(a_intfc, c.hurt) && Read(a_intfc, c.why) &&
-			       Read(a_intfc, c.who) && Read(a_intfc, c.breakupDay) && Read(a_intfc, c.unforgivable) && Read(a_intfc, c.secret) &&
-			       Read(a_intfc, c.lockUntilDay) && Read(a_intfc, c.lastDateDay) && Read(a_intfc, c.lastKissDay) && Read(a_intfc, c.lastGiftDay) &&
-			       Read(a_intfc, c.killDay) && Read(a_intfc, c.killsToday) && Read(a_intfc, c.recent) && Read(a_intfc, c.recentDay) &&
-			       Read(a_intfc, c.partnerXp) && Read(a_intfc, c.appliedLevels) && Read(a_intfc, c.profileApplied) &&
-			       Read(a_intfc, c.savedConfidence) && Read(a_intfc, c.savedAggression) && Read(a_intfc, c.pendingBreakup) &&
-			       Read(a_intfc, c.confrontPending) && Read(a_intfc, c.confrontWorks) && Read(a_intfc, c.waryUntilDay) &&
-			       Read(a_intfc, c.jealousUntilDay) && Read(a_intfc, c.pleadsLeft) && Read(a_intfc, c.nextPleadDay) && Read(a_intfc, c.committedDay) && Read(a_intfc, c.confessed) && Read(a_intfc, c.knowAsked) && Read(a_intfc, c.lastKnowDay) && Read(a_intfc, c.dateUntilDay) && ReadSet(a_intfc, c.knowSeeing) &&
-			       ReadSet(a_intfc, c.sawStraying);
+			Writer w{ a_intfc };
+			Fields(w, a_entry);
+			Write(a_intfc, kEnd);
+		}
+
+		template <class T>
+		bool ReadFields(SKSE::SerializationInterface* a_intfc, T& a_entry)
+		{
+			for (;;) {
+				std::uint32_t tag = 0, size = 0;
+				if (!Read(a_intfc, tag)) {
+					return false;
+				}
+				if (tag == kEnd) {
+					return true;
+				}
+				if (!Read(a_intfc, size)) {
+					return false;
+				}
+				Reader r{ a_intfc, tag, size };
+				Fields(r, a_entry);
+				if (r.broken || (!r.taken && !Skip(a_intfc, size))) {
+					return false;
+				}
+			}
+		}
+
+		template <class T>
+		void WriteMap(SKSE::SerializationInterface* a_intfc, std::uint32_t a_record, std::unordered_map<RE::FormID, T>& a_map)
+		{
+			if (!a_intfc->OpenRecord(a_record, kFormat)) {
+				logger::error("State: could not open the co-save record '{}'", TagName(a_record));
+				return;
+			}
+			Write(a_intfc, static_cast<std::uint32_t>(a_map.size()));
+			for (auto& [id, entry] : a_map) {
+				Write(a_intfc, id);
+				WriteFields(a_intfc, entry);
+			}
+		}
+
+		template <class T>
+		void ReadMap(SKSE::SerializationInterface* a_intfc, std::uint32_t a_record, std::unordered_map<RE::FormID, T>& a_map)
+		{
+			std::uint32_t count = 0;
+			if (!Read(a_intfc, count)) {
+				return;
+			}
+			for (std::uint32_t i = 0; i < count; ++i) {
+				RE::FormID id = 0, resolved = 0;
+				T          entry{};
+				if (!Read(a_intfc, id) || !ReadFields(a_intfc, entry)) {
+					logger::error("State: co-save record '{}' cut short after {} of {}", TagName(a_record), i, count);
+					return;
+				}
+				if (a_intfc->ResolveFormID(id, resolved)) {  // gone with its plugin: dropped
+					a_map[resolved] = std::move(entry);
+				}
+			}
+		}
+
+		void OnSave(SKSE::SerializationInterface* a_intfc)
+		{
+			WriteMap(a_intfc, kCandidates, g_candidates);
+			WriteMap(a_intfc, kReactions, g_reactions);
+			WriteMap(a_intfc, kRefusals, g_refusals);
+			WriteMap(a_intfc, kChildren, g_children);
+			if (a_intfc->OpenRecord(kPlayer, kFormat)) {
+				Player player;
+				WriteFields(a_intfc, player);
+			}
 		}
 
 		void OnLoad(SKSE::SerializationInterface* a_intfc)
 		{
 			std::uint32_t type = 0, version = 0, length = 0;
 			while (a_intfc->GetNextRecordInfo(type, version, length)) {
-				if (type != kRecord || version != kVersion) {
+				if (type == kOldRecord) {
+					logger::warn("State: this save is from before co-save format 2 (a development build); its romance state isn't read");
 					continue;
 				}
-				std::uint32_t count = 0;
-				Read(a_intfc, count);
-				for (std::uint32_t i = 0; i < count; ++i) {
-					RE::FormID id = 0, resolved = 0;
-					Candidate  c;
-					if (!Read(a_intfc, id) || !ReadCandidate(a_intfc, c)) {
-						logger::error("State: co-save record cut short");
-						return;
-					}
-					if (a_intfc->ResolveFormID(id, resolved)) {
-						g_candidates[resolved] = std::move(c);
-					}
+				if (version != kFormat) {
+					logger::warn("State: co-save record '{}' has format {}, this framework reads {}: skipped", TagName(type), version, kFormat);
+					continue;
 				}
-				Read(a_intfc, count);
-				for (std::uint32_t i = 0; i < count; ++i) {
-					RE::FormID id = 0, resolved = 0;
-					Reaction   r;
-					if (!Read(a_intfc, id) || !Read(a_intfc, r.event) || !Read(a_intfc, r.untilDay)) {
-						return;
+				switch (type) {
+				case kCandidates:
+					ReadMap(a_intfc, type, g_candidates);
+					break;
+				case kReactions:
+					ReadMap(a_intfc, type, g_reactions);
+					break;
+				case kRefusals:
+					ReadMap(a_intfc, type, g_refusals);
+					std::erase_if(g_refusals, [](const auto& a_entry) { return a_entry.second.because == 0; });  // its candidate is gone
+					break;
+				case kChildren:
+					ReadMap(a_intfc, type, g_children);
+					break;
+				case kPlayer:
+					{
+						Player player;
+						if (!ReadFields(a_intfc, player)) {
+							logger::error("State: co-save record 'PLYR' cut short");
+						}
+						break;
 					}
-					if (a_intfc->ResolveFormID(id, resolved)) {
-						g_reactions[resolved] = r;
-					}
-				}
-				Read(a_intfc, count);
-				for (std::uint32_t i = 0; i < count; ++i) {
-					RE::FormID id = 0, resolved = 0, because = 0;
-					Refusal    r;
-					if (!Read(a_intfc, id) || !Read(a_intfc, because) || !Read(a_intfc, r.untilDay)) {
-						return;
-					}
-					if (a_intfc->ResolveFormID(id, resolved) && a_intfc->ResolveFormID(because, r.because)) {
-						g_refusals[resolved] = r;
-					}
-				}
-				std::uint32_t size = 0;
-				if (Read(a_intfc, size) && size < 64) {
-					g_interest.resize(size);
-					a_intfc->ReadRecordData(g_interest.data(), size);
-				}
-				Read(a_intfc, count);
-				for (std::uint32_t i = 0; i < count; ++i) {
-					RE::FormID id = 0, resolved = 0;
-					Child      c;
-					if (!Read(a_intfc, id) || !Read(a_intfc, c.lastSeenDay) || !Read(a_intfc, c.lastMoodDay)) {
-						return;
-					}
-					if (a_intfc->ResolveFormID(id, resolved)) {
-						g_children[resolved] = c;
-					}
+				default:
+					break;  // a kind from a newer framework: not ours to read
 				}
 			}
-			logger::info("State: loaded {} candidates, {} reactions, {} refusals", g_candidates.size(), g_reactions.size(), g_refusals.size());
+			logger::info("State: loaded {} candidates, {} reactions, {} refusals, {} children", g_candidates.size(), g_reactions.size(),
+				g_refusals.size(), g_children.size());
 		}
 
 		void OnRevert(SKSE::SerializationInterface*)
@@ -242,6 +425,11 @@ namespace State
 
 	void Register()
 	{
+		CheckTags<Candidate>("candidate");
+		CheckTags<Reaction>("reaction");
+		CheckTags<Refusal>("refusal");
+		CheckTags<Child>("child");
+		CheckTags<Player>("player");
 		const auto s = SKSE::GetSerializationInterface();
 		s->SetUniqueID(kId);
 		s->SetSaveCallback(OnSave);

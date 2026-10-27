@@ -2,8 +2,10 @@
 
 #include "Types.h"
 
-// What the framework remembers beyond faction ranks, saved in the SKSE co-save (record 'IRFS'). Days are
-// GameDaysPassed. Everything is reset on Revert and read back on load.
+// What the framework remembers beyond faction ranks, saved in the SKSE co-save as tagged fields (State.cpp), so
+// saves survive updates. A new saved value: a member here with its default, and one line with a new tag in its
+// Fields list in State.cpp (a value only a session needs stays out of that list). Days are GameDaysPassed.
+// Everything is reset on Revert and read back on load.
 namespace State
 {
 	inline constexpr float kNever = -1.0e9f;  // "no such day yet" (game days can be negative in debug use)
