@@ -25,8 +25,12 @@ namespace World
 	// Both in the same interior, or both outside in the same worldspace
 	bool SamePlace(RE::Actor* a_a, RE::Actor* a_b);
 
-	// 18:00 to 23:30: when an evening together is a date
+	// 18:00 to 23:30: evening (the first date waits for it)
 	bool Evening();
+
+	// "Spend the evening with me.": dateFromHour to dateToHour, in a town (a city, town, settlement, inn or home), not
+	// in combat
+	bool DateTime();
 
 	// The speaker says their line for a moment (IRF_SayTopic, gated on IRF_MomentFaction), after a_delay seconds of
 	// game time when given (a line said while a dialogue is still closing never plays)

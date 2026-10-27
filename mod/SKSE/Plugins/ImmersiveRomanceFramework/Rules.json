@@ -33,6 +33,8 @@
   // what raises approval
   "knowGain": 3,            // a question you hadn't asked her yet ("I'd like to get to know you better.", one a day)
   "dateGain": 3,            // "Spend the evening with me." (evenings, from Dating up) ...
+  "dateFromHour": 18.0,     // ... from this hour to dateToHour, in a town (a city, town, settlement, inn or home), not in combat
+  "dateToHour": 22.0,
   "dateEveryDays": 2.0,     // ... offered this often: the road together is where approval grows
   "kissGain": 1,            // the first kiss of the day (kiss as often as you like)
   "wifeGiftEveryDays": 3.0, // married, she takes a gift again, this often (Dating to Engaged she declines them)

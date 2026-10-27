@@ -64,6 +64,8 @@ namespace Rules
 		IRF_RULE(knowGain);
 		IRF_RULE(dateGain);
 		IRF_RULE(dateEveryDays);
+		IRF_RULE(dateFromHour);
+		IRF_RULE(dateToHour);
 		IRF_RULE(kissGain);
 		IRF_RULE(wifeGiftEveryDays);
 		IRF_RULE(giftGain);

@@ -31,7 +31,7 @@ line they say.
   fighting and clearing places together raise it. A gift can also be disliked, or an insult (a human heart).
 - **Getting to know her:** "I'd like to get to know you better." (once a day, Friend to Married) opens her own
   questions (1 to 10, her add-on writes them). A question you hadn't asked gives approval; asking again does nothing.
-  It's only talk: it never starts courting and never counts as straying. From Dating up, "Spend the evening with me." in the evening is a date (every second day); kiss her as often as you like, the first kiss of the day counts.
+  It's only talk: it never starts courting and never counts as straying. From Dating up, "Spend the evening with me." from 6 to 10 pm, in a town and out of combat, is a date (every second day); kiss her as often as you like, the first kiss of the day counts.
 - **Asking her out:** "Would you spend an evening with me?" is always there for a Friend. Below askDateApproval she
   says not yet; a Friend who knows you're taken (and won't compete for you) says no; from it she says yes and names
   her place. Once she'd say yes, about half her greetings hint at it. Yes starts **the first date**: the journal says

@@ -2,6 +2,7 @@
 
 #include "Candidates.h"
 #include "Forms.h"
+#include "Rules.h"
 #include "Scenes.h"
 #include "Script.h"
 
@@ -159,6 +160,31 @@ namespace World
 		const auto calendar = RE::Calendar::GetSingleton();
 		const auto hour = calendar ? calendar->GetHour() : 12.0f;
 		return hour >= 18.0f && hour <= 23.5f;
+	}
+
+	bool DateTime()
+	{
+		const auto  calendar = RE::Calendar::GetSingleton();
+		const auto  hour = calendar ? calendar->GetHour() : 12.0f;
+		const auto& r = Rules::Get();
+		const auto  player = RE::PlayerCharacter::GetSingleton();
+		if (hour < r.dateFromHour || hour > r.dateToHour || player->IsInCombat()) {
+			return false;
+		}
+		const auto loc = player->GetCurrentLocation();
+		if (!loc) {
+			return false;  // the wilds
+		}
+		if (Candidates::TownOf(loc)) {
+			return true;
+		}
+		const auto& f = Forms::Get();
+		for (const auto keyword : { f.locCity, f.locTown, f.locSettlement, f.locInn, f.locPlayerHouse, f.locHouse, f.locDwelling }) {
+			if (keyword && loc->HasKeyword(keyword)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	bool SamePlace(RE::Actor* a_a, RE::Actor* a_b)
