@@ -26,7 +26,7 @@ line they say.
 ### What it does
 
 - **Stages:** Friend, Dating, Committed, then vanilla's Engaged and Married. A Friend is the courting phase. An Ex and a Widowed state
-  follow a breakup or a death; if you killed them and someone saw it, it's Killed instead (no condolences).
+  follow a breakup or a death (Widowed is any partner who dies, Dating up, not only a wife); if you killed them and someone saw it, it's Killed instead (no condolences).
   Approval (0..100, never shown) moves you between them: getting to know her, evening dates, kisses, gifts (one a day),
   fighting and clearing places together raise it. A gift can also be disliked, or an insult (a human heart).
 - **Getting to know her:** "I'd like to get to know you better." (once a day, Friend to Married) opens her own
