@@ -4,8 +4,9 @@
 
 // Adopted children (Hearthfire's adoption, unchanged), married to a candidate:
 // - Their greeting tells you when something is wrong at home: you were away long (IRF_ChildFaction 1-3), or the
-//   marriage is strained, bad or heartbroken (11-13, once a day). All is well: vanilla's greeting. The lines are the
-//   framework's own (IRF_ChildHelloTopic, both child voices), never naming a parent.
+//   marriage is strained, bad or heartbroken (11-13, once a day). All is well: vanilla's greeting. The framework only
+//   says when; the lines are the spouse's add-on's ("children": IRF_ChildHelloTopic, both child voices). An add-on
+//   without them: vanilla's greeting always.
 // - The spouse stays home with them: she follows you inside the family's town; at its edge she comes up to you
 //   (IRF_StayHomeForceGreet), says why (her add-on's "stayhome" line) and goes home. A fast travel can't play a line,
 //   so a message says it instead.

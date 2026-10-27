@@ -48,6 +48,8 @@ Spec (JSON):
              (a line may be versions: {"her": [{"text": ..., "player": "male"}, {"text": ..., "player": "female"}]})
              home is that way (her heart and approval) and, given, she's in that mood; either may start, any number of
              turns; the framework picks one a day (the least recent that fits) and stages it
+  "children": {"away1|away2|away3|strained|bad|heartbroken": "Text" | [...]}   the adopted children's greeting when
+             something is wrong at home (the framework says when; you're married to her): both child voices
   "placeholders": true,                      fill every required key that has no text
   "records": [ {houseCARL create record}, ... ]  her own other records (a spouse perk, ...), created FIRST so their
                                              FormIDs never move; an attribute value "@EditorID" names one of them
@@ -102,6 +104,10 @@ EXPOSE_OUTCOMES = ["believed", "disbelieved", "disowned", "true"]
 # her family conversations with the adopted children (the framework's Family): moment, which one (on her), which line
 FAMILY_MOMENT, FAMILY_F, FAMILY_STEP_F = 32, 0x87B, 0x87C
 FAMILY_HOMES = ["happy", "fine", "strained", "bad", "heartbroken"]
+# the children's greetings when something is wrong at home: IRF_ChildHelloTopic, IRF_ChildFaction on the child (the
+# framework sets when); married to her
+CHILD_HELLO, CHILD_F = 0x852, 0x847
+CHILD_STATES = {"away1": 1, "away2": 2, "away3": 3, "strained": 11, "bad": 12, "heartbroken": 13}
 LINKS = {"confess": [CONFESS_REPLY], "firstdate": [FIRSTDATE_REPLY], "expose.question": [EXPOSE_SIDE_A, EXPOSE_SIDE_B, EXPOSE_TRUE]}  # the replies her line offers (LinkTo); "court" links to her questions (main)
 ASKDATE, FOLLOW, KISS, BREAKUP, AMENDS, WINBACK, SECRET, DATE, DENY, ADMIT = (
     0x82A, 0x82C, 0x82E, 0x830, 0x832, 0x834, 0x836, 0x838, 0x83A, 0x83C)
@@ -612,6 +618,24 @@ def main(spec_path, out_dir, relock=False, into=None):
             if key.startswith("circle.") and key not in before:
                 del lines[key]  # circle lines live under the circle entry, not in "lines"
 
+    # the children's greetings when something is wrong at home: said by whichever child it is (no speaker check), while
+    # you're married to her (her stage read off her), voiced in both child voices
+    children = {}
+    for state, said in spec.get("children", {}).items():
+        if state not in CHILD_STATES:
+            sys.exit(f'children: "{state}" is one of {list(CHILD_STATES)}')
+        for text in (said if isinstance(said, list) else [said]):
+            married = {"type": "ConditionFloat", "fields": {"CompareOperator": "EqualTo", "ComparisonValue": str(MARRIED)},
+                       "sets": [{"path": "Data", "compose": {"type": "GetFactionRankConditionData", "fields": {"RunOnType": "Reference"},
+                                                             "sets": [{"path": "Faction", "value": fw(STAGE_F)}, {"path": "Reference", "value": HER[0]}]}}]}
+            record = info(word_id(f"IRF{short}_children_{state}", text), CHILD_HELLO, text, npc, CHILD_F, CHILD_STATES[state],
+                          "EqualTo", False, None, [married])
+            for op in record["ops"]:
+                if op.get("field_path") == "Conditions":
+                    op["composes"] = op["composes"][1:]  # whichever child: no GetIsID
+            records.append(record)
+            children.setdefault(state, []).append(record["editorid"])
+
     # her family conversations: both halves are hers to write; the child's lines are said by whichever child it is
     # (no speaker check; the conversation's number is read off her), voiced in both child voices
     family = []
@@ -730,6 +754,8 @@ def main(spec_path, out_dir, relock=False, into=None):
         manifest["replies"] = refs(replies)
     if family:
         manifest["family"] = refs(family)
+    if children:
+        manifest["children"] = refs(children)
     if lock_path:
         new_lock = {**lock, **ids}
         lock_path.write_text(json.dumps({e: f"0x{i:03X}" for e, i in sorted(new_lock.items(), key=lambda x: x[1])}, indent=1) + "\n",

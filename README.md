@@ -45,7 +45,8 @@ line they say.
   script (Ysolda's store profits). Vanilla's own spouse perks stay as they are.
 - **Adopted children** (Hearthfire's adoption, unchanged), once you're married to a candidate: their greeting tells
   you when something is wrong at home (you were away long, or the marriage is in a bad way); when all is well they
-  keep vanilla's. Your spouse stays home with them: she follows you inside the family's town, but at its edge she
+  keep vanilla's. The framework says when; the words are the spouse's add-on's (`"children"` in the spec, both child
+  voices), so an add-on without them keeps vanilla's greeting. The framework itself has no voiced lines at all. Your spouse stays home with them: she follows you inside the family's town, but at its edge she
   comes up to you, says why she can't come and goes home; after a fast travel a message says it.
 - **Gifts:** "I have something for you." opens the gift menu (gold included) for a candidate from Friend up; she
   answers as she says goodbye. Stolen and quest items can't be given, and an insult isn't taken.
@@ -297,7 +298,9 @@ yet, 0 Friend, 2 Dating, 3 Committed, 4 Engaged, 5 Married, 6 Ex, 7 Widowed, 8 K
 0x802 (0..100), `IRF_WhyFaction` 0x810 and `IRF_WhoFaction` 0x811 (1 you, 2 them) for an Ex,
 `IRF_SecretFaction`, `IRF_RecentFaction` with `IRF_RecentDaysFaction` 0x815 (days since). On an adopted child,
 `IRF_ChildFaction` 0x847: what their greeting is about (1-3 you were away, 11 strained, 12 bad, 13 heartbroken, 0 all
-well); the framework's own lines for it live in IRF_ChildHelloTopic 0x852.
+well); the spouse's add-on's lines for it go in IRF_ChildHelloTopic 0x852 (spec `"children": {"away1", "away2", "away3",
+"strained", "bad", "heartbroken"}`; said by whichever child: no GetIsID, `GetFactionRank IRF_StageFaction == 5` on her
+reference).
 
 **Her own follower comments** (towns, guilds, quests, a bandit camp ahead: an expansion's worth of road talk) belong in
 the add-on: its own quest and lines, triggered the vanilla way (location conditions or Story Manager events, `GetStage`,

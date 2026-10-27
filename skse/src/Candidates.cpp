@@ -642,6 +642,27 @@ namespace Candidates
 				TakeLines(r, req, candidate.npc, std::format("reply.{}", reply), candidate.lines, problems);
 			}
 
+			// the children's greetings when something is wrong at home (the framework says when, IRF_ChildFaction on the
+			// child; the words and voices are hers): "children": {"away1": [lines], ..., "heartbroken": [...]}. Said by
+			// whichever child it is (no speaker check); IRF_ChildHelloTopic lines
+			const std::map<std::string, ChildMood> childStates{ { "away1", ChildMood::kAway1 }, { "away2", ChildMood::kAway2 },
+				{ "away3", ChildMood::kAway3 }, { "strained", ChildMood::kStrained }, { "bad", ChildMood::kBad }, { "heartbroken", ChildMood::kHeartbroken } };
+			for (const auto& [state, list] : j.value("children", nlohmann::json::object()).items()) {
+				if (!childStates.contains(state)) {
+					problems.push_back(std::format("children: unknown state '{}'", state));
+					continue;
+				}
+				for (const auto& entry : list) {
+					const auto text = entry.is_string() ? entry.get<std::string>() : ""s;
+					const auto info = ParseForm(text);
+					if (!info || !info->As<RE::TESTopicInfo>() || info->As<RE::TESTopicInfo>()->parentTopic != f.childHello) {
+						problems.push_back(std::format("children.{}: '{}' is not an IRF_ChildHelloTopic line", state, text));
+						continue;
+					}
+					candidate.lines["children." + state].push_back(info->As<RE::TESTopicInfo>());
+				}
+			}
+
 			// her conversations with the children: "family": [{"home" (one or a list), "mood"?, "alive"?, "dead"?, "child"?,
 			// "lines": [{"who", "line"}]}]
 			// (the child's lines are said by whichever child it is: no speaker check, only that they're IRF_SayTopic lines)
