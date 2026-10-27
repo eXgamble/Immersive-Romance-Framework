@@ -96,7 +96,7 @@
   "childAwayDays": 5,       // a child misses you after this many days apart (twice, three times as long: more so)
 
   // lines and sight
-  "momentCooldownSeconds": 90.0,  // between two road lines
+  "momentCooldownSeconds": 180.0, // between two road lines (real seconds)
   "witnessDistance": 2048.0,      // farther than this, nobody saw it
   "caughtDistance": 2048.0,       // your partner sees you stray within this
   "jealousDistance": 1536.0,      // your partner sees you and her within this

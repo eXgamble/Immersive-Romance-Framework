@@ -77,7 +77,7 @@ namespace Rules
 		float confessMinDatingDays = 3.0f;    // ... and not before you've been Dating this long (a candidate's confession.minDatingDays overrides it)
 		float confessDistance = 3000.0f;      // ... when you're this close (she walks over)
 		int   childAwayDays = 5;              // an adopted child misses you after this many days apart (2x, 3x: more)
-		float momentCooldownSeconds = 90.0f;  // between two road lines
+		float momentCooldownSeconds = 180.0f;  // between two road lines
 		float witnessDistance = 2048.0f;      // ~30 m: farther than this, nobody "saw" it
 		float caughtDistance = 2048.0f;
 		float jealousDistance = 1536.0f;
