@@ -205,6 +205,7 @@ namespace Forms
 		RE::TESFaction*    currentFollower{ nullptr };    // CurrentFollowerFaction 05C84E
 		RE::TESFaction*    brawl{ nullptr };              // DGIntimidateFaction 04CFA6
 		RE::TESQuest*      marriage{ nullptr };           // RelationshipMarriage 074793
+		RE::TESQuest*      marriageHome{ nullptr };       // RelationshipMarriageFIN 021382: which house the spouse lives in (its aliases)
 		RE::TESQuest*      wedding{ nullptr };            // RelationshipMarriageWedding 07404E
 		RE::TESQuest*      followerQuest{ nullptr };      // DialogueFollower 0750BA
 		RE::TESObjectARMO* amuletOfMara{ nullptr };       // ReligiousSymbolMaraLove 0C891B

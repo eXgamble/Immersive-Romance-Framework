@@ -152,6 +152,9 @@ namespace Family
 			if ((t.alive && !living(t.alive)) || (t.dead && living(t.dead))) {
 				continue;  // about someone who isn't (or is still) alive
 			}
+			if (t.lives && (t.lives == 2) != Romance::LivesWithYou(her)) {
+				continue;  // about her own home (her shop, her family next door) or about yours
+			}
 			const auto it = g_played.find({ her->GetFormID(), i + 1 });
 			const float day = it == g_played.end() ? -1.0f + static_cast<float>(std::rand() % 100) / 1000.0f : it->second;  // skse-lint: ok a tie-break, once a day
 			if (day < bestDay) {

@@ -143,6 +143,7 @@ namespace Forms
 		s.brawl = f.Vanilla<RE::TESFaction>(0x04CFA6, "DGIntimidateFaction");
 		s.marriage = f.Vanilla<RE::TESQuest>(0x074793, "RelationshipMarriage");
 		s.wedding = f.Vanilla<RE::TESQuest>(0x07404E, "RelationshipMarriageWedding");
+		s.marriageHome = f.Vanilla<RE::TESQuest>(0x021382, "RelationshipMarriageFIN");
 		s.followerQuest = f.Vanilla<RE::TESQuest>(0x0750BA, "DialogueFollower");
 		s.amuletOfMara = f.Vanilla<RE::TESObjectARMO>(0x0C891B, "ReligiousSymbolMaraLove");
 		s.loversComfort = f.Vanilla<RE::SpellItem>(0x0CDA1D, "MarriageRested");

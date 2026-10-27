@@ -334,6 +334,10 @@ well); the spouse's add-on's lines for it go in IRF_ChildHelloTopic 0x852 (spec 
 "strained", "bad", "heartbroken"}`; said by whichever child: no GetIsID, `GetFactionRank IRF_StageFaction == 5` on her
 reference).
 
+**Where she lives, married:** she may stay in her own home or move to one of yours. A line that places her family next
+door ("help in the shop tomorrow") takes `"lives": "hers"` in the spec (on a text, or in a family conversation's
+`"when"`), and its version for your home `"lives": "yours"` (vanilla's `RelationshipMarriageFIN` SpouseCurrentHome).
+
 **A circle member who won't talk to you** (her brother once you've killed her): give his hellos for that stage
 `"brushoff": true` in the spec (`"hello.killed": [{"text": "Murderer.", "brushoff": true}]`, a reaction too). A
 brush-off always plays and ends the talk at once (the Goodbye flag), so you get no dialogue options with him.

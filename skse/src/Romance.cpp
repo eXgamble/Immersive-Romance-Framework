@@ -587,6 +587,25 @@ namespace Romance
 		}
 	}
 
+	bool LivesWithYou(RE::Actor* a_wife)
+	{
+		const auto quest = Forms::Get().marriageHome;
+		const auto extra = a_wife && quest ? a_wife->extraList.GetByType<RE::ExtraAliasInstanceArray>() : nullptr;
+		if (!extra) {
+			return false;
+		}
+		RE::BSReadLockGuard locker{ extra->lock };
+		for (const auto data : extra->aliases) {
+			if (data && data->quest == quest && data->alias) {
+				const std::string_view name = data->alias->aliasName.c_str();
+				if (name.ends_with("House") && name != "SpouseHouse") {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	void LetterSync()
 	{
 		const auto global = Forms::Get().letterDay;

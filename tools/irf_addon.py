@@ -20,6 +20,8 @@ Spec (JSON):
              most specific first and a plain one last
              a text may also carry "alive": "Skyrim.esm|0x013487" or "dead": ... (a placed reference): played only
              while that person lives (or after they died), e.g. lines about her brother; these join the random pick
+             a text may carry "lives": "hers" | "yours": married, she still lives in her own home / moved to one of
+             yours (vanilla's RelationshipMarriageFIN SpouseCurrentHome), for lines that place her family next door
              a text's "text" may be a list: one line said as several responses in a row (a longer answer)
              a text may carry "rank": "<0" (the speaker's relationship rank with you; "<0" = your rival) or
              {"toward": "Skyrim.esm|0x013491", "is": "<0"} (with someone else), and "stageDone": "Skyrim.esm|0x074A83:310"
@@ -43,7 +45,7 @@ Spec (JSON):
              "expose.disbelieved", "expose.disowned", "expose.true" (and "expose.reply.<outcome>" when her answer in the
              talk should differ from her line after it)
   "family": [ {"when": {"home": "happy|fine|strained|bad|heartbroken" (or a list), "mood": "jealous|wary|...",
-                         "alive": "Skyrim.esm|0x013487", "dead": ...}, "child": "boy|girl",
+                         "alive": "Skyrim.esm|0x013487", "dead": ..., "lives": "hers|yours"}, "child": "boy|girl",
               "lines": [{"child": "Text"}, {"her": "Text"}, ...]} ]   her conversations with the adopted children, when
              (a line may be versions: {"her": [{"text": ..., "player": "male"}, {"text": ..., "player": "female"}]})
              home is that way (her heart and approval) and, given, she's in that mood; either may start, any number of
@@ -328,6 +330,20 @@ def adopted_conditions(text):
     return rows
 
 
+MARRIAGE_HOME = "021382:Skyrim.esm"  # RelationshipMarriageFIN: its script's SpouseCurrentHome > 0 once she moved to your house
+
+
+def home_conditions(text):
+    """{"lives": "hers" | "yours"}: married, she lives in her own home / in one of yours (vanilla's SpouseCurrentHome)"""
+    if not isinstance(text, dict) or text.get("lives") not in ("hers", "yours"):
+        return []
+    return [{"type": "ConditionFloat", "fields": {"CompareOperator": "GreaterThan" if text["lives"] == "yours" else "LessThanOrEqualTo",
+                                                  "ComparisonValue": "0"},
+             "sets": [{"path": "Data", "compose": {"type": "GetVMQuestVariableConditionData", "fields": {"RunOnType": "Subject"},
+                                                   "sets": [{"path": "Quest", "value": MARRIAGE_HOME},
+                                                            {"path": "VariableName", "value": "::SpouseCurrentHome_var"}]}}]}]
+
+
 def life_conditions(text):
     """{"alive": ref} / {"dead": ref} -> GetDead on that reference == 0 / == 1"""
     rows = []
@@ -428,7 +444,7 @@ def specific(text):
 
 
 def info(editor_id, topic, text, speaker_npc, faction, rank, op, goodbye, random=None, rows=None):
-    extra = (rows or []) + adopted_conditions(text) + life_conditions(text) + feeling_conditions(text) + kids_conditions(text) + place_conditions(text)
+    extra = (rows or []) + adopted_conditions(text) + home_conditions(text) + life_conditions(text) + feeling_conditions(text) + kids_conditions(text) + place_conditions(text)
     raw = text
     prompt = text.get("prompt") if isinstance(text, dict) else None
     text = text["text"] if isinstance(text, dict) else text
@@ -662,7 +678,7 @@ def main(spec_path, out_dir, relock=False, into=None):
         if not homes or any(h not in FAMILY_HOMES for h in homes):
             sys.exit(f'family {n}: "home" is one or more of {FAMILY_HOMES}')
         entry = {"home": homes, "lines": []}
-        for key in ("mood", "alive", "dead"):  # her mood; only while someone lives / after they died (a placed actor)
+        for key in ("mood", "alive", "dead", "lives"):  # her mood; only while someone lives / after they died; where she lives
             if when.get(key):
                 entry[key] = when[key]
         if talk.get("child") in ("boy", "girl"):

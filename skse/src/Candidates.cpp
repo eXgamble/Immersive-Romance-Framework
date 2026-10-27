@@ -675,7 +675,7 @@ namespace Candidates
 				}
 			}
 
-			// her conversations with the children: "family": [{"home" (one or a list), "mood"?, "alive"?, "dead"?, "child"?,
+			// her conversations with the children: "family": [{"home" (one or a list), "mood"?, "alive"?, "dead"?, "child"?, "lives"?,
 			// "lines": [{"who", "line"}]}]
 			// (the child's lines are said by whichever child it is: no speaker check, only that they're IRF_SayTopic lines)
 			const std::map<std::string, Home> homes{ { "happy", Home::kHappy }, { "fine", Home::kFine }, { "strained", Home::kStrained },
@@ -713,6 +713,8 @@ namespace Candidates
 				}
 				const auto child = t.value("child", "any"s);
 				ft.child = child == "boy" ? 1 : child == "girl" ? 2 : 0;
+				const auto lives = t.value("lives", "anywhere"s);
+				ft.lives = lives == "hers" ? 1 : lives == "yours" ? 2 : 0;
 				int step = 0;
 				for (const auto& l : t.value("lines", nlohmann::json::array())) {
 					++step;

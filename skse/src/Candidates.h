@@ -125,6 +125,7 @@ namespace Candidates
 		RE::FormID                                      alive{ 0 };   // only while this person lives ("alive": a placed actor)
 		RE::FormID                                      dead{ 0 };    // only after they died
 		int                                             child{ 0 };   // 0 any child, 1 a boy, 2 a girl
+		int                                             lives{ 0 };   // 0 anywhere, 1 in her own home, 2 in yours
 		std::vector<std::pair<bool, RE::TESTopicInfo*>> steps;        // (said by the child, the line), in order
 	};
 

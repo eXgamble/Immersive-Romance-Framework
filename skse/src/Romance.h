@@ -63,6 +63,10 @@ namespace Romance
 	// A letter home: IRF_LetterDay follows your wife (a day after you last saw her; never while she's with you), and a
 	// courier's line sends it (her absence starts over, her "reaction.letter" line waits for you)
 	void LetterSync();
+
+	// Married, she lives in one of your houses (vanilla moved her: a *House alias of RelationshipMarriageFIN other than
+	// SpouseHouse; its SpouseCurrentHome > 0), not in her own home
+	bool LivesWithYou(RE::Actor* a_wife);
 	void SendLetter();
 
 	// Brings a candidate's ranks in line with the save. a_talking: the player is about to talk to them (absence,
