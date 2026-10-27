@@ -99,7 +99,7 @@ namespace Children
 			if (s.hurt || s.silentUntilDay > today) {
 				return ChildMood::kHeartbroken;
 			}
-			const int band = 1 + std::min(4, Romance::GetApproval(spouse) / 20);  // as "How are we?"
+			const int band = Romance::Band(Romance::GetApproval(spouse));  // as "How are we?"
 			return band == 1 ? ChildMood::kBad : band == 2 ? ChildMood::kStrained : ChildMood::kNone;
 		}
 

@@ -14,6 +14,7 @@ namespace Romance
 
 	Stage GetStage(RE::Actor* a_actor);
 	int   GetApproval(RE::Actor* a_actor);
+	int   Band(int a_approval);  // 1..5 (Rules.json band2..band5): "How are we?" and how things are at home
 
 	// The player's main partner (home, children, the spouse): the one at the highest stage (married included), not an
 	// ex; nullptr when none

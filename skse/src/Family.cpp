@@ -35,7 +35,7 @@ namespace Family
 			if (s.hurt || s.silentUntilDay > State::Today()) {
 				return Home::kHeartbroken;
 			}
-			const int band = 1 + std::min(4, Romance::GetApproval(a_her) / 20);  // as "How are we?"
+			const int band = Romance::Band(Romance::GetApproval(a_her));  // as "How are we?"
 			return band >= 4 ? Home::kHappy : band == 3 ? Home::kFine : band == 2 ? Home::kStrained : Home::kBad;
 		}
 

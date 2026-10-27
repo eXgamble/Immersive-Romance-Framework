@@ -88,6 +88,10 @@ namespace Rules
 		IRF_RULE(waryDays);
 		IRF_RULE(jealousDays);
 		IRF_RULE(strainedBelow);
+		IRF_RULE(band2);
+		IRF_RULE(band3);
+		IRF_RULE(band4);
+		IRF_RULE(band5);
 		IRF_RULE(heartbreakSilentDays);
 		IRF_RULE(pleads);
 		IRF_RULE(pleadEvery);

@@ -55,6 +55,11 @@ namespace Rules
 		int waryDays = 5;           // default wary-tolerance: days she's wary of you after an attack
 		int jealousDays = 1;        // her jealous mood after seeing you with another woman: the rest of that day (1) or more
 		int strainedBelow = 15;     // approval under this: strained mood
+		// approval bands ("How are we?", how things are at home: 4 and 5 happy, 3 fine, 2 strained, 1 bad): where each starts
+		int band2 = 25;
+		int band3 = 50;
+		int band4 = 70;
+		int band5 = 85;
 		int heartbreakSilentDays = 5;  // a bitter candidate you left (or who caught you) won't talk this long
 		int pleads = 3;             // a pleading candidate you left asks you back this many times ...
 		int pleadEvery = 2;         // ... this many days apart

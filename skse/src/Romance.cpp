@@ -231,6 +231,12 @@ namespace Romance
 		return static_cast<Stage>(Rank(a_actor, Forms::Get().stage));
 	}
 
+	int Band(int a_approval)
+	{
+		const auto& r = Rules::Get();
+		return a_approval >= r.band5 ? 5 : a_approval >= r.band4 ? 4 : a_approval >= r.band3 ? 3 : a_approval >= r.band2 ? 2 : 1;
+	}
+
 	int GetApproval(RE::Actor* a_actor)
 	{
 		return std::max(0, Rank(a_actor, Forms::Get().approval));
@@ -733,7 +739,7 @@ namespace Romance
 		}
 
 		SetRank(a_actor, f.questBusy, QuestBusy(a_actor) ? 1 : 0);
-		SetRank(a_actor, f.band, stage >= Stage::kDating && stage <= Stage::kMarried ? 1 + std::min(4, approval / 20) : 0);
+		SetRank(a_actor, f.band, stage >= Stage::kDating && stage <= Stage::kMarried ? Band(approval) : 0);
 		if (stage == Stage::kEx) {
 			SetRank(a_actor, f.why, IRF::Rank(s.why));
 			SetRank(a_actor, f.who, IRF::Rank(s.who));
