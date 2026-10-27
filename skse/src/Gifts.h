@@ -3,7 +3,8 @@
 #include "Candidates.h"
 
 // Gifts (moved from eXrim, 2026-10-25): the player's "I have something for you." (IRF_GiveTopic, offered to a
-// candidate from Friend to Married who isn't giving you the silent treatment) opens the game's own gift menu over the
+// Friend who isn't giving you the silent treatment; from Dating up she declines with her "gift.decline" line,
+// IRF_GiveFaction 2, and would rather you took her along) opens the game's own gift menu over the
 // conversation, the player's things with stolen and quest items refused and a gold row added. A pick is handed over,
 // the menus close and her goodbye is her answer (IRF_GiftAnswerTopic, by IRF_GiftFaction). How she takes it:
 // insulted, disliked, neutral, liked or loved, from her manifest's lists, then IRF_GiftInsulting (items the average

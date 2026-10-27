@@ -805,8 +805,10 @@ namespace Romance
 		// an evening together: from Dating up, evenings, once a day
 		const bool datable = stage >= Stage::kDating && stage <= Stage::kMarried && !silent && !hurt && !cold && today - s.lastDateDay >= 1.0f;
 		SetRank(a_actor, f.date, datable && World::Evening() ? 1 : 0);
+		// gifts are for courting: a Friend takes one a day; from Dating up she declines them (she'd rather travel with you)
 		const bool gaveToday = today - s.lastGiftDay < 1.0f;  // one gift a day: the line waits for tomorrow
-		SetRank(a_actor, f.give, stage >= Stage::kFriend && stage <= Stage::kMarried && !silent && !gaveToday ? 1 : 0);
+		const bool declines = partnerStage && candidate->lines.contains("gift.decline");
+		SetRank(a_actor, f.give, silent ? 0 : stage == Stage::kFriend && !gaveToday ? 1 : declines ? 2 : 0);
 		SetRank(a_actor, f.confront, s.confrontPending ? (s.confrontWorks ? 1 : 2) : 0);
 
 		// the amulet: below Committed the framework's own line and a rejection; from Committed vanilla's

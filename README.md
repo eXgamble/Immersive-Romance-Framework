@@ -27,7 +27,7 @@ line they say.
 
 - **Stages:** Friend, Dating, Committed, then vanilla's Engaged and Married. A Friend is the courting phase. An Ex and a Widowed state
   follow a breakup or a death (Widowed is any partner who dies, Dating up, not only a wife); if you killed them and someone saw it, it's Killed instead (no condolences).
-  Approval (0..100, never shown) moves you between them: getting to know her, evening dates, kisses, gifts (one a day),
+  Approval (0..100, never shown) moves you between them: getting to know her, evening dates, kisses, gifts (one a day, a Friend only),
   fighting and clearing places together raise it. A gift can also be disliked, or an insult (a human heart).
 - **Getting to know her:** "I'd like to get to know you better." (once a day, Friend to Married) opens her own
   questions (1 to 10, her add-on writes them). A question you hadn't asked gives approval; asking again does nothing.
@@ -57,8 +57,10 @@ line they say.
   keep vanilla's. The framework says when; the words are the spouse's add-on's (`"children"` in the spec, both child
   voices), so an add-on without them keeps vanilla's greeting. The framework itself has no voiced lines at all. Your spouse stays home with them: she follows you inside the family's town, but at its edge she
   comes up to you, says why she can't come and goes home; after a fast travel a message says it.
-- **Gifts:** "I have something for you." opens the gift menu (gold included) for a candidate from Friend up; she
-  answers as she says goodbye. Stolen and quest items can't be given, and an insult isn't taken.
+- **Gifts are for courting:** "I have something for you." opens the gift menu (gold included) for a Friend; she
+  answers as she says goodbye. Stolen and quest items can't be given, and an insult isn't taken. From Dating up she
+  turns gifts down (her `gift.decline` line): she'd rather you took her along, and the road together is where
+  approval grows.
 - **Moods** on top of the stage: wary (you attacked her lately), hurt (broken heart), jealous (seen you with
   another woman following you, for the rest of that day), strained (low approval). No mood is the happy default: her plain lines. Her
   greetings, goodbyes and idle chatter can follow them; her idles follow every stage, so a partner never falls
@@ -287,6 +289,7 @@ mood lines; the generator does this. A spouse's idle lines also carry `(IRF_Stag
 | `confess` (newly Committed she comes up to you: how much you mean to her, no marriage hint; LinkTo IRF_ConfessReplyTopic 0x862) | IRF_ForceGreetTopic 0x848 | IRF_MomentFaction 0x816 | 9 |
 | `confess.reply` (her answer to "You mean a lot to me too."; Goodbye flag) | IRF_ConfessReplyTopic 0x862 | IRF_MomentFaction 0x816 | 9 |
 | `gift.insulted` / `.disliked` / `gift` / `.liked` / `.loved` (her answer, as her goodbye) | IRF_GiftAnswerTopic 0x846 | IRF_GiftFaction 0x841 | 1 / 2 / 3 / 4 / 5 |
+| `gift.decline` (optional: from Dating up, her answer to "I have something for you."; without it the line is gone) | IRF_GiveTopic 0x842 | IRF_GiveFaction 0x840 | 2 |
 | `absence.1`..`3` (back after a long time) | IRF_AbsenceHelloTopic 0x825 | IRF_AbsenceFaction 0x812 | 1..3 |
 | moments (below) | IRF_SayTopic 0x829 | IRF_MomentFaction 0x816 | the moment |
 | `reaction.<event>` (optional) | IRF_ReactionHelloTopic | IRF_ReactionFaction | the event |

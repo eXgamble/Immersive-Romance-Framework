@@ -344,7 +344,7 @@ namespace Gifts
 				}
 				const auto info = RE::TESForm::LookupByID<RE::TESTopicInfo>(a_event->topicInfoFormID);
 				const auto actor = info && info->parentTopic == Forms::Get().giveTopic ? a_event->speakerRef->As<RE::Actor>() : nullptr;
-				if (!actor) {
+				if (!actor || actor->GetFactionRank(Forms::Get().give, false) != 1) {  // 2: she declined (her own line)
 					return RE::BSEventNotifyControl::kContinue;
 				}
 				SKSE::GetTaskInterface()->AddTask([handle = actor->GetHandle()] {

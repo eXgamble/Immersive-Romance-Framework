@@ -90,6 +90,7 @@ FRAMEWORK = "Immersive Romance Framework.esp"
 HELLO, GOODBYE, COURT, HOWAREWE, AMULET = 0x806, 0x807, 0x808, 0x80A, 0x80D
 REACTION_HELLO, ABSENCE_HELLO, RECENT_HELLO, SAY = 0x823, 0x825, 0x827, 0x829
 GIFT_ANSWER = 0x846  # her goodbye after a gift
+GIVE = 0x842  # IRF_GiveTopic: "I have something for you."
 FORCEGREET = 0x848  # IRF_ForceGreetTopic: what she comes up to tell you (stay home, confess)
 CONFESS_REPLY = 0x862  # IRF_ConfessReplyTopic: "You mean a lot to me too."
 KNOW, KNOW_MAX = 0x864, 10  # IRF_KnowTopic1-10 (0x864-0x86D): the get-to-know questions (at least one)
@@ -120,6 +121,7 @@ ABSENCE_F, REACTION_F, RECENT_F, MOMENT_F = 0x812, 0x813, 0x814, 0x816
 ASKDATE_F, FOLLOW_F, KISS_F, BREAKUP_F, AMENDS_F, WINBACK_F, SECRET_F, DATE_F, CONFRONT_F, COURT_F = (
     0x818, 0x819, 0x81A, 0x81B, 0x81C, 0x81D, 0x81E, 0x81F, 0x820, 0x821)
 GIFT_F = 0x841  # her answer to a gift: 1 insulted, 2 disliked, 3 plain, 4 liked, 5 loved
+GIVE_F = 0x840  # 1 she takes a gift (a Friend), 2 she declines it (Dating up)
 MOOD_F, IDLE = 0x85B, 0x85C  # her mood (IRF_MoodFaction), her idles (IRF_IdleTopic, by IRF_StageFaction)
 MOODS = {"strained": 2, "jealous": 3, "hurt": 4, "wary": 5}
 PLEAD_F, PLEAD_YES, PLEAD_NO, PLEAD_GREET = 0x85D, 0x85E, 0x860, 30  # a pleading ex you left
@@ -236,6 +238,7 @@ def requirements(attributes):
     add("stoodup", REACTION_HELLO, REACTION_F, EVENTS["stoodUp"])
     for rank, name in enumerate(["gift.insulted", "gift.disliked", "gift", "gift.liked", "gift.loved"], start=1):
         add(name, GIFT_ANSWER, GIFT_F, rank)
+    add("gift.decline", GIVE, GIVE_F, 2, required=False)  # from Dating up: she'd rather you took her along
     for name, code in MOMENTS.items():
         required = True
         if name == "crime.approve":

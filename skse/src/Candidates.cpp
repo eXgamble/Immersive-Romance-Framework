@@ -200,6 +200,8 @@ namespace Candidates
 			list.back().goodbye = true;
 			add("firstdate.after", f.say, f.moment, Rank(Moment::kFirstDateAfter));
 			add("stoodup", f.reactionHello, f.reaction, Rank(Event::kStoodUp));
+			// from Dating up she'd rather have you take her along than take gifts (optional: without it, no gifts from Dating)
+			add("gift.decline", f.giveTopic, f.give, 2, false);
 			add("follow.yes", f.followTopic, f.follow, 1);
 			add("follow.no", f.followTopic, f.follow, 2);
 			add("kiss.yes", f.kissTopic, f.kiss, 1);
