@@ -65,6 +65,7 @@ namespace Rules
 		IRF_RULE(dateGain);
 		IRF_RULE(dateEveryDays);
 		IRF_RULE(kissGain);
+		IRF_RULE(wifeGiftEveryDays);
 		IRF_RULE(giftGain);
 		IRF_RULE(giftLikedGain);
 		IRF_RULE(giftLovedGain);

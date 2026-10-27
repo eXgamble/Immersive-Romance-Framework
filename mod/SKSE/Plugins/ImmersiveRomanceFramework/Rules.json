@@ -35,6 +35,7 @@
   "dateGain": 3,            // "Spend the evening with me." (evenings, from Dating up) ...
   "dateEveryDays": 2.0,     // ... offered this often: the road together is where approval grows
   "kissGain": 1,            // the first kiss of the day (kiss as often as you like)
+  "wifeGiftEveryDays": 3.0, // married, she takes a gift again, this often (Dating to Engaged she declines them)
   "giftGain": 3,            // a gift (one a day: the line waits until a day has passed)
   "giftLikedGain": 5,       // a gift they like, instead
   "giftLovedGain": 8,       // a gift they love, instead

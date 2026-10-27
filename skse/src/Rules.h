@@ -31,6 +31,7 @@ namespace Rules
 		int dateGain = 3;       // "Spend the evening with me." (18:00-23:30, from Dating up, every dateEveryDays)
 		float dateEveryDays = 2.0f;  // an evening together is offered this often (the road should be where approval grows)
 		int kissGain = 1;       // once a day
+		float wifeGiftEveryDays = 3.0f;  // a wife takes a gift this often (Dating to Engaged she declines them)
 		int giftGain = 3;          // a gift (one a day)
 		int giftLikedGain = 5;     // a gift they like (instead)
 		int giftLovedGain = 8;     // a gift they love (instead)

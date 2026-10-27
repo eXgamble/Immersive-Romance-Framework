@@ -242,7 +242,7 @@ def requirements(attributes):
     add("stoodup", REACTION_HELLO, REACTION_F, EVENTS["stoodUp"])
     for rank, name in enumerate(["gift.insulted", "gift.disliked", "gift", "gift.liked", "gift.loved"], start=1):
         add(name, GIFT_ANSWER, GIFT_F, rank)
-    add("gift.decline", GIVE, GIVE_F, 2, required=False)  # from Dating up: she'd rather you took her along
+    add("gift.decline", GIVE, GIVE_F, 2, required=False)  # Dating to Engaged: she'd rather you took her along
     for name, code in MOMENTS.items():
         required = True
         if name == "crime.approve":

@@ -62,9 +62,9 @@ line they say.
   starts over, and the next time you meet she has her own line about it (`reaction.letter`, optional; it plays only
   while things are fine or better at home, band 3+: the generator adds the condition).
 - **Gifts are for courting:** "I have something for you." opens the gift menu (gold included) for a Friend; she
-  answers as she says goodbye. Stolen and quest items can't be given, and an insult isn't taken. From Dating up she
-  turns gifts down (her `gift.decline` line): she'd rather you took her along, and the road together is where
-  approval grows.
+  answers as she says goodbye. Stolen and quest items can't be given, and an insult isn't taken. From Dating to Engaged
+  she turns gifts down (her `gift.decline` line): she'd rather you took her along, and the road together is where
+  approval grows. A wife takes a gift again, once every 3 days (`wifeGiftEveryDays`).
 - **Moods** on top of the stage: wary (you attacked her lately), hurt (broken heart), jealous (seen you with
   another woman following you, for the rest of that day), strained (low approval). No mood is the happy default: her plain lines. Her
   greetings, goodbyes and idle chatter can follow them; her idles follow every stage, so a partner never falls
