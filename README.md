@@ -334,9 +334,6 @@ reference).
 `"brushoff": true` in the spec (`"hello.killed": [{"text": "Murderer.", "brushoff": true}]`, a reaction too). A
 brush-off always plays and ends the talk at once (the Goodbye flag), so you get no dialogue options with him.
 
-**Her idles rest:** after she says one of her idle lines, her idles are off for `idleCooldownSeconds` (180 real
-seconds; Rules.json): the generator gives every idle line `GetFactionRank IRF_IdleRestFaction` 0x87D != 1.
-
 **Her own follower comments** (towns, guilds, quests, a bandit camp ahead: an expansion's worth of road talk) belong in
 the add-on: its own quest and lines, triggered the vanilla way (location conditions or Story Manager events, `GetStage`,
 the player's factions, Say Once). Give each of those lines one framework condition, `GetFactionRank IRF_ChatFaction`

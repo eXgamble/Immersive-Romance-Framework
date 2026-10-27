@@ -9,15 +9,6 @@ Function SayLater(ObjectReference akSpeaker, Topic akTopic, float afSeconds) glo
 	EndIf
 EndFunction
 
-; Her idles rest after one of them (the DLL set akRest to 1, which her idle lines need to be anything but): back on
-; after afSeconds of play
-Function RestIdles(Actor akActor, Faction akRest, float afSeconds) global
-	Utility.Wait(afSeconds)
-	If akActor && akActor.GetFactionRank(akRest) == 1
-		akActor.SetFactionRank(akRest, 0)
-	EndIf
-EndFunction
-
 ; Someone coming up to tell you something (IRF_MomentFaction says what: a spouse who stays home with the children,
 ; a confession): IRF_SayQuest's ForceGreet alias (alias 0, its force greet) on or off
 Function ForceGreet(Quest akQuest, Actor akSpouse, bool abOn) global

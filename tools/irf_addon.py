@@ -108,7 +108,6 @@ EXPOSE_SIDE_A, EXPOSE_SIDE_B, EXPOSE_TRUE = 0x878, 0x879, 0x87A
 EXPOSE_OUTCOMES = ["believed", "disbelieved", "disowned", "true"]
 # her family conversations with the adopted children (the framework's Family): moment, which one (on her), which line
 FAMILY_MOMENT, FAMILY_F, FAMILY_STEP_F = 32, 0x87B, 0x87C
-IDLE_REST_F = 0x87D  # IRF_IdleRestFaction: 1 while her idles rest (idleCooldownSeconds after one)
 FAMILY_HOMES = ["happy", "fine", "strained", "bad", "heartbroken"]
 # the children's greetings when something is wrong at home: IRF_ChildHelloTopic, IRF_ChildFaction on the child (the
 # framework sets when); married to her
@@ -429,8 +428,7 @@ def specific(text):
 
 
 def info(editor_id, topic, text, speaker_npc, faction, rank, op, goodbye, random=None, rows=None):
-    rest = [condition("GetFactionRankConditionData", "Faction", fw(IDLE_REST_F), 1, "NotEqualTo")] if topic == IDLE else []
-    extra = (rows or []) + rest + adopted_conditions(text) + life_conditions(text) + feeling_conditions(text) + kids_conditions(text) + place_conditions(text)
+    extra = (rows or []) + adopted_conditions(text) + life_conditions(text) + feeling_conditions(text) + kids_conditions(text) + place_conditions(text)
     raw = text
     prompt = text.get("prompt") if isinstance(text, dict) else None
     text = text["text"] if isinstance(text, dict) else text
