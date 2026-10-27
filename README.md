@@ -38,7 +38,8 @@ line they say.
 - **Asking her out:** "Would you spend an evening with me?" is always there for a Friend. Below askDateApproval she
   says not yet; a Friend who knows you're taken (and won't compete for you) says no; from it she says yes and names
   her place. Once she'd say yes, about half her greetings hint at it. Yes starts **the first date**: the journal says
-  "Meet <her> at <her place> after sunset", she goes there and waits; come in the evening and she comes over, you
+  "Meet <her> at <her place> after sunset", that evening, or tomorrow evening when you ask her from 6 pm on (her
+  `askdate.tomorrow` line says so). From sunset that evening she goes there and waits; come and she comes over, you
   answer "Of course I came.", it ends in a kiss and you're Dating. Not there by the end of that evening: you stood
   her up (approval, and she tells you about it next time); ask again another day. One date at a time.
 - **Straying** (only once you have a partner): going on a date with someone else, kissing someone else (and
@@ -280,6 +281,7 @@ mood lines; the generator does this. A spouse's idle lines also carry `(IRF_Stag
 | `amulet.friend` / `.dating` (turns the amulet down) | IRF_AmuletTopic 0x80D | IRF_AmuletFaction 0x80C | 1 / 3 |
 | `howarewe.1`..`5` (worst to best) | IRF_HowAreWeTopic 0x80A | IRF_BandFaction 0x80F | 1..5 |
 | `askdate.yes` (she names her place and time) / `.notyet` / `.taken` ("Would you spend an evening with me?", a Friend) | IRF_AskDateTopic 0x82A | IRF_AskDateFaction 0x818 | 1 / 2 / 3 |
+| `askdate.tomorrow` (optional: her yes from 6 pm on, the date is tomorrow night; the generator plays `askdate.yes` only before 6 pm then. Without it her `askdate.yes` plays at any hour, so word it to fit both) | IRF_AskDateTopic 0x82A | IRF_AskDateFaction 0x818 | 1 |
 | `hello.hint`, `goodbye.hint` (she'd say yes: add `GetRandomPercent < 50` so vanilla's greetings still come up; the generator does) | Hello / Goodbye | IRF_GreetFaction | 1 |
 | `firstdate` (at her spot after sunset she comes up to you; LinkTo IRF_FirstDateReplyTopic 0x871) | IRF_ForceGreetTopic 0x848 | IRF_MomentFaction | 14 |
 | `firstdate.reply` (her answer to "Of course I came."; Goodbye flag: the kiss follows) | IRF_FirstDateReplyTopic 0x871 | IRF_MomentFaction | 14 |

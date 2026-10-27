@@ -19,6 +19,24 @@ namespace FirstDate
 		RE::ActorHandle g_date;      // the date is set with her (IRF_FirstDateQuest running)
 		RE::ActorHandle g_greeting;  // she's coming up to you at her spot
 		RE::ActorHandle g_on;        // she said "firstdate": the date ends with the talk
+		bool            g_sent{ false };  // the date's evening has come: she was sent to her spot
+
+		constexpr float kFrom = 18.0f;  // the date's evening: from sunset ...
+		constexpr float kEnd = 23.5f;   // ... until it's late (then you stood her up)
+
+		// the day (GameDaysPassed) the date's evening starts
+		float FromDay(float a_untilDay)
+		{
+			return a_untilDay - (kEnd - kFrom) / 24.0f;
+		}
+
+		// IRF_FirstDateWait takes her to her spot from then (its condition reads IRF_DateFrom)
+		void SyncFrom(float a_untilDay)
+		{
+			if (const auto global = Forms::Get().dateFrom) {
+				global->value = a_untilDay > 0.0f ? FromDay(a_untilDay) : 1.0e6f;
+			}
+		}
 
 		// Her place for the journal: her add-on's firstDate.place, or the location of her spot's cell
 		RE::BGSLocation* PlaceOf(const Candidates::Candidate& a_candidate)
@@ -44,8 +62,10 @@ namespace FirstDate
 		{
 			Script::CallStatic("IRF_Internal"sv, "EndDate"sv, Forms::Get().firstDateQuest, a_actor, a_kept);
 			State::Of(a_actor->GetFormID()).dateUntilDay = 0.0f;
+			SyncFrom(0.0f);
 			GreetOff(a_actor);
 			g_date = {};
+			g_sent = false;
 			g_greeting = {};
 			Scenes::End(Scenes::Kind::kFirstDate);
 		}
@@ -63,15 +83,18 @@ namespace FirstDate
 		if (!candidate || !candidate->attributes.dateSpot || g_date) {
 			return;
 		}
-		// tonight; asked after the evening is over, tomorrow night
-		const auto calendar = RE::Calendar::GetSingleton();
+		// tonight; asked in the evening (user, 2026-10-27) or later, tomorrow night
+		const auto  calendar = RE::Calendar::GetSingleton();
 		const float hour = calendar ? calendar->GetHour() : 12.0f;
-		const float end = 23.5f;
-		const float until = State::Today() + (hour < end ? end - hour : 24.0f - hour + end) / 24.0f;
+		const bool  tomorrow = hour >= kFrom;
+		const float until = State::Today() + (kEnd - hour + (tomorrow ? 24.0f : 0.0f)) / 24.0f;
 		State::Of(a_actor->GetFormID()).dateUntilDay = until;
+		SyncFrom(until);
 		g_date = a_actor->GetHandle();
+		g_sent = false;
 		Script::CallStatic("IRF_Internal"sv, "StartDate"sv, Forms::Get().firstDateQuest, a_actor, candidate->attributes.dateSpot, PlaceOf(*candidate));
-		logger::info("FirstDate: {} will meet you at her spot after sunset (until day {:.2f})", a_actor->GetDisplayFullName(), until);
+		logger::info("FirstDate: {} will meet you at her spot {} after sunset (until day {:.2f})", a_actor->GetDisplayFullName(),
+			tomorrow ? "tomorrow" : "tonight", until);
 	}
 
 	bool Pending()
@@ -100,6 +123,14 @@ namespace FirstDate
 			Romance::Notify(actor, Event::kStoodUp);  // her line at your next meeting
 			logger::info("FirstDate: you stood {} up", actor->GetDisplayFullName());
 			return;
+		}
+		SyncFrom(s.dateUntilDay);  // a skipped day (IRF - Debug) moves it too
+		if (today < FromDay(s.dateUntilDay)) {
+			return;  // not the date's evening yet
+		}
+		if (!g_sent) {
+			g_sent = true;
+			Script::Call(actor, "Actor"sv, "EvaluatePackage"sv);  // her wait package is on now: off to her spot
 		}
 		if (g_greeting || !World::Evening() || !actor->Is3DLoaded() || Busy(actor)) {
 			return;
@@ -167,12 +198,16 @@ namespace FirstDate
 		g_date = {};
 		g_greeting = {};
 		g_on = {};
+		g_sent = false;
+		float until = 0.0f;
 		for (const auto& candidate : Candidates::All()) {
 			const auto actor = Candidates::ActorOf(candidate);
 			if (actor && State::Of(actor->GetFormID()).dateUntilDay > 0.0f) {
 				g_date = actor->GetHandle();  // the quest and its aliases come back with the save
+				until = State::Of(actor->GetFormID()).dateUntilDay;
 				break;
 			}
 		}
+		SyncFrom(until);
 	}
 }

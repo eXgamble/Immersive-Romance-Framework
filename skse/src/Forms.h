@@ -70,6 +70,7 @@ namespace Forms
 		kChatFaction = 0x86E,        // 1 while she may chat on the road: an add-on's own follower comments read it
 		kFirstDateQuest = 0x86F,     // IRF_FirstDateQuest: her (alias 0, IRF_FirstDateWait 0x870), her spot (1), its place (2)
 		kFirstDateReplyTopic = 0x871, // IRF_FirstDateReplyTopic: "Of course I came." (linked from her first-date greeting)
+		kDateFrom = 0x881,            // IRF_DateFrom: the date's evening starts (GameDaysPassed); IRF_FirstDateWait waits for it
 		kCircleHelloTopic = 0x873,    // IRF_CircleHelloTopic / GoodbyeTopic (IRF_CircleQuest 0x872, open to any speaker):
 		kCircleGoodbyeTopic = 0x874,  // a circle member's everyday greetings about the two of you
 		kReplyFaction = 0x875,        // IRF_ReplyFaction: which reply she's saying (moment kReply)
@@ -187,6 +188,7 @@ namespace Forms
 		RE::TESFaction* chat{ nullptr };
 		RE::TESQuest*   firstDateQuest{ nullptr };
 		RE::TESTopic*   firstDateReply{ nullptr };
+		RE::TESGlobal*  dateFrom{ nullptr };
 		RE::TESTopic*   circleHello{ nullptr };
 		RE::TESTopic*   circleGoodbye{ nullptr };
 		RE::TESTopic*   pleadYes{ nullptr };
