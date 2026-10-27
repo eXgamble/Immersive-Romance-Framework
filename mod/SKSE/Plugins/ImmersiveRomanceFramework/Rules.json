@@ -61,10 +61,10 @@
 
   // her moods (for her greetings, goodbyes and idles)
   "jealousDays": 1,         // jealous for the rest of that day (1) or more
-  "strainedBelow": 15,      // approval under this: strained
 
   // approval bands, where each starts (band 1 from 0): her "How are we?" answer, and how things are at home for the
-  // children's greetings and family talks (bands 4 and 5 happy, 3 fine, 2 strained, 1 bad)
+  // children's greetings and family talks (bands 4 and 5 happy, 3 fine, 2 strained, 1 bad). Below band3 the
+  // marriage is strained: her strained mood, and her spouse perk pauses
   "band2": 25,
   "band3": 50,
   "band4": 70,
@@ -74,7 +74,6 @@
   "heartbreakSilentDays": 5, // bitter: won't talk to you this long (also when she catches you)
   "pleads": 3,              // pleading: asks you back this many times ...
   "pleadEvery": 2,          // ... this many days apart
-  "spouseBonusBelow": 40,   // her spouse perk pauses while approval is below this (a strained marriage)
   "crimeScale": 1,          // a crime they see: alignment x severity x this (theft 1, pickpocket 2, assault 4, murder 10)
   "murderLeaveAlignment": 2, // a murder she sees, her alignment this or higher: she turns wary (her waryDays), stops
                              // following and goes home, and won't come along again for her attackLockDays

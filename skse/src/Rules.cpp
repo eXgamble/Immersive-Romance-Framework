@@ -87,7 +87,6 @@ namespace Rules
 		IRF_RULE(jealousCost);
 		IRF_RULE(waryDays);
 		IRF_RULE(jealousDays);
-		IRF_RULE(strainedBelow);
 		IRF_RULE(band2);
 		IRF_RULE(band3);
 		IRF_RULE(band4);
@@ -95,7 +94,6 @@ namespace Rules
 		IRF_RULE(heartbreakSilentDays);
 		IRF_RULE(pleads);
 		IRF_RULE(pleadEvery);
-		IRF_RULE(spouseBonusBelow);
 		IRF_RULE(crimeScale);
 		IRF_RULE(murderLeaveAlignment);
 		IRF_RULE(winBackDays);
