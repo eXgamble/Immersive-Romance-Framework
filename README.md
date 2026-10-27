@@ -41,7 +41,7 @@ line they say.
 - **Straying** (only once you have a partner): going on a date with someone else, kissing someone else (and
   intimate scenes, for mods that add them). Talking and gifts never count.
 - **Her confession makes her Committed:** a day after her approval reaches the commitment bar (75), and no sooner than 3 days
-  after you started dating, she comes up to you, somewhere safe (a town, an inn, a home; anywhere but a dungeon while she follows you) and out of combat, and
+  after you started dating (her add-on may set its own), she comes up to you, somewhere safe (a town, an inn, a home; anywhere but a dungeon while she follows you) and out of combat, and
   tells you how much you mean to her. You answer "You mean a lot to me too." and she replies; when that talk ends
   she's Committed. If approval falls below the bar first, she waits until it's back. Once per relationship (again
   after a win-back): if she drops back to Dating later (approval below
@@ -165,6 +165,8 @@ A candidate whose manifest is missing a required line, or whose lines don't carr
                                                    // rather than dying); nothing after the wedding
     "absenceTolerance": { "days": 5, "cost": 4 },  // apart longer than days costs cost per band (1-3)
     "brokenHeartDays": 2,                          // silent this long after catching you, then hurt until amends
+    "confession": { "minDatingDays": 3 },          // her confession (which makes her Committed) waits until you've
+                                                   // been Dating this long (default: Rules.json confessMinDatingDays, 3)
     "modesty": 1,                                  // 0 kisses anywhere .. 3 only at home, alone
     "scruples": "refuse",                          // someone else's partner: "refuse", "stayout" or "compete"
     "garrulous": 40,                               // chance (%) she passes on what she saw

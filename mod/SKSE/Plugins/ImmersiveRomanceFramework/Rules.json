@@ -88,7 +88,8 @@
 
   // becoming Committed: she comes up to you and says how much you mean to her; when that talk ends she is Committed
   "confessDelayDays": 1.0,   // this long after her approval reaches commitBar (still Dating until she has said it) ...
-  "confessMinDatingDays": 3.0, // ... and not before you've been Dating this long (since the first date or a win-back)
+  "confessMinDatingDays": 3.0, // ... and not before you've been Dating this long (since the first date or a win-back;
+                               // a candidate's "confession": { "minDatingDays" } overrides it)
   "confessDistance": 3000.0, // when you're this close, somewhere safe, out of combat
 
   // adopted children

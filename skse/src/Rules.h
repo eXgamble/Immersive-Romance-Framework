@@ -74,7 +74,7 @@ namespace Rules
 		int partnerSkillPerLevel = 2;
 
 		float confessDelayDays = 1.0f;        // at the commitment bar, she tells you how much you mean to her after this long
-		float confessMinDatingDays = 3.0f;    // ... and not before you've been Dating this long
+		float confessMinDatingDays = 3.0f;    // ... and not before you've been Dating this long (a candidate's confession.minDatingDays overrides it)
 		float confessDistance = 3000.0f;      // ... when you're this close (she walks over)
 		int   childAwayDays = 5;              // an adopted child misses you after this many days apart (2x, 3x: more)
 		float momentCooldownSeconds = 90.0f;  // between two road lines

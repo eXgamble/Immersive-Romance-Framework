@@ -87,6 +87,7 @@ namespace Candidates
 		Tolerance absence;
 		int       absenceDays{ 0 };
 		int       brokenHeartDays{ 0 };
+		float     confessMinDatingDays{ 0.0f };  // her confession waits until you've been Dating this long
 		int       modesty{ 1 };  // 0 anywhere, 1 not with others watching, 2 only indoors and alone, 3 only at home
 		Scruples  scruples{ Scruples::kStayOut };
 		int       garrulous{ 30 };  // 0..100, the chance they pass on what they know

@@ -436,6 +436,7 @@ namespace Candidates
 			out.absence = ReadTolerance(absence, r.absenceCost);
 			out.absenceDays = absence.is_object() ? absence.value("days", r.absenceDays) : r.absenceDays;
 			out.brokenHeartDays = a.value("brokenHeartDays", r.brokenHeartDays);
+			out.confessMinDatingDays = a.value("confession", nlohmann::json::object()).value("minDatingDays", r.confessMinDatingDays);
 			out.modesty = std::clamp(a.value("modesty", 1), 0, 3);
 			const auto scruples = a.value("scruples", "stayout"s);
 			out.scruples = scruples == "refuse" ? Scruples::kRefuse : scruples == "compete" ? Scruples::kCompete : Scruples::kStayOut;

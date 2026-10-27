@@ -104,7 +104,7 @@ namespace Confess
 		const auto candidate = Candidates::Find(partner);
 		const auto& s = State::Of(partner->GetFormID());
 		const auto& r = Rules::Get();
-		if (!candidate || today - s.readyDay < r.confessDelayDays || today - s.datingDay < r.confessMinDatingDays) {
+		if (!candidate || today - s.readyDay < r.confessDelayDays || today - s.datingDay < candidate->attributes.confessMinDatingDays) {
 			return;
 		}
 		if (s.pendingBreakup != Why::kNone || s.hurt || s.silentUntilDay > today || s.lockUntilDay > today || s.confrontPending) {
