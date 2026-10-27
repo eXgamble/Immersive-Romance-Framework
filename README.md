@@ -40,12 +40,12 @@ line they say.
   her up (approval, and she tells you about it next time); ask again another day. One date at a time.
 - **Straying** (only once you have a partner): going on a date with someone else, kissing someone else (and
   intimate scenes, for mods that add them). Talking and gifts never count.
-- **Her confession makes her Committed:** a day after her approval reaches the commitment bar (60) she comes up to
+- **Her confession makes her Committed:** a day after her approval reaches the commitment bar (75) she comes up to
   you, somewhere safe (a town, an inn, a home; anywhere but a dungeon while she follows you) and out of combat, and
   tells you how much you mean to her. You answer "You mean a lot to me too." and she replies; when that talk ends
   she's Committed. If approval falls below the bar first, she waits until it's back. Once per relationship (again
   after a win-back): if she drops back to Dating later (approval below
-  `uncommitBar`, 48: some leeway, so one bad fight doesn't undo it), the bar makes her Committed again at once, as it does with
+  `uncommitBar`, 63: some leeway, so one bad fight doesn't undo it), the bar makes her Committed again at once, as it does with
   the confession switched off.
 - **Spouse perks:** each spouse can have her own perk (her add-on decides what it is). The framework decides when:
   on while you're married and the marriage is good, paused while she's hurt or approval is below 40, gone if she
