@@ -520,7 +520,8 @@ namespace Romance
 			if (candidate->lines.contains(key)) {
 				pend(member.ref, a_event);
 			}
-			if (member.refuseOn.contains(a_event) || (a_event == Event::kTheyEnded && member.refuseOnBreakup.contains(s.why))) {
+			if (Rules::Get().serviceRefusal &&
+				(member.refuseOn.contains(a_event) || (a_event == Event::kTheyEnded && member.refuseOnBreakup.contains(s.why)))) {
 				State::Refusals()[member.ref] = { candidate->ref, member.refuseDays > 0 ? today + static_cast<float>(member.refuseDays) : 0.0f };
 				logger::info("Romance: {} refuses you service over {}", member.name, candidate->name);
 				if (const auto actor = RE::TESForm::LookupByID<RE::Actor>(member.ref)) {
@@ -690,7 +691,8 @@ namespace Romance
 
 		if (a_talking && !silent) {
 			// absence: worked out once, at the first talk after a long time apart
-			if (stage >= Stage::kDating && stage <= Stage::kMarried && s.lastContactDay > State::kNever && s.pendingBreakup == Why::kNone) {
+			if (Rules::Get().absence && stage >= Stage::kDating && stage <= Stage::kMarried && s.lastContactDay > State::kNever &&
+				s.pendingBreakup == Why::kNone) {
 				const auto gap = today - s.lastContactDay;
 				const auto days = static_cast<float>(std::max(1, candidate->attributes.absenceDays));
 				if (gap > days) {

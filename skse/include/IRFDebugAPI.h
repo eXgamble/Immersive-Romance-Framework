@@ -9,7 +9,7 @@
 // framework of version N or later.
 namespace IRFDebug
 {
-	constexpr std::uint32_t kVersion = 2;
+	constexpr std::uint32_t kVersion = 3;
 	constexpr std::uint32_t kMaxCircle = 8;
 
 	struct Candidate
@@ -101,6 +101,8 @@ namespace IRFDebug
 		// version 2: runs the jealousy check for her now (past its once-a-day limit), as when you meet her: true with
 		// whom and whether a fighter in a_why, or false with why not
 		bool (*checkJealous)(std::uint32_t a_ref, char* a_why, std::uint32_t a_size) = nullptr;
+		// version 3: sets one rule for this session as JSON ("jealousy", "false"); false when there's no such rule
+		bool (*setRule)(const char* a_name, const char* a_json) = nullptr;
 	};
 }
 

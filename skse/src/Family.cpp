@@ -106,6 +106,9 @@ namespace Family
 			Tick();  // a look, a place, a closed talk: one going on may have to end (its walker never arrived)
 			return;
 		}
+		if (!Rules::Get().familyTalks) {
+			return;
+		}
 		if (std::floor(today) == std::floor(g_lastDay)) {
 			return;  // cheap first: one a day
 		}

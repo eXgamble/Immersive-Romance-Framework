@@ -150,7 +150,7 @@ namespace Children
 		RE::Actor* SpouseLeavingTown(RE::BGSLocation* a_location)
 		{
 			const auto spouse = Spouse();
-			if (!spouse || !spouse->IsPlayerTeammate() || Adopted().empty() || InHomeTown(a_location)) {  // no location: the wilds
+			if (!Rules::Get().stayHome || !spouse || !spouse->IsPlayerTeammate() || Adopted().empty() || InHomeTown(a_location)) {  // no location: the wilds
 				return nullptr;
 			}
 			return spouse;

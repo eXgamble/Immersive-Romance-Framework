@@ -6,6 +6,19 @@ namespace Rules
 {
 	struct Values
 	{
+		// systems on or off (Rules.json "systems" section): off, the framework leaves that part of the game alone
+		bool jealousy = true;        // she gets jealous of another woman at your side
+		bool crimes = true;          // crimes she sees cost (or earn) approval, with her line
+		bool murderLeaves = true;    // a good-hearted one leaves you over a murder (murderLeaveAlignment)
+		bool absence = true;         // a long time apart costs approval
+		bool bleedouts = true;       // going down at your side costs approval
+		bool exposeScenes = true;    // two partners have it out (off: both simply catch you)
+		bool familyTalks = true;     // she and an adopted child talk at home
+		bool stayHome = true;        // a wife with children won't leave town with you
+		bool confession = true;      // newly Committed, she comes to tell you how she feels
+		bool serviceRefusal = true;  // her family or friends refuse you their shop or training over a broken heart
+		bool roadLines = true;       // her lines on the road (places, after a fight, dragons, resting)
+
 		int startApproval = 20;   // when someone becomes a Friend
 		int askDateApproval = 35; // a Friend says yes to "Would you spend an evening with me?" from this much
 		int standUpCost = 10;     // you didn't come to the first date
@@ -74,8 +87,12 @@ namespace Rules
 		float familyHearDistance = 1500.0f;   // a family conversation: she and a child this close to each other and to you
 	};
 
+	// Rules.json, then Rules.user.json over it (only the keys it gives: a modlist's own changes, kept apart from the
+	// framework's defaults so an update's new defaults still come through)
 	void          Load();
 	const Values& Get();
+	// One rule set by name, as a JSON value ("false", "12"): IRF - Debug's SetRule, for tests. False: no such rule
+	bool Set(std::string_view a_name, std::string_view a_json);
 
 	// Who the player is interested in: "any", "male" or "female" (Rules.json playerInterestedIn; eXrim's
 	// character creator overrides it through IRF.SetPlayerInterest)

@@ -50,7 +50,7 @@ namespace Crimes
 		{
 			const auto candidate = Candidates::Find(a_witness);
 			const auto stage = Romance::GetStage(a_witness);
-			if (!candidate || stage < Stage::kFriend || stage > Stage::kMarried) {
+			if (!Rules::Get().crimes || !candidate || stage < Stage::kFriend || stage > Stage::kMarried) {
 				return;
 			}
 			const int alignment = candidate->attributes.alignment;
@@ -64,7 +64,7 @@ namespace Crimes
 			if (alignment > 0) {
 				World::SayMoment(a_witness, murder && candidate->lines.contains("crime.disapprove.murder") ? Moment::kMurderDisapprove : Moment::kCrimeDisapprove);
 				Romance::Hurt(a_witness, { amount, false }, Why::kCrime, murder ? "saw you murder someone" : "saw you break the law");
-				if (murder && alignment >= Rules::Get().murderLeaveAlignment) {
+				if (murder && Rules::Get().murderLeaves && alignment >= Rules::Get().murderLeaveAlignment) {
 					// a good heart won't walk beside a murderer: wary of you, she leaves you there and goes home (as when
 					// you hit her: her waryDays, no following for her attackLockDays)
 					auto&      s = State::Of(a_witness->GetFormID());

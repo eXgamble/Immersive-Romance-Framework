@@ -247,6 +247,9 @@ namespace Expose
 			logger::info("Expose: already on");
 			return false;
 		}
+		if (!Rules::Get().exposeScenes) {
+			return false;  // off: both simply catch you
+		}
 		const auto player = RE::PlayerCharacter::GetSingleton();
 		for (const auto actor : { a_a, a_b }) {
 			if (!Fine(actor)) {

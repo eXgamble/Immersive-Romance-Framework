@@ -63,6 +63,9 @@ namespace Confess
 
 	void Check()
 	{
+		if (!Rules::Get().confession && !g_coming && !g_said) {
+			return;
+		}
 		RE::Actor* partner = nullptr;
 		for (const auto p : Romance::Partners()) {
 			if (Romance::GetStage(p) == Stage::kCommitted && !State::Of(p->GetFormID()).confessed) {

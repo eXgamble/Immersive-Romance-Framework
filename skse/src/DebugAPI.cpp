@@ -335,6 +335,11 @@ namespace
 		return jealous;
 	}
 
+	bool SetRule(const char* a_name, const char* a_json)
+	{
+		return a_name && a_json && Rules::Set(a_name, a_json);
+	}
+
 	const IRFDebug::API g_api{
 		IRFDebug::kVersion,
 		ListCandidates,
@@ -351,6 +356,7 @@ namespace
 		EventNameOf,
 		EventByName,
 		CheckJealous,
+		SetRule,
 	};
 }
 

@@ -2,6 +2,22 @@
   // Immersive Romance Framework: the numbers. Every value here is the built-in default; change any of them, or delete
   // a line to keep the default. Approval runs 0..100. Days are game days. Distances are game units (~70 = 1 m).
 
+  // Systems on or off. Off, the framework leaves that part of the game alone. A modlist keeps its own changes in
+  // Rules.user.json beside this file (only the keys it changes), so a framework update's new defaults still come through.
+  "systems": {
+    "jealousy": true,        // she gets jealous of another woman at your side
+    "crimes": true,          // crimes she sees cost (or earn) approval, with her line
+    "murderLeaves": true,    // a good-hearted one leaves you over a murder (murderLeaveAlignment below)
+    "absence": true,         // a long time apart costs approval
+    "bleedouts": true,       // going down at your side costs approval
+    "exposeScenes": true,    // two partners have it out (off: both simply catch you)
+    "familyTalks": true,     // she and an adopted child talk at home
+    "stayHome": true,        // a wife with children won't leave town with you
+    "confession": true,      // newly Committed, she comes to tell you how she feels
+    "serviceRefusal": true,  // her family or friends refuse you their shop or training over a broken heart
+    "roadLines": true        // her lines on the road (places, after a fight, dragons, resting)
+  },
+
   // Who the player is interested in: "any", "male" or "female" (eXrim's character creator overrides this)
   "playerInterestedIn": "any",
 

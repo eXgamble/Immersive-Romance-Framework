@@ -135,7 +135,7 @@ namespace Events
 		void Moment_(RE::Actor* a_speaker, Moment a_moment, float a_delay = 0.0f)
 		{
 			const auto now = Clock::now();
-			if (now - g_lastMoment < std::chrono::duration<float>(Rules::Get().momentCooldownSeconds)) {
+			if (!Rules::Get().roadLines || now - g_lastMoment < std::chrono::duration<float>(Rules::Get().momentCooldownSeconds)) {
 				return;
 			}
 			g_lastMoment = now;
@@ -177,6 +177,9 @@ namespace Events
 		std::string CheckJealousImpl(RE::Actor* a_partner, bool a_test, std::string* a_kind = nullptr)
 		{
 			const auto player = RE::PlayerCharacter::GetSingleton();
+			if (!Rules::Get().jealousy) {
+				return "jealousy is off (Rules.json)";
+			}
 			if (!a_partner || a_partner->IsDead()) {
 				return "no partner";
 			}
@@ -658,7 +661,9 @@ namespace Events
 						return;  // after the wedding, bleedouts no longer cost approval
 					}
 					g_down.insert(a->GetFormID());
-					Romance::Hurt(a.get(), candidate->attributes.bleedout, Why::kBleedouts, "went down beside you");
+					if (Rules::Get().bleedouts) {
+						Romance::Hurt(a.get(), candidate->attributes.bleedout, Why::kBleedouts, "went down beside you");
+					}
 				});
 				return RE::BSEventNotifyControl::kContinue;
 			}

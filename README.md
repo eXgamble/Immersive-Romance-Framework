@@ -17,6 +17,11 @@ line they say.
 - Not compatible: Relationship Dialogue Overhaul, and other marriage mods (Marry Anyone and the like).
 - Who you are interested in: `playerInterestedIn` in `SKSE/Plugins/ImmersiveRomanceFramework/Rules.json`
   (`any`, `male`, `female`). Every other number lives there too, commented.
+- Systems on or off: the `systems` section of Rules.json switches off a part you don't want (jealousy, crimes,
+  leaving over a murder, absence, bleedouts, the expose scene, family talks, staying home with the children, the
+  confession, her family refusing you service, road lines). Off, the framework leaves that part of the game alone.
+- Your own changes go in `Rules.user.json` beside it, holding only the keys you change: it's read over Rules.json,
+  so a framework update's new defaults still come through (a modlist ships its settings this way).
 
 ### What it does
 
