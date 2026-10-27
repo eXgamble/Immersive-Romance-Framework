@@ -85,7 +85,7 @@ namespace Candidates
 		int       pleadEvery{ 0 };
 		Tolerance bleedout;
 		Tolerance absence;
-		int       absenceDays{ 0 };
+		std::array<int, 3> absenceDays{};  // apart longer than each: absence band 1, 2, 3
 		int       brokenHeartDays{ 0 };
 		float     confessMinDatingDays{ 0.0f };  // her confession waits until you've been Dating this long
 		int       modesty{ 1 };  // 0 anywhere, 1 not with others watching, 2 only indoors and alone, 3 only at home

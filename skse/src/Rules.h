@@ -49,7 +49,9 @@ namespace Rules
 		int strayHitsToAttack = 4;  // stray hits in one fight that count as an attack
 		int attackCost = 25;        // an attack
 		int attackLockDays = 3;     // won't follow or date after an attack
-		int absenceDays = 7;        // default absence-tolerance
+		int absence1 = 3;           // default absence bands: apart longer than this many days ...
+		int absence2 = 6;
+		int absence3 = 10;
 		int absenceCost = 5;        // per band, once when you come back
 		int jealousCost = 2;        // seen travelling with another woman, once a day
 		int waryDays = 5;           // default wary-tolerance: days she's wary of you after an attack

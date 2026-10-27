@@ -54,7 +54,9 @@
   "strayHitsToAttack": 4,   // this many stray hits in one fight count as an attack
   "attackCost": 25,         // an attack
   "attackLockDays": 3,      // won't follow or date after an attack
-  "absenceDays": 7,         // apart longer than this hurts ...
+  "absence1": 3,            // apart longer than this many days hurts (band 1) ...
+  "absence2": 6,            // ... more (band 2) ...
+  "absence3": 10,           // ... most (band 3)
   "absenceCost": 5,         // ... this much per band (1-3), once, when you meet again
   "jealousCost": 2,         // seen travelling with another woman, once a day
   "waryDays": 5,            // her wary mood after an attack (a candidate's "wary" days override it)

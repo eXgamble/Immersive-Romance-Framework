@@ -711,9 +711,9 @@ namespace Romance
 			if (Rules::Get().absence && stage >= Stage::kDating && stage <= Stage::kMarried && s.lastContactDay > State::kNever &&
 				s.pendingBreakup == Why::kNone) {
 				const auto gap = today - s.lastContactDay;
-				const auto days = static_cast<float>(std::max(1, candidate->attributes.absenceDays));
-				if (gap > days) {
-					const int band = gap > 4 * days ? 3 : gap > 2 * days ? 2 : 1;
+				const auto& days = candidate->attributes.absenceDays;
+				if (gap > static_cast<float>(std::max(1, days[0]))) {
+					const int band = gap > static_cast<float>(days[2]) ? 3 : gap > static_cast<float>(days[1]) ? 2 : 1;
 					SetRank(a_actor, f.absence, band);
 					logger::info("Romance: {} missed you ({:.1f} days apart, band {})", a_actor->GetDisplayFullName(), gap, band);
 					Hurt(a_actor, candidate->attributes.absence, Why::kAbsence, "absence", band);

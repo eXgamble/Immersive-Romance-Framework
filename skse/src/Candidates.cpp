@@ -434,7 +434,13 @@ namespace Candidates
 			out.bleedout = ReadTolerance(a.value("bleedoutTolerance", nlohmann::json()), r.bleedoutCost);
 			const auto absence = a.value("absenceTolerance", nlohmann::json());
 			out.absence = ReadTolerance(absence, r.absenceCost);
-			out.absenceDays = absence.is_object() ? absence.value("days", r.absenceDays) : r.absenceDays;
+			out.absenceDays = { r.absence1, r.absence2, r.absence3 };
+			if (const auto days = absence.is_object() && absence.contains("days") ? absence["days"] : nlohmann::json(); days.is_number()) {
+				const int d = days.get<int>();
+				out.absenceDays = { d, 2 * d, 4 * d };  // one number: the first band, twice and four times as long the next
+			} else if (days.is_array() && days.size() == 3 && days[0].is_number() && days[1].is_number() && days[2].is_number()) {
+				out.absenceDays = { days[0].get<int>(), days[1].get<int>(), days[2].get<int>() };
+			}
 			out.brokenHeartDays = a.value("brokenHeartDays", r.brokenHeartDays);
 			out.confessMinDatingDays = a.value("confession", nlohmann::json::object()).value("minDatingDays", r.confessMinDatingDays);
 			out.modesty = std::clamp(a.value("modesty", 1), 0, 3);

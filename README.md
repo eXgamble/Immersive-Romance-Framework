@@ -163,7 +163,8 @@ A candidate whose manifest is missing a required line, or whose lines don't carr
     "bleedoutTolerance": 6,                        // approval lost each time she goes down while following
                                                    // you (vanilla's follower slot is Protected, so she goes down
                                                    // rather than dying); nothing after the wedding
-    "absenceTolerance": { "days": 5, "cost": 4 },  // apart longer than days costs cost per band (1-3)
+    "absenceTolerance": { "days": [3, 6, 10], "cost": 4 },  // apart longer than each (band 1-3) costs cost per band;
+                                                   // days left out: Rules.json absence1..3 (3, 6, 10)
     "brokenHeartDays": 2,                          // silent this long after catching you, then hurt until amends
     "confession": { "minDatingDays": 3 },          // her confession (which makes her Committed) waits until you've
                                                    // been Dating this long (default: Rules.json confessMinDatingDays, 3)

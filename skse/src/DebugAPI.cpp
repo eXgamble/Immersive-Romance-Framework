@@ -175,7 +175,7 @@ namespace
 		} else if (deed == "jealous") {
 			s.jealousUntilDay = std::floor(State::Today()) + static_cast<float>(Rules::Get().jealousDays);
 		} else if (deed == "absence") {
-			s.lastContactDay = State::Today() - static_cast<float>(candidate->attributes.absenceDays) * 3.0f;
+			s.lastContactDay = State::Today() - static_cast<float>(candidate->attributes.absenceDays[2]) - 1.0f;  // band 3
 		} else if (deed == "crime") {
 			Romance::Hurt(actor, { std::abs(candidate->attributes.alignment) * 4, false }, Why::kCrime, "debug crime");
 		} else if (deed == "breakup") {

@@ -82,7 +82,9 @@ namespace Rules
 		IRF_RULE(strayHitsToAttack);
 		IRF_RULE(attackCost);
 		IRF_RULE(attackLockDays);
-		IRF_RULE(absenceDays);
+		IRF_RULE(absence1);
+		IRF_RULE(absence2);
+		IRF_RULE(absence3);
 		IRF_RULE(absenceCost);
 		IRF_RULE(jealousCost);
 		IRF_RULE(waryDays);
