@@ -60,7 +60,8 @@ namespace Romance
 	// The candidate and the player spent time together (for absence)
 	void Contact(RE::Actor* a_actor);
 
-	// A letter home: IRF_LetterDay follows your wife (a day after you last saw her; never while she's with you), and a
+	// A letter home: IRF_LetterDay follows your wife (a day after you last saw her; never while she's with you or you're
+	// in the town she lives in), and a
 	// courier's line sends it (her absence starts over, her "reaction.letter" line waits for you)
 	void LetterSync();
 

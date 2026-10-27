@@ -613,7 +613,10 @@ namespace Romance
 			return;
 		}
 		const auto wife = Wife();
-		global->value = wife && !wife->IsPlayerTeammate() ? State::Of(wife->GetFormID()).lastContactDay + 1.0f : 1.0e6f;
+		// not in the town where she lives (her location, as she isn't with you): there you'd just walk over
+		const auto herTown = wife ? Candidates::TownOf(wife->GetCurrentLocation()) : nullptr;
+		const bool sameTown = herTown && herTown == Candidates::TownOf(RE::PlayerCharacter::GetSingleton()->GetCurrentLocation());
+		global->value = wife && !wife->IsPlayerTeammate() && !sameTown ? State::Of(wife->GetFormID()).lastContactDay + 1.0f : 1.0e6f;
 	}
 
 	void SendLetter()

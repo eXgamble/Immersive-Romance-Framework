@@ -873,6 +873,7 @@ namespace Events
 					return RE::BSEventNotifyControl::kContinue;
 				}
 				Queue([loc = a_event->newLoc]() {
+					Romance::LetterSync();  // no letter home from the town she lives in
 					Children::OnPlayerLocation(loc);  // the wilds have no location at all
 					Family::Check();
 					Confess::Check();

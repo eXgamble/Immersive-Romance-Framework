@@ -57,7 +57,7 @@ line they say.
   keep vanilla's. The framework says when; the words are the spouse's add-on's (`"children"` in the spec, both child
   voices), so an add-on without them keeps vanilla's greeting. The framework itself has no voiced lines at all. Your spouse stays home with them: she follows you inside the family's town, but at its edge she
   comes up to you, says why she can't come and goes home; after a fast travel a message says it.
-- **A letter home:** married, a day or more since you last saw your wife, a courier you meet (the one who brings
+- **A letter home:** married, a day or more since you last saw your wife, away from the town she lives in, a courier you meet (the one who brings
   you letters, or one on the road) takes a letter home for you: "Could you take a letter home for me?" Her absence
   starts over, and the next time you meet she has her own line about it (`reaction.letter`, optional; it plays only
   while things are fine or better at home, band 3+: the generator adds the condition).
