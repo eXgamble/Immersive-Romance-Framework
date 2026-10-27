@@ -53,6 +53,9 @@ Spec (JSON):
   "placeholders": true,                      fill every required key that has no text
   "records": [ {houseCARL create record}, ... ]  her own other records (a spouse perk, ...), created FIRST so their
                                              FormIDs never move; an attribute value "@EditorID" names one of them
+  "released": "1.0"                          once the add-on is out: its FormIDs are frozen (other mods' patches,
+                                             translations and voice replacers point at them), so --relock is refused
+                                             unless --major says this build is a new major version (a breaking release)
   "lock": "camilla.ids.json"                 (beside the spec) every record's FormID, for good: voice files are named
                                              by FormID. A line is known by its spoken words (its EditorID ends in a
                                              hash of them): the same words keep their FormID wherever the line moves;
@@ -778,6 +781,10 @@ if __name__ == "__main__":
     parser.add_argument("spec")
     parser.add_argument("out")
     parser.add_argument("--relock", action="store_true")
+    parser.add_argument("--major", action="store_true", help="with --relock on a released add-on: a breaking new major version")
     parser.add_argument("--into")
     a = parser.parse_args()
+    if a.relock and json.loads(Path(a.spec).read_text(encoding="utf-8")).get("released") and not a.major:
+        sys.exit("STOP: this add-on is released: --relock renumbers its lines and breaks other mods' patches and translations. "
+                 "Only for a new major version (a breaking release, new game advised): add --major.")
     main(a.spec, a.out, a.relock, a.into)

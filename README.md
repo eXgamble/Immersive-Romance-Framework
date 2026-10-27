@@ -116,6 +116,11 @@ PNAM puts it in its place in its topic. Build: `irf_addon.py spec.json out --int
 ESL named Build.esp create `out/records.json` and apply `out/order.json`, rename it to the add-on's plugin, and ship
 `out/manifest.json` as its manifest. Close MO2 while the plugin is swapped (it unticks a plugin that goes missing).
 
+If a new line can't go where the spec puts it (the generator stops: "a new line can't go first in a topic"),
+`--relock` numbers every line afresh; rename the voice files to their new FormIDs after it. Once the add-on is out,
+set `"released": "1.0"` in its spec: its FormIDs are then frozen (other mods' patches, translations and voice
+replacers point at them), and `--relock` is refused unless `--major` says the build is a breaking new major version.
+
 A candidate whose manifest is missing a required line, or whose lines don't carry the right conditions, is
 **rejected**: not registered, stays vanilla, and the log says exactly what is wrong.
 
