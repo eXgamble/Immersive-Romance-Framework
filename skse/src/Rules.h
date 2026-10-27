@@ -28,8 +28,9 @@ namespace Rules
 		int floorDating = 1;      // at or below 0 from Dating up: they end it (approval ran out)
 
 		int knowGain = 3;       // a question you hadn't asked her yet (one a day)
-		int dateGain = 4;       // "Spend the evening with me." (18:00-23:30, from Dating up, once a day)
-		int kissGain = 1;       // once a day
+		int dateGain = 3;       // "Spend the evening with me." (18:00-23:30, from Dating up, every dateEveryDays)
+		float dateEveryDays = 2.0f;  // an evening together is offered this often (the road should be where approval grows)
+		int kissGain = 1;       // once a day (the option is gone until a day has passed)
 		int giftGain = 3;          // a gift (one a day)
 		int giftLikedGain = 5;     // a gift they like (instead)
 		int giftLovedGain = 8;     // a gift they love (instead)
@@ -72,7 +73,7 @@ namespace Rules
 		int partnerHealthPerLevel = 10;
 		int partnerSkillPerLevel = 2;
 
-		float confessDelayDays = 1.0f;        // newly Committed, she tells you how much you mean to her after this long
+		float confessDelayDays = 1.0f;        // at the commitment bar, she tells you how much you mean to her after this long
 		float confessDistance = 3000.0f;      // ... when you're this close (she walks over)
 		int   childAwayDays = 5;              // an adopted child misses you after this many days apart (2x, 3x: more)
 		float momentCooldownSeconds = 90.0f;  // between two road lines

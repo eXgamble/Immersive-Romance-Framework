@@ -63,6 +63,7 @@ namespace Rules
 		IRF_RULE(floorDating);
 		IRF_RULE(knowGain);
 		IRF_RULE(dateGain);
+		IRF_RULE(dateEveryDays);
 		IRF_RULE(kissGain);
 		IRF_RULE(giftGain);
 		IRF_RULE(giftLikedGain);

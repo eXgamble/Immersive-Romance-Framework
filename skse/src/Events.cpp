@@ -324,7 +324,7 @@ namespace Events
 				Romance::Sync(a_speaker);
 			} else if (a_key == "secret.yes") {
 				s.secret = true;
-			} else if (a_key == "date" && today - s.lastDateDay >= 1.0f) {
+			} else if (a_key == "date" && today - s.lastDateDay >= r.dateEveryDays) {
 				s.lastDateDay = today;
 				Romance::Strayed(a_speaker, "a date with someone else");  // from every other partner
 				Romance::ModApproval(a_speaker, r.dateGain, "an evening together");

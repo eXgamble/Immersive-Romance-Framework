@@ -789,7 +789,7 @@ namespace Romance
 		SetRank(a_actor, f.moodFaction, Rank(mood));
 
 		int kiss = 0;
-		if (stage >= Stage::kDating && stage <= Stage::kMarried && !silent) {
+		if (stage >= Stage::kDating && stage <= Stage::kMarried && !silent && today - s.lastKissDay >= 1.0f) {  // once a day
 			kiss = hurt || wary ? 3 : World::PrivateEnough(a_actor, candidate->attributes.modesty) ? 1 : 2;
 		}
 		SetRank(a_actor, f.kiss, kiss);
@@ -802,8 +802,8 @@ namespace Romance
 		SetRank(a_actor, f.plead, pleading ? 1 : 0);
 		const bool secretable = stage >= Stage::kDating && stage <= Stage::kCommitted && !s.secret && !silent && !hurt && !s.confrontPending;
 		SetRank(a_actor, f.secret, secretable ? (candidate->attributes.refusesSecret ? 2 : 1) : 0);
-		// an evening together: from Dating up, evenings, once a day
-		const bool datable = stage >= Stage::kDating && stage <= Stage::kMarried && !silent && !hurt && !cold && today - s.lastDateDay >= 1.0f;
+		// an evening together: from Dating up, evenings, every dateEveryDays
+		const bool datable = stage >= Stage::kDating && stage <= Stage::kMarried && !silent && !hurt && !cold && today - s.lastDateDay >= r.dateEveryDays;
 		SetRank(a_actor, f.date, datable && World::Evening() ? 1 : 0);
 		// gifts are for courting: a Friend takes one a day; from Dating up she declines them (she'd rather travel with you)
 		const bool gaveToday = today - s.lastGiftDay < 1.0f;  // one gift a day: the line waits for tomorrow
