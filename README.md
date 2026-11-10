@@ -18,8 +18,7 @@ line they say.
 - Who you are interested in: `playerInterestedIn` in `SKSE/Plugins/ImmersiveRomanceFramework/Rules.json`
   (`any`, `male`, `female`). Every other number lives there too, commented. Another mod (a character creator) can
   set it for one character with Papyrus `IRF.SetPlayerInterest`, kept in that save. It decides who becomes a Friend
-  (both sides must be interested: a candidate's add-on says whom they're interested in), whose jealousy a follower
-  stirs up, and which vanilla spouses offer marriage: vanilla's Amulet of Mara greetings and the answers to
+  (both sides must be interested: a candidate's add-on says whom they're interested in) and which vanilla spouses offer marriage: vanilla's Amulet of Mara greetings and the answers to
   "Interested in me, are you?" only come from someone of a sex you're interested in. A relationship already past
   Friend stays when you change it.
 - Systems on or off: the `systems` section of Rules.json switches off a part you don't want (jealousy, crimes,
@@ -139,8 +138,8 @@ line they say.
 - **Beside you:** a partner who follows you fights to her own profile (role, nerve, gear) and grows in level up to
   her cap. She can die if you don't get her up in time; an essential one is only knocked out.
 - **On the road:** lines in ruins, caves, towns and inns, after a fight, a dragon, a rest; a jealous line when
-  she sees you travelling with someone else (another candidate, or any follower of a sex you're interested in, but
-  the old people). Her jealous lines can differ for a fighter at your side and for a woman who isn't one
+  she sees you travelling with someone else (another candidate, or any follower of her own sex, but the old
+  people: her lines are written for a rival like her). Her jealous lines can differ for a fighter at your side and for a woman who isn't one
   (`IRF_JealousOfFaction` 0x876: 1 fighter, 2 not; the generator's `"jealousOf"`: fighter, nonfighter or both).
 
 ## For add-on authors
