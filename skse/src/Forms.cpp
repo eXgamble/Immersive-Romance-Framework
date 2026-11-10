@@ -130,6 +130,8 @@ namespace Forms
 		s.dateFrom = f.Own<RE::TESGlobal>(kDateFrom, "IRF_DateFrom");
 		s.datePhase = f.Own<RE::TESGlobal>(kDatePhase, "IRF_DatePhase");
 		s.dateTalked = f.Own<RE::TESGlobal>(kDateTalked, "IRF_DateTalked");
+		s.maleAllowed = f.Own<RE::TESGlobal>(kMaleAllowed, "IRF_MaleAllowed");
+		s.femaleAllowed = f.Own<RE::TESGlobal>(kFemaleAllowed, "IRF_FemaleAllowed");
 		s.mine = f.Own<RE::TESFaction>(kMineFaction, "IRF_MineFaction");
 		for (std::uint32_t i = 0; i < 5; ++i) {
 			s.dateAsked[i] = f.Own<RE::TESGlobal>(kDateAsked1 + i, "IRF_DateAsked");

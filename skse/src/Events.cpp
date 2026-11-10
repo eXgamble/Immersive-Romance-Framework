@@ -152,8 +152,9 @@ namespace Events
 		// day (not straying; the session forgets the day on load, so a reload can bring it once more)
 		std::unordered_map<RE::FormID, float> g_jealousDay;
 
-		// Someone following you that she'd be jealous of: another candidate, or any woman who isn't one of the old
-		// people (ElderRace, ElderRaceVampire)
+		// Someone following you that she'd be jealous of: another candidate, or anyone of a sex you're attracted to
+		// (Rules.json playerInterestedIn, or the save's choice) who isn't one of the old people (ElderRace,
+		// ElderRaceVampire)
 		bool Rival(RE::Actor* a_actor, RE::Actor* a_partner)
 		{
 			if (!a_actor || a_actor == a_partner || a_actor->IsPlayerRef() || a_actor->IsDead() || !a_actor->IsPlayerTeammate()) {
@@ -164,7 +165,7 @@ namespace Events
 			}
 			const auto base = a_actor->GetActorBase();
 			const auto race = a_actor->GetRace();
-			if (!base || !race || !base->IsFemale() || !race->HasKeywordString("ActorTypeNPC")) {
+			if (!base || !race || !Romance::PlayerAttractedTo(!base->IsFemale()) || !race->HasKeywordString("ActorTypeNPC")) {
 				return false;
 			}
 			const auto id = race->GetFormID();

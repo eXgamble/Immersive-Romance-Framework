@@ -221,13 +221,30 @@ namespace Romance
 		}
 		const bool playerMale = player->GetSex() == RE::SEX::kMale;
 		const bool theyMale = a_candidate.npc->GetSex() == RE::SEX::kMale;
-		const auto interest = State::PlayerInterest().empty() ? Rules::PlayerInterest() : State::PlayerInterest();
-		if ((interest == "male" && !theyMale) || (interest == "female" && theyMale)) {
+		if (!PlayerAttractedTo(theyMale)) {
 			return false;
 		}
 		using I = Candidates::Interest;
 		const auto want = a_candidate.attributes.interestedIn;
 		return want == I::kAny || (want == I::kMale) == playerMale;
+	}
+
+	bool PlayerAttractedTo(bool a_male)
+	{
+		const auto& interest = State::PlayerInterest().empty() ? Rules::PlayerInterest() : State::PlayerInterest();
+		return interest == "male" ? a_male : interest == "female" ? !a_male : true;
+	}
+
+	void SyncInterest()
+	{
+		const auto& f = Forms::Get();
+		const float male = PlayerAttractedTo(true) ? 1.0f : 0.0f;
+		const float female = PlayerAttractedTo(false) ? 1.0f : 0.0f;
+		if (f.maleAllowed && f.femaleAllowed && (f.maleAllowed->value != male || f.femaleAllowed->value != female)) {
+			f.maleAllowed->value = male;
+			f.femaleAllowed->value = female;
+			logger::info("Romance: attracted to {}", male && female ? "everyone" : male ? "men" : "women");
+		}
 	}
 
 	Stage GetStage(RE::Actor* a_actor)
@@ -915,6 +932,7 @@ namespace Romance
 
 	void SyncAll()
 	{
+		SyncInterest();
 		for (const auto& candidate : Candidates::All()) {
 			if (const auto actor = Candidates::ActorOf(candidate)) {
 				Sync(actor);

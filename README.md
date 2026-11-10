@@ -16,7 +16,12 @@ line they say.
   vanilla (Friend, the Amulet of Mara, the wedding).
 - Not compatible: Relationship Dialogue Overhaul, and other marriage mods (Marry Anyone and the like).
 - Who you are interested in: `playerInterestedIn` in `SKSE/Plugins/ImmersiveRomanceFramework/Rules.json`
-  (`any`, `male`, `female`). Every other number lives there too, commented.
+  (`any`, `male`, `female`). Every other number lives there too, commented. Another mod (a character creator) can
+  set it for one character with Papyrus `IRF.SetPlayerInterest`, kept in that save. It decides who becomes a Friend
+  (both sides must be interested: a candidate's add-on says whom they're interested in), whose jealousy a follower
+  stirs up, and which vanilla spouses offer marriage: vanilla's Amulet of Mara greetings and the answers to
+  "Interested in me, are you?" only come from someone of a sex you're interested in. A relationship already past
+  Friend stays when you change it.
 - Systems on or off: the `systems` section of Rules.json switches off a part you don't want (jealousy, crimes,
   leaving over a murder, absence, bleedouts, the expose scene, family talks, staying home with the children, the
   confession, her family refusing you service, road lines). Off, the framework leaves that part of the game alone.
@@ -82,7 +87,7 @@ line they say.
   she turns gifts down (her `gift.decline` line): she'd rather you took her along, and the road together is where
   approval grows. A wife takes a gift again, once every 3 days (`wifeGiftEveryDays`).
 - **Moods** on top of the stage: wary (you attacked her lately), hurt (broken heart), jealous (seen you with
-  another woman following you, for the rest of that day), strained (low approval). No mood is the happy default: her plain lines. Her
+  someone else following you, for the rest of that day), strained (low approval). No mood is the happy default: her plain lines. Her
   greetings, goodbyes and idle chatter can follow them; her idles follow every stage, so a partner never falls
   back to a friend's chatter.
 - **Tolerances**, per candidate: being caught straying, hitting them (a stray hit in a fight vs. turning on
@@ -134,7 +139,8 @@ line they say.
 - **Beside you:** a partner who follows you fights to her own profile (role, nerve, gear) and grows in level up to
   her cap. She can die if you don't get her up in time; an essential one is only knocked out.
 - **On the road:** lines in ruins, caves, towns and inns, after a fight, a dragon, a rest; a jealous line when
-  she sees you travelling with another woman (another candidate, or any female follower but the old people). Her jealous lines can differ for a fighter at your side and for a woman who isn't one
+  she sees you travelling with someone else (another candidate, or any follower of a sex you're interested in, but
+  the old people). Her jealous lines can differ for a fighter at your side and for a woman who isn't one
   (`IRF_JealousOfFaction` 0x876: 1 fighter, 2 not; the generator's `"jealousOf"`: fighter, nonfighter or both).
 
 ## For add-on authors
@@ -360,6 +366,11 @@ yet, 0 Friend, 2 Dating, 3 Committed, 4 Engaged, 5 Married, 6 Ex, 7 Widowed, 8 K
 well); the spouse's add-on's lines for it go in IRF_ChildHelloTopic 0x852 (spec `"children": {"away1", "away2", "away3",
 "strained", "bad", "heartbroken"}`; said by whichever child: no GetIsID, `GetFactionRank IRF_StageFaction == 5` on her
 reference).
+
+Who the player is interested in: the globals `IRF_MaleAllowed` 0x8A1 and `IRF_FemaleAllowed` 0x8A2 (1 when that sex is
+allowed). A line only for someone the player could fall for: `GetIsSex Male <= IRF_MaleAllowed` and `GetIsSex Female
+<= IRF_FemaleAllowed`, both with the global as the comparison value, run on the speaker. Read them, never set them: the
+framework keeps them in step with the setting.
 
 **Where she lives, married:** she may stay in her own home or move to one of yours. A line that places her family next
 door ("help in the shop tomorrow") takes `"lives": "hers"` in the spec (on a text, or in a family conversation's

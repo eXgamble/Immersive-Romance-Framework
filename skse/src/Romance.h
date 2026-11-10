@@ -87,4 +87,12 @@ namespace Romance
 	void StartQuests();
 
 	bool IsPlayerInterested(const Candidates::Candidate& a_candidate);
+
+	// Whether the player is attracted to that sex (the save's choice, else Rules.json playerInterestedIn)
+	bool PlayerAttractedTo(bool a_male);
+
+	// IRF_MaleAllowed / IRF_FemaleAllowed set from the player's interest: vanilla's marriage proposal lines (the amulet
+	// greetings and the answers to "Interested in me, are you?") need the speaker's sex to be allowed. Other mods may
+	// read them too (eXrim's character creator shows the choice from them)
+	void SyncInterest();
 }

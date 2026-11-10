@@ -86,6 +86,8 @@ namespace Forms
 		kDateKissTopic = 0x89C,       // at her door: "(Kiss her.)" ...
 		kDateGoodnightTopic = 0x89D,  // ... or "Goodnight."
 		kMineTopic = 0x89E,           // "Will you be mine?" (IRF_Quest, top level)
+		kMaleAllowed = 0x8A1,         // IRF_MaleAllowed / IRF_FemaleAllowed: 1 when the player is attracted to that sex
+		kFemaleAllowed = 0x8A2,       //   (kept in step by Romance::SyncInterest; vanilla's proposal lines check them)
 		kCircleHelloTopic = 0x873,    // IRF_CircleHelloTopic / GoodbyeTopic (IRF_CircleQuest 0x872, open to any speaker):
 		kCircleGoodbyeTopic = 0x874,  // a circle member's everyday greetings about the two of you
 		kReplyFaction = 0x875,        // IRF_ReplyFaction: which reply she's saying (moment kReply)
@@ -206,6 +208,8 @@ namespace Forms
 		RE::TESGlobal*  dateFrom{ nullptr };
 		RE::TESGlobal*  datePhase{ nullptr };
 		RE::TESGlobal*  dateTalked{ nullptr };
+		RE::TESGlobal*  maleAllowed{ nullptr };
+		RE::TESGlobal*  femaleAllowed{ nullptr };
 		std::array<RE::TESGlobal*, 5> dateAsked{};
 		RE::TESFaction* mine{ nullptr };
 		std::array<RE::TESTopic*, 5>  dateTalk{};
