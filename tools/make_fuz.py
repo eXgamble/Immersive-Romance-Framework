@@ -8,7 +8,7 @@ import tempfile
 from pathlib import Path
 
 FFMPEG = r"C:\ProgramData\HP\LCDDisplayHelper\bin\ffmpeg.exe"
-TOOLS = Path(r"C:\Steam\steamapps\common\Skyrim Special Edition\Tools\LipGen\LipGenerator")
+TOOLS = Path(r"C:\Modding\Stock Game\Tools\LipGen\LipGenerator")
 
 audio, text, out = Path(sys.argv[1]), sys.argv[2], Path(sys.argv[3])
 with tempfile.TemporaryDirectory() as tmp:
